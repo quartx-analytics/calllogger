@@ -37,10 +37,10 @@ with open("README.md", "r", encoding="utf-8") as stream:
 
 setup["install_requires"] = [
     "phonenumbers",
-    "pyserial",
-    "requests",
-    "appdirs",
-    "django"
+    "pyserial==3.4",
+    "requests==2.21.*",
+    "appdirs==1.4.*",
+    "Django==2.2.*",
 ]
 
 

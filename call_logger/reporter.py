@@ -59,7 +59,7 @@ class Reporter(threading.Thread):
 
                 # There is no point in saving incoming records for later processing
                 # sense the incoming call would have ended by then
-                if record == 0:
+                if record.call_type == plugins.INCOMING:
                     logger.debug(f"Ignoring Incoming record: {record}")
                 else:
                     # Send the record back for later logging

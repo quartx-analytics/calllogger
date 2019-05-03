@@ -35,13 +35,7 @@ with open("README.md", "r", encoding="utf-8") as stream:
 # Dependencies
 # ############
 
-setup["install_requires"] = [
-    "phonenumbers",
-    "pyserial==3.4",
-    "requests==2.21.*",
-    "appdirs==1.4.*",
-    "Django==2.2.*",
-]
+setup["install_requires"] = [line.strip() for line in open("requirements.txt")]
 
 
 # Classifiers

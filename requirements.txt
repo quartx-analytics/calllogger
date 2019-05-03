@@ -1,0 +1,5 @@
+phonenumbers==8.10.*
+pyserial==3.4
+requests==2.21.*
+appdirs==1.4.*
+Django==2.2.*

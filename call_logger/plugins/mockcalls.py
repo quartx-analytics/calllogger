@@ -110,7 +110,7 @@ class Mockmonitor(plugins.BasePlugin):
 
                 yield plugins.Call(
                     plugins.RECEIVED,
-                    date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number,
                     ext=ext,
                     line=line,
@@ -123,7 +123,7 @@ class Mockmonitor(plugins.BasePlugin):
                 duration = duration_gen()
                 yield plugins.Call(
                     plugins.OUTGOING,
-                    date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number_gen(),
                     line=line_gen(),
                     ext=ext_gen(),

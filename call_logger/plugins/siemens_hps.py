@@ -70,7 +70,7 @@ class SiemensHPS(plugins.SerialMonitor, plugins.BasePlugin):
 
         # Received & Outgoing calls share common data points
         elif call.call_type == plugins.RECEIVED or call.call_type == plugins.OUTGOING:
-            call["date"] = datetime.strptime(raw_date, "%d.%m.%y%X").astimezone().astimezone(timezone.utc).isoformat()
+            call["date"] = datetime.strptime(raw_date, "%d.%m.%y%X").astimezone(timezone.utc).isoformat()
             call["number"] = number
             call["ext"] = ext = int(ext) if ext else 0
             call["ring"] = self.time_in_seconds(ring) if ring else 0

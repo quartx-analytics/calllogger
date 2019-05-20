@@ -7,7 +7,6 @@ import os
 
 # Django
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
 
 # Package
 from call_frontend import models
@@ -132,7 +131,7 @@ class Command(BaseCommand):
     @staticmethod
     def get_user(username):
         try:
-            return User.objects.get(username=username)
-        except User.DoesNotExist:
+            return models.User.objects.get(username=username)
+        except models.User.DoesNotExist:
             logger.error(f"User \"{username}\" not found")
             exit(1)

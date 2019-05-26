@@ -16,7 +16,6 @@ from .. import config, logger
 NOT_ANSWERED = 0
 ANSWERED = 1
 VOICEMAIL = 2
-BUSY = 9
 
 # Calltype field
 INCOMING = 0

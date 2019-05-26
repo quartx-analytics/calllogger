@@ -50,11 +50,6 @@ class SiemensHPS(plugins.SerialMonitor, plugins.BasePlugin):
         duration = output[30:38].strip()
         number = output[38:53].strip()
         call_type = int(output[74:77].strip())
-        if call_type == plugins.BUSY:
-            call_type = 2
-            busy = True
-        else:
-            busy = False
 
         # Parse the received record
         call = plugins.Call(call_type, line=int(line) if line else 0)
@@ -75,7 +70,7 @@ class SiemensHPS(plugins.SerialMonitor, plugins.BasePlugin):
             call["ext"] = ext = int(ext) if ext else 0
             call["ring"] = self.time_in_seconds(ring) if ring else 0
             call["duration"] = duration = self.time_in_seconds(duration) if duration else 0
-            call["answered"] = plugins.BUSY if busy else self.check_if_answered(duration, ext)
+            call["answered"] = self.check_if_answered(duration, ext)
 
         else:
             logger.error(f"unexpected call type: {call_type}")

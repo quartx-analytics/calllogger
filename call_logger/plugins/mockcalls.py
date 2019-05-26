@@ -129,7 +129,7 @@ class Mockmonitor(plugins.BasePlugin):
                     ext=ext_gen(),
                     ring=ring_gen(),
                     duration=duration,
-                    answered=9 if not bool(duration) and random.randrange(1, 7) == 6 else int(bool(duration))
+                    answered=int(bool(duration))
                 )
 
             # Sleep for a random time between 1 and 5 seconds

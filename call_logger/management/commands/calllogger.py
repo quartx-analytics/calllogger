@@ -139,7 +139,7 @@ class Command(BaseCommand):
     @staticmethod
     def get_tenant(tenant):
         try:
-            return Tenant.objects.get(name=tenant)
+            return Tenant.objects.only("id").get(name=tenant)
         except models.User.DoesNotExist:
             logger.error(f"Tenant \"{tenant}\" not found")
             exit(1)

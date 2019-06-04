@@ -9,8 +9,7 @@ import os
 from django.core.management.base import BaseCommand
 
 # Package
-from call_frontend import models
-from call_frontend.models.base import Tenant
+from call_frontend import models, utils
 from call_logger import logger, plugins, config, reporter, setup_env, arguments
 from call_logger.monitors import monitor
 
@@ -62,10 +61,10 @@ class DirectReporter(threading.Thread):
         try:
             # Check if this incoming call already exists
             # This is very usefull, it makes it a lot easir for the call logger to update the incoming table
-            instance = models.Incoming.objects.get(tenant=record["tenant"], contact=record["contact"])
+            instance = models.Incoming.all_objects.get(tenant=record["tenant"], contact=record["contact"])
         except models.Incoming.DoesNotExist:
             # Just call the original create method
-            models.Incoming.objects.create(**record)
+            models.Incoming.all_objects.create(**record)
         else:
             # Update the pre existing instance instead of creating a new one
             instance.ext = record["ext"]
@@ -75,18 +74,35 @@ class DirectReporter(threading.Thread):
     @staticmethod
     def create_call(**record):
         """Log that a there was a outgoing or received call logged."""
-        models.Call.objects.create(**record)
+        callobj = models.Call.all_objects.create(**record)
+        
+        if callobj.answered == models.Call.ANSWERED:
+            # Remove call from missed if caller
+            # called back after an unanswered call
+            models.Missed.objects.filter(tenant=callobj.tenant, call__contact=callobj.contact).delete()
+
+            # Also remove call log from callback table
+            models.Callback.objects.filter(tenant=callobj.tenant, contact=callobj.contact).delete()
+
+        if callobj.call_type == models.Call.RECEIVED:
+            # Remove call from incomming if call was received
+            models.Incoming.objects.filter(tenant=callobj.tenant, contact=callobj.contact).delete()
+
+            # Log that a call was missed if call was not answered
+            if callobj.answered == models.Call.NOT_ANSWERED or callobj.answered == models.Call.VOICEMAIL:
+                models.Missed(tenant=callobj.tenant, call=callobj).save()
 
     @staticmethod
     def get_contact(tenant, number):
         """Return a Contact instance for given number. Creating one if don't exist."""
-        ins, _ = models.Contact.objects.get_or_create(tenant=tenant, number=number)
+        number = utils.Phonenumbers(number)
+        ins, _ = models.Contact.all_objects.only("id").get_or_create(tenant=tenant, number=number.as_e164)
         return ins
 
     @staticmethod
     def get_ext(tenant, ext):
         """Return a Ext instance for the given site & ext. Creating one if don't exist."""
-        ins, _ = models.Ext.objects.get_or_create(tenant=tenant, ext=ext)
+        ins, _ = models.Ext.all_objects.only("id").get_or_create(tenant=tenant, ext=ext)
         return ins
 
 
@@ -132,14 +148,14 @@ class Command(BaseCommand):
             monitor(direct_reporter)
 
     def cleanup(self):
-        models.Incoming.objects.all().delete()
+        models.Incoming.all_objects.all().delete()
         self.stdout.write(self.style.SUCCESS("Successfully cleaned incoming"))
 
     # noinspection PyUnresolvedReferences
     @staticmethod
     def get_tenant(tenant):
         try:
-            return Tenant.objects.only("id").get(name=tenant)
+            return models.Tenant.objects.only("id").get(name=tenant)
         except models.User.DoesNotExist:
             logger.error(f"Tenant \"{tenant}\" not found")
             exit(1)

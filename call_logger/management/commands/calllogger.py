@@ -79,14 +79,14 @@ class DirectReporter(threading.Thread):
         if callobj.answered == models.Call.ANSWERED:
             # Remove call from missed if caller
             # called back after an unanswered call
-            models.Missed.objects.filter(tenant=callobj.tenant, call__contact=callobj.contact).delete()
+            models.Missed.all_objects.filter(tenant=callobj.tenant, call__contact=callobj.contact).delete()
 
             # Also remove call log from callback table
-            models.Callback.objects.filter(tenant=callobj.tenant, contact=callobj.contact).delete()
+            models.Callback.all_objects.filter(tenant=callobj.tenant, contact=callobj.contact).delete()
 
         if callobj.call_type == models.Call.RECEIVED:
             # Remove call from incomming if call was received
-            models.Incoming.objects.filter(tenant=callobj.tenant, contact=callobj.contact).delete()
+            models.Incoming.all_objects.filter(tenant=callobj.tenant, contact=callobj.contact).delete()
 
             # Log that a call was missed if call was not answered
             if callobj.answered == models.Call.NOT_ANSWERED or callobj.answered == models.Call.VOICEMAIL:

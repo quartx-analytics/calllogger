@@ -102,7 +102,7 @@ class DirectReporter(threading.Thread):
     @staticmethod
     def get_ext(tenant, ext):
         """Return a Ext instance for the given site & ext. Creating one if don't exist."""
-        ins, _ = models.Ext.all_objects.only("id").get_or_create(tenant=tenant, ext=ext)
+        ins, _ = models.Ext.all_objects.only("id").get_or_create(tenant=tenant, number=ext)
         return ins
 
 
@@ -155,7 +155,7 @@ class Command(BaseCommand):
     @staticmethod
     def get_tenant(tenant):
         try:
-            return models.Tenant.objects.only("id").get(name=tenant)
+            return models.Tenant.objects.only("id").get(slug=tenant)
         except models.User.DoesNotExist:
             logger.error(f"Tenant \"{tenant}\" not found")
             exit(1)

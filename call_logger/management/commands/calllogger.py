@@ -22,6 +22,9 @@ class DirectReporter(threading.Thread):
 
     def run(self):
         """Continuously check the call queue for new records to process."""
+        # Se the global tenant so fix tenant.region not working within call_frontend.utils.Phonenumbers
+        models.set_current_tenant(self.tenant)
+        
         while True:
             # Fetch the call record from the queue
             record: plugins.Call = self.calls.get().copy()
@@ -126,6 +129,7 @@ class Command(BaseCommand):
 
         # Fetch the user instance
         tenant = self.get_tenant(options["tenant"])
+        models.set_current_tenant(tenant)
         self.cleanup()
 
         # Load the mocked monitor if required

@@ -13,7 +13,6 @@ class SiemensHPS(plugins.SerialMonitor, plugins.BasePlugin):
     def __init__(self, queue_manager, **kwargs):
         self.queue_manager = queue_manager
         settings = config[self.name]
-        self.voicemail_ext = settings.getintlist("voicemail_ext")
         rate = settings.getint("rate")
         port = settings["port"]
 

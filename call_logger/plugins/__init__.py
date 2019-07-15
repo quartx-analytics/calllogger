@@ -1,94 +1,24 @@
 # Standard library
-from typing import Dict, Type, NoReturn, Iterator
-from datetime import datetime, timezone
-from collections.abc import MutableMapping
+from typing import Dict, Type, NoReturn
+
 import time
 import abc
 
 # Third party
-import phonenumbers
 import serial
 
 # Package imports
-from .. import config, logger
-
-# Answered field
-NOT_ANSWERED = 0
-ANSWERED = 1
-VOICEMAIL = 2
-
-# Calltype field
-INCOMING = 0
-RECEIVED = 1
-OUTGOING = 2
+from .. import logger, api
 
 
-class Call(MutableMapping):
-    """
-    Common required fields.
-    number, line, ext
-
-    Fields required by Received & Outgoing call logs.
-    ring, duration
-
-    Optinal fields for Received & Outgoing call logs.
-    answered, date
-    """
-
-    def __setitem__(self, k, v) -> None:
-        self.data[k] = self._parse_phone_num(v) if k == "number" else v
-
-    def __delitem__(self, k) -> None:
-        del self.data[k]
-
-    def __getitem__(self, k):
-        return self.data[k]
-
-    def __len__(self) -> int:
-        return len(self.data)
-
-    def __iter__(self) -> Iterator:
-        return iter(self.data)
-
-    def __init__(self, calltype: int, **kwargs):
-        self.call_type = calltype
-        if calltype != INCOMING:
-            if "call_type" not in kwargs:
-                kwargs["call_type"] = calltype
-
-            if "date" not in kwargs:
-                kwargs["date"] = datetime.now(timezone.utc).isoformat()
-
-        self.data = {}
-        # Update the dict class
-        self.update(kwargs)
-
-    def __repr__(self):
-        data = ", ".join([f"{name}={repr(value)}" for name, value in self.items()])
-        return f"Call({self.call_type}, {data})"
-
-    def __str__(self):
-        data = ", ".join([f"{name}={repr(value)}" for name, value in self.items()])
-        str_call_type = ["incoming", "received", "outgoing"][self.call_type]
-        return f"{str_call_type.title()}({data})"
-
-    @staticmethod
-    def _parse_phone_num(num) -> str:
-        """
-        Parse phone number to add international code if required.
-        Returning the full E164 international number.
-        """
-        region_code = config["settings"].get("region_code", "IE")
-        num_obj = phonenumbers.parse(num, region_code)
-
-        # Return the number as the full E164 international phone number
-        return phonenumbers.format_number(num_obj, phonenumbers.PhoneNumberFormat.E164)
-
-    def copy(self):
-        return Call(self.call_type, **self.data)
+def load_plugins():
+    """Import all plugin's so they can be registered."""
+    prefix = plugins.__name__ + "."
+    for _, modname, _ in pkgutil.iter_modules(plugins.__path__, prefix):
+        __import__(modname)
 
 
-class BasePlugin(object):
+class BasePlugin(metaclass=abc.ABCMeta):
     """
     This is the Base class for all phone system parsers.
     It's not that useful now but will be when we support more than 1 phone system.
@@ -97,9 +27,16 @@ class BasePlugin(object):
     # The name of the plugin (Required)
     name: str = None
 
-    def __init__(self, *args, **kwargs):
-        # This method is just for signature purposes
-        pass
+    # noinspection PyUnusedLocal
+    def __init__(self, **settings):
+        self.settings = settings
+        self.api_thread = api.API()
+        self.api_thread.start()
+        # TODO: Exit script if api is not running
+
+    def log(self, record):
+        """Send a call log to the api."""
+        self.api_thread.log(record)
 
     @staticmethod
     def time_in_seconds(duration: str) -> int:
@@ -115,15 +52,18 @@ class BasePlugin(object):
 
         return duration
 
+    def run(self):
+        pass
 
-class SerialMonitor(metaclass=abc.ABCMeta):
+
+class SerialMonitor(BasePlugin):
     """
     This monitor is used for monitoring the serial interface for call logs.
     Using the newline character as the delimiter.
     """
-    def __init__(self, port: str, rate: int, **kwargs):
-        super(SerialMonitor, self).__init__(**kwargs)
-        self.timeout = config["settings"].getint("timeout")
+    def __init__(self, port: str, rate: int, **settings):
+        super(SerialMonitor, self).__init__(**settings)
+
 
         # Setup serial interface
         self.sserver = ser = serial.Serial()
@@ -202,6 +142,15 @@ def register(cls: Type[BasePlugin]) -> Type[BasePlugin]:
     logger.debug(f"Registering plugin: {cls.name} {cls}")
     systems[cls.name.lower()] = cls
     return cls
+
+
+def get_plugin(plugin_name: str) -> Type[BasePlugin]:
+    """Return pluging matching the given name."""
+    try:
+        # Load required plugin
+        return systems[plugin_name.lower()]
+    except KeyError:
+        raise KeyError(f"plugin not found: {plugin_name}")
 
 
 # All register system plugin's

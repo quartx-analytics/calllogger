@@ -2,3 +2,4 @@ pyserial
 requests
 appdirs
 systemd-python
+pyyaml

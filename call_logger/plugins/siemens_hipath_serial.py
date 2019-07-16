@@ -2,23 +2,12 @@
 from datetime import datetime, timezone
 
 # Package imports
-from .. import logger, config, plugins
+from .. import plugins
+from ..record import Record
 
 
-@plugins.register
-class SiemensHPS(plugins.SerialMonitor, plugins.BasePlugin):
+class SiemensHipathSerial(plugins.SerialPlugin):
     """Data object for call logs."""
-    name = "SiemensHipathSerial"
-
-    def __init__(self, queue_manager, **kwargs):
-        self.queue_manager = queue_manager
-        settings = config[self.name]
-        rate = settings.getint("rate")
-        port = settings["port"]
-
-        # Start the serial monitor and scan for call logs
-        super(SiemensHPS, self).__init__(port, rate, **kwargs)
-        self.start()
 
     def decode(self, line: bytes) -> str:
         return line.decode("ASCII")
@@ -51,41 +40,31 @@ class SiemensHPS(plugins.SerialMonitor, plugins.BasePlugin):
         call_type = int(output[74:77].strip())
 
         # Parse the received record
-        call = plugins.Call(call_type, line=int(line) if line else 0)
+        call = Record(call_type, line=int(line) if line else 0)
 
         # Common
         number = number if number else "000000000"
         ext = int(ext) if ext else 0
 
         # Incoming
-        if call.call_type == plugins.INCOMING:
+        if call.call_type == Record.INCOMING:
             call["ext"] = int(ext) if ext else 0
             call["number"] = number
 
         # Received & Outgoing calls share common data points
-        elif call.call_type == plugins.RECEIVED or call.call_type == plugins.OUTGOING:
+        elif call.call_type == Record.RECEIVED or call.call_type == Record.OUTGOING:
             call["date"] = datetime.strptime(raw_date, "%d.%m.%y%X").astimezone(timezone.utc).isoformat()
             call["number"] = number
-            call["ext"] = ext = int(ext) if ext else 0
-            call["ring"] = self.time_in_seconds(ring) if ring else 0
-            call["duration"] = duration = self.time_in_seconds(duration) if duration else 0
-            call["answered"] = self.check_if_answered(duration, ext)
+            call["ext"] = int(ext) if ext else 0
+            call["ring"] = ring
+            call["duration"] = duration
 
         else:
-            logger.error(f"unexpected call type: {call_type}")
-            logger.error(line, exc_info=True)
+            self.logger.error(f"unexpected call type: {call_type}")
+            self.logger.error(line, exc_info=True)
             return None
 
         # Queue the call to be
         # sent to the frontend
-        self.queue_manager.put(call)
-        logger.info(call)
-
-    def check_if_answered(self, duration: int, ext: int) -> int:
-        """Check if call went to voicemail or if the call was answered or not."""
-        if duration and ext in self.voicemail_ext:
-            return plugins.VOICEMAIL
-        elif duration:
-            return plugins.ANSWERED
-        else:
-            return plugins.NOT_ANSWERED
+        self.logger.info(call)
+        return call

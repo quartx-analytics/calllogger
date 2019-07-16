@@ -1,5 +1,13 @@
+# Standard lib
+import pkgutil
+
 # Package
 from call_logger import config, plugins
+
+# Import all plugin's so they can be registered
+prefix = plugins.__name__ + "."
+for _, modname, _ in pkgutil.iter_modules(plugins.__path__, prefix):
+    __import__(modname)
 
 
 def main():

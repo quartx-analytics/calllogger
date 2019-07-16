@@ -58,15 +58,17 @@ user_config = os.path.join(CONFIG_DIR, "call-logger.yml")
 with open(base_config) as stream:
     config = yaml.safe_load(stream.read())
 
-with open(user_config) as stream:
-    custom_config = yaml.safe_load(stream.read())
+if os.path.exists(user_config):
+    with open(user_config) as stream:
+        custom_config = yaml.safe_load(stream.read())
 
-    # Validate that token is set
-    if "settings" not in custom_config or "token" not in custom_config["settings"]:
-        raise RuntimeError("missing required token. please set token in config file: %s", user_config)
+        # Validate that token is set
+        if "settings" not in custom_config or "token" not in custom_config["settings"]:
+            raise RuntimeError("missing required token. please set token in config file: %s", user_config)
 
-    # Recursively update base config
-    update_recursively(config, custom_config)
+        # Recursively update base config
+        update_recursively(config, custom_config)
+
 
 # Notify systemd that we are ready
 daemon.notify("READY=1")

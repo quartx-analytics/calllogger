@@ -12,9 +12,9 @@ from . import config, logger
 
 token = config["settings"]["token"]
 url = "https://glaonna.ie/cdr/record/"
-timeout = config["settings"].getint("timeout") * 60
-timeout_decay = config["settings"].getfloat("decay")
-timeout_max = config["settings"].getint("max_timeout") * 60
+timeout = config["settings"]["timeout"] * 60
+timeout_decay = config["settings"]["decay"]
+timeout_max = config["settings"]["max_timeout"] * 60
 
 
 class API(threading.Thread):

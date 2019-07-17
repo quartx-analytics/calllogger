@@ -38,7 +38,7 @@ class Plugin(metaclass=abc.ABCMeta):
 
     @property
     def running(self) -> bool:
-        """Flag to indecate that the api thread is still running."""
+        """Flag to indecate that everything is working and ready to keep monitoring."""
         return self._api_thread.running
 
     @running.setter
@@ -131,7 +131,8 @@ class SerialPlugin(Plugin):
                         self.logger.exception(e)
                     else:
                         # Push record to the cloud
-                        self.push(record)
+                        if record:
+                            self.push(record)
 
             except KeyboardInterrupt:
                 # noinspection PyAttributeOutsideInit

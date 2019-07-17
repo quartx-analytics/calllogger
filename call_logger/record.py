@@ -5,14 +5,14 @@ from typing import Iterator
 
 class Record(MutableMapping):
     """
-    Common required fields.
-    number, line, ext
+    Required fields for Incoming calls
+    -> number, line, ext
 
-    Fields required by Received & Outgoing call logs.
-    ring, duration
+    Fields for Received & Outgoing calls
+    -> number, line, ext, ring, duration
 
-    Optinal fields for Received & Outgoing call logs.
-    answered, date
+    Optional fields for Received & Outgoing calls
+    -> answered, date
     """
 
     # Answered field
@@ -28,11 +28,9 @@ class Record(MutableMapping):
     def __init__(self, calltype: int, **kwargs):
         self.call_type = calltype
         if calltype != self.INCOMING:
-            if "call_type" not in kwargs:
-                kwargs["call_type"] = calltype
+            kwargs["call_type"] = calltype
 
         self.data = {}
-        # Update the dict class
         self.update(kwargs)
 
     def __setitem__(self, k, v) -> None:

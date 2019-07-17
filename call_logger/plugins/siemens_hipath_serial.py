@@ -61,10 +61,9 @@ class SiemensHipathSerial(plugins.SerialPlugin):
 
         else:
             self.logger.error(f"unexpected call type: {call_type}")
-            self.logger.error(line, exc_info=True)
+            self.logger.error(line)
             return None
 
-        # Queue the call to be
-        # sent to the frontend
+        # Return processed call record
         self.logger.info(call)
         return call

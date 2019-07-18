@@ -10,9 +10,8 @@ for _, modname, _ in pkgutil.iter_modules(plugins.__path__, prefix):
     __import__(modname)
 
 
-def main():
-    plugin_name = config["settings"]["phone_system"]
-    plugin_settings = config.get(plugin_name, fallback=None)
+def main(plugin_name):
+    plugin_settings = config.get(plugin_name)
     timeout_settings = {
         "timeout": config["settings"]["timeout"],
         "max_timeout": config["settings"]["max_timeout"],
@@ -29,4 +28,5 @@ def main():
 
 # Start the call monitoring software
 if __name__ == "__main__":
-    main()
+    name = config["settings"]["phone_system"]
+    main(name)

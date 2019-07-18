@@ -27,14 +27,20 @@ class Plugin(metaclass=abc.ABCMeta):
             plugins[cls.__name__.lower()] = cls
 
     def __init__(self, timeout: int, max_timeout: int, decay: float, **settings):
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._api_thread = api.API()
         self._api_thread.start()
 
-        # TODO: Find a better way to handle timeout decay
-        self.max_timeout = max_timeout
-        self.timeout_decay = decay
-        self.timeout = timeout
+        #: The logger object associated with this plugin
+        self.logger: logging.Logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
+        #: The timeout setting in seconds
+        self.timeout: int = timeout
+        #: The timeout decay, the timeout will get longer after each failed connection
+        self.timeout_decay: float = decay
+        #: The max timeout in seconds, the timeout will not decay past this point
+        self.max_timeout: int = max_timeout
+        #: The base timeout setting without decay applied
+        self.base_timeout: int = timeout
 
     @property
     def running(self) -> bool:
@@ -53,6 +59,10 @@ class Plugin(metaclass=abc.ABCMeta):
     def run(self) -> NoReturn:
         """Main entry point for plugin. Must be overridden"""
         pass
+
+
+# All register plugin's
+plugins: Dict[str, Type[Plugin]] = {}
 
 
 class SerialPlugin(Plugin):
@@ -90,7 +100,6 @@ class SerialPlugin(Plugin):
             self.logger.error(e)
             self.logger.info(f"Retrying in {self.timeout} seconds")
             time.sleep(self.timeout)
-            self.timeout = min(self.max_timeout, self.timeout * self.timeout_decay)
             return False
         else:
             self.logger.debug(f"Conection made to serial interface: {self.sserver.port}")
@@ -146,7 +155,3 @@ def get_plugin(plugin_name: str) -> Type[Plugin]:
         return plugins[plugin_name.lower()]
     except KeyError:
         raise KeyError(f"plugin not found: {plugin_name.lower()}")
-
-
-# All register plugin's
-plugins: Dict[str, Type[Plugin]] = {}

@@ -12,9 +12,9 @@ from . import config, logger
 
 token = config["settings"]["token"]
 url = "https://glaonna.ie/cdr/record/"
-timeout = config["settings"]["timeout"] * 60
+timeout = config["settings"]["timeout"]
 timeout_decay = config["settings"]["decay"]
-timeout_max = config["settings"]["max_timeout"] * 60
+timeout_max = config["settings"]["max_timeout"]
 
 
 class API(threading.Thread):
@@ -93,5 +93,5 @@ class API(threading.Thread):
 
     def _sleep(self):
         logger.debug(f"Reattempting connection in: {self.timeout} seconds")
-        time.sleep(self.timeout)
+        time.sleep(self.timeout * 60)
         self.timeout = min(timeout_max, self.timeout * timeout_decay)

@@ -23,7 +23,7 @@ def main(plugin_name):
 
     # Start the plugin and monitor for call logs
     plugin_ins = plugin(**plugin_settings, **timeout_settings)
-    plugin_ins.run()
+    plugin_ins.start()
 
 
 # Start the call monitoring software

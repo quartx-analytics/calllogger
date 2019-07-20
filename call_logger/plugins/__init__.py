@@ -42,14 +42,21 @@ class Plugin(metaclass=abc.ABCMeta):
         #: The base timeout setting without decay applied
         self.base_timeout: int = timeout
 
+    def start(self):
+        try:
+            self.run()
+        except KeyboardInterrupt:
+            self.logger.debug("Keyboard Interrupt accepted.")
+        except Exception as err:
+            self.logger.debug("unhandled expection: %s", str(err), exc_info=True)
+            raise
+        finally:
+            self._api_thread.running.clear()
+
     @property
     def running(self) -> bool:
         """Flag to indecate that everything is working and ready to keep monitoring."""
-        return self._api_thread.running
-
-    @running.setter
-    def running(self, value: bool) -> NoReturn:
-        self._api_thread.running = value
+        return self._api_thread.running.is_set()
 
     def push(self, record: Record) -> NoReturn:
         """Send a call log to the api."""
@@ -122,30 +129,25 @@ class SerialPlugin(Plugin):
         serial interface, parse and push to glaonna monitoring.
         """
         while self.running:
-            try:
-                # Open serial port connection
-                if not (self.sserver.is_open or self.__open()):
-                    continue
+            # Open serial port connection
+            if not (self.sserver.is_open or self.__open()):
+                continue
 
-                # Read the raw serial input and parse
-                serial_line = self.__read()
-                if serial_line:
-                    self.logger.debug(f"Processing line: {serial_line.strip()}")
+            # Read the raw serial input and parse
+            serial_line = self.__read()
+            if serial_line:
+                self.logger.debug(f"Processing line: {serial_line.strip()}")
 
-                    try:
-                        # Parse the line wtih the selected parser
-                        record = self.parse(serial_line)
-                    except Exception as e:
-                        self.logger.error(f"Failed to process line: {serial_line}")
-                        self.logger.exception(e)
-                    else:
-                        # Push record to the cloud
-                        if record:
-                            self.push(record)
-
-            except KeyboardInterrupt:
-                # noinspection PyAttributeOutsideInit
-                self.running = False
+                try:
+                    # Parse the line wtih the selected parser
+                    record = self.parse(serial_line)
+                except Exception as e:
+                    self.logger.error(f"Failed to process line: {serial_line}")
+                    self.logger.exception(e)
+                else:
+                    # Push record to the cloud
+                    if record:
+                        self.push(record)
 
 
 def get_plugin(plugin_name: str) -> Type[Plugin]:

@@ -22,9 +22,10 @@ class API(threading.Thread):
 
     def __init__(self):
         super().__init__()
-        self.queue = queue.Queue(10_000)
         self.timeout = timeout
-        self.running = True
+        self.queue = queue.Queue(10_000)
+        self.running = threading.Event()
+        self.running.set()
         self.daemon = True
 
         # Setup requests session
@@ -41,9 +42,12 @@ class API(threading.Thread):
         session = self.session
         record_queue = self.queue
 
-        while self.running:
-            # Fetch the call record from the queue
-            record: Record = record_queue.get()
+        while self.running.is_set():
+            try:
+                # Fetch the call record from the queue
+                record: Record = record_queue.get(timeout=0.1)
+            except queue.Empty:
+                continue
 
             try:
                 resp = session.post(url, json=record.data, timeout=self.timeout)
@@ -85,7 +89,7 @@ class API(threading.Thread):
 
             if resp.status_code in (401, 403):
                 logger.info("Quiting as given token thoes not have access to create call logs.")
-                self.running = False
+                self.running.clear()
             else:
                 self._sleep()
         else:
@@ -93,5 +97,5 @@ class API(threading.Thread):
 
     def _sleep(self):
         logger.debug(f"Reattempting connection in: {self.timeout} seconds")
-        time.sleep(self.timeout * 60)
+        time.sleep(self.timeout)
         self.timeout = min(timeout_max, self.timeout * timeout_decay)

@@ -14,6 +14,10 @@ from ..record import Record
 logger = logging.getLogger(__name__)
 
 
+class DuplicatePlugin(ValueError):
+    pass
+
+
 class Plugin(metaclass=abc.ABCMeta):
     """This is the Base class for all phone system parsers."""
 
@@ -22,11 +26,11 @@ class Plugin(metaclass=abc.ABCMeta):
         super().__init_subclass__(**kwargs)
         logger.debug(f"Registering plugin: {cls.__name__} {cls}")
         if cls.__name__.lower() in plugins:
-            raise RuntimeError(f"Plugin with name '{cls.__name__.lower()}' already exists")
+            raise DuplicatePlugin(f"Plugin with name '{cls.__name__.lower()}' already exists")
         else:
             plugins[cls.__name__.lower()] = cls
 
-    def __init__(self, timeout: int, max_timeout: int, decay: float, **settings):
+    def __init__(self, timeout=10, max_timeout=300, decay=1.5, **settings):
         self._api_thread = api.API()
         self._api_thread.start()
 
@@ -60,10 +64,10 @@ class Plugin(metaclass=abc.ABCMeta):
 
     def push(self, record: Record) -> NoReturn:
         """Send a call log to the api."""
-        self._api_thread.log(record)
+        self._api_thread.push(record)
 
     @abc.abstractmethod
-    def run(self) -> NoReturn:
+    def run(self) -> NoReturn:  # pragma: no cover
         """Main entry point for plugin. Must be overridden"""
         pass
 
@@ -88,12 +92,12 @@ class SerialPlugin(Plugin):
         ser.port = port
 
     @abc.abstractmethod
-    def decode(self, line: bytes) -> str:
+    def decode(self, line: bytes) -> str:  # pragma: no cover
         """Overide to handel decoding of serial data."""
         pass
 
     @abc.abstractmethod
-    def parse(self, line: str) -> Record:
+    def parse(self, line: str) -> Record:  # pragma: no cover
         """Overide to handel parsing of serial data."""
         pass
 

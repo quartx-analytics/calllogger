@@ -43,26 +43,18 @@ class SiemensHipathSerial(plugins.SerialPlugin):
         call = Record(call_type, line=int(line) if line else 0)
 
         # Common
-        number = number if number else "000000000"
-        ext = int(ext) if ext else 0
-
-        # Incoming
-        if call.call_type == Record.INCOMING:
-            call["ext"] = int(ext) if ext else 0
-            call["number"] = number
+        call["number"] = number if number else "000000000"
+        call["ext"] = int(ext) if ext else 0
 
         # Received & Outgoing calls share common data points
-        elif call.call_type == Record.RECEIVED or call.call_type == Record.OUTGOING:
+        if call.call_type == Record.RECEIVED or call.call_type == Record.OUTGOING:
             call["date"] = datetime.strptime(raw_date, "%d.%m.%y%X").astimezone(timezone.utc).isoformat()
-            call["number"] = number
-            call["ext"] = int(ext) if ext else 0
-            call["ring"] = ring
             call["duration"] = duration
+            call["ring"] = ring
 
-        else:
+        elif not call.call_type == Record.INCOMING:
             self.logger.error(f"unexpected call type: {call_type}")
             self.logger.error(line)
-            return None
 
         # Return processed call record
         self.logger.info(call)

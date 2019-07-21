@@ -16,6 +16,9 @@ timeout = config["settings"]["timeout"]
 timeout_decay = config["settings"]["decay"]
 timeout_max = config["settings"]["max_timeout"]
 
+# Call types to ignore when there are errors
+IGNORE_ON_ERROR = [Record.INCOMING]
+
 
 class API(threading.Thread):
     """Threaded class to monitor for call logs and send them to the monitoring service."""
@@ -34,7 +37,7 @@ class API(threading.Thread):
         session.headers["Content-Type"] = "application/json; charset=utf-8"
         session.headers["Accept"] = "application/json"
 
-    def log(self, record: Record):
+    def push(self, record: Record):
         self.queue.put(record)
 
     def run(self):
@@ -56,7 +59,7 @@ class API(threading.Thread):
 
                 # There is no point in saving incoming records for later processing
                 # sense the incoming call would have ended by then
-                if record.call_type == Record.INCOMING:
+                if record.call_type in IGNORE_ON_ERROR:
                     logger.debug(f"Ignoring Incoming record: {record}")
                 else:
                     try:
@@ -85,13 +88,17 @@ class API(threading.Thread):
         except requests.HTTPError as e:
             logger.error(record)
             logger.error(resp.status_code)
+            logger.error(resp.reason)
             logger.error(e)
 
             if resp.status_code in (401, 403):
                 logger.info("Quiting as given token thoes not have access to create call logs.")
                 self.running.clear()
-            else:
-                self._sleep()
+                return
+            elif resp.status_code == 400:
+                logger.info(f"record was rejected")
+
+            self._sleep()
         else:
             self.timeout = timeout
 

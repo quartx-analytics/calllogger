@@ -3,7 +3,9 @@ import pytest
 import serial
 
 # Package
-from call_logger.__main__ import main
+from call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
+from call_logger.record import Record
+from call_logger import api, plugins
 
 mock_data = b"""
 10.04.1923:19:06  2   104     00:00:0500441619251900                       2
@@ -34,24 +36,61 @@ mock_data = b"""
 
 
 @pytest.fixture
-def serial_mock():
-    with mock.patch.object(serial, "Serial", spec=True) as serial_mock:
-        serial_mock.return_value.is_open = True
-        yield serial_mock
+def mock_api():
+    with mock.patch.object(api, "API") as mocker:
+        mocker.return_value.running.return_value.is_set.return_value = True
+        yield mocker
+
+
+@pytest.fixture
+def mock_serial():
+    with mock.patch.object(serial, "Serial", spec=True) as mocker:
+        def open_on_request():
+            mocker.return_value.is_open = True
+        mocker.return_value.open.side_effect = open_on_request
+        mocker.return_value.is_open = False
+        yield mocker
 
 
 @pytest.fixture(params=mock_data)
-def serial_params(request, serial_mock):
-    serial_mock.return_value.readline.side_effect = [request.param, KeyboardInterrupt]
-    yield serial_mock
+def serial_params(request, mock_serial):
+    mock_serial.return_value.readline.side_effect = [request.param, KeyboardInterrupt]
+    return mock_serial
 
 
-def text_callback(request, context):
-    context.status_code = 201
-    context.json = {"success": True}
-    return 'response'
+def test_incoming(mock_api, serial_params):
+    """Test the serial parser with different lines of call data."""
+    def push(record):
+        # Check if we have a Record class
+        assert isinstance(record, Record)
+
+        # The expected values for a given call type
+        required_fields = ["number", "ext", "line"]
+        if record.call_type == record.OUTGOING or record.call_type == record.RECEIVED:
+            required_fields.extend(["ring", "duration"])
+
+        # Check if the required fields exists
+        for val in required_fields:
+            assert val in record
+
+    mock_api.return_value.push.side_effect = push
+    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600)
+    plugin.start()
 
 
-def test_incoming(requests_mock, serial_params):
-    requests_mock.post("https://glaonna.ie/cdr/record/")
-    main("SiemensHipathSerial")
+def test_exception(mock_api, mock_serial):
+    """There is nothing to check here, only that it works without raising an error."""
+    mock_serial.return_value.open.side_effect = [serial.SerialException, KeyboardInterrupt]
+    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
+    plugin.start()
+
+
+# noinspection PyUnusedLocal,PyRedeclaration,PyAbstractClass
+def test_dup_plugin():
+    """Test that DuplicatePlugin is raised when Plugin name already exists."""
+    with pytest.raises(plugins.DuplicatePlugin):
+        class Test1(plugins.Plugin):
+            pass
+
+        class Test1(plugins.Plugin):
+            pass

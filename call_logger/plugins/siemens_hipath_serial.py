@@ -54,7 +54,7 @@ class SiemensHipathSerial(plugins.SerialPlugin):
 
         elif not call.call_type == Record.INCOMING:
             self.logger.error(f"unexpected call type: {call_type}")
-            self.logger.error(line)
+            self.logger.error(output)
 
         # Return processed call record
         self.logger.info(call)

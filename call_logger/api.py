@@ -1,5 +1,6 @@
 # Standard lib
 import threading
+import logging
 import queue
 import time
 
@@ -8,7 +9,7 @@ import requests
 
 # Package imports
 from .record import Record
-from . import config, logger
+from . import settings
 
 token = config["settings"]["token"]
 url = "https://glaonna.ie/cdr/record/"
@@ -97,6 +98,7 @@ class API(threading.Thread):
                 return
             elif resp.status_code == 400:
                 logger.info(f"record was rejected")
+                logger.info(resp.json())
 
             self._sleep()
         else:

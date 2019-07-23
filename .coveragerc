@@ -1,6 +1,5 @@
 [run]
 source=call_logger
-branch = True
 
 [report]
 exclude_lines =

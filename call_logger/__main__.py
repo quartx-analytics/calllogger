@@ -2,7 +2,7 @@
 import pkgutil
 
 # Package
-from call_logger import config, plugins
+from call_logger import settings, plugins
 
 # Import all plugin's so they can be registered
 prefix = plugins.__name__ + "."
@@ -11,11 +11,11 @@ for _, modname, _ in pkgutil.iter_modules(plugins.__path__, prefix):
 
 
 def main(plugin_name):
-    plugin_settings = config.get(plugin_name)
+    plugin_settings = settings.get(plugin_name)
     timeout_settings = {
-        "timeout": config["settings"]["timeout"],
-        "max_timeout": config["settings"]["max_timeout"],
-        "decay": config["settings"]["decay"]
+        "timeout": settings["settings"]["timeout"],
+        "max_timeout": settings["settings"]["max_timeout"],
+        "decay": settings["settings"]["decay"]
     }
 
     # Select phone system plugin that is used to fetch call logs
@@ -28,5 +28,5 @@ def main(plugin_name):
 
 # Start the call monitoring software
 if __name__ == "__main__":
-    name = config["settings"]["phone_system"]
+    name = settings["settings"]["phone_system"]
     main(name)

@@ -51,3 +51,6 @@ class Record(MutableMapping):
     def __repr__(self):
         data = ", ".join([f"{name}={repr(value)}" for name, value in self.items()])
         return f"{self.__class__.__name__}({self.call_type}, {data})"
+
+    def copy(self):
+        return self.data.copy()

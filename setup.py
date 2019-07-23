@@ -36,7 +36,7 @@ with open("README.md", "r", encoding="utf-8") as stream:
 # ############
 
 setup["install_requires"] = [line.strip() for line in open("requirements.txt")]
-setup["test_requires"] = ['pytest', 'pytest-pep8', 'pytest-cov', 'requests-mock']
+setup["test_requires"] = ['pytest', 'pytest-cov', 'requests-mock']
 
 
 # Classifiers

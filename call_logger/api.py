@@ -11,11 +11,12 @@ import requests
 from .record import Record
 from . import settings
 
-token = config["settings"]["token"]
-url = "https://glaonna.ie/cdr/record/"
-timeout = config["settings"]["timeout"]
-timeout_decay = config["settings"]["decay"]
-timeout_max = config["settings"]["max_timeout"]
+token = settings["settings"]["token"]
+url = settings["settings"]["frontend"]
+timeout = settings["settings"]["timeout"]
+timeout_decay = settings["settings"]["decay"]
+timeout_max = settings["settings"]["max_timeout"]
+logger = logging.getLogger(f"{__name__}.api")
 
 # Call types to ignore when there are errors
 IGNORE_ON_ERROR = [Record.INCOMING]

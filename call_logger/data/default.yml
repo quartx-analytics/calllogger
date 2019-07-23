@@ -1,5 +1,8 @@
 # Global Settings
 settings:
+  # The frontend api url
+  frontend: "https://glaonna.ie/cdr/record/"
+
   timeout: 10 # Timeout in seconds before re-attemping connection on failure
   decay: 1.5 # Timeout decay to increate the timeout when connection keeps failing
   max_timeout: 300 # Max timeout if connection keeps failing

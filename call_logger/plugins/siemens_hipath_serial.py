@@ -57,5 +57,4 @@ class SiemensHipathSerial(plugins.SerialPlugin):
             self.logger.error(output)
 
         # Return processed call record
-        self.logger.info(call)
         return call

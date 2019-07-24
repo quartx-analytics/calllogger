@@ -64,6 +64,7 @@ class Plugin(metaclass=abc.ABCMeta):
 
     def push(self, record: Record) -> NoReturn:
         """Send a call log to the api."""
+        self.logger.info(record)
         self._api_thread.push(record)
 
     @abc.abstractmethod

@@ -63,7 +63,7 @@ def ring_gen():
 
 class Mockmonitor(plugins.Plugin):
     def run(self):
-        while True:
+        while self.running:
             if random.randrange(0, 2):
                 # Incoming call
                 number = number_gen()
@@ -71,16 +71,17 @@ class Mockmonitor(plugins.Plugin):
                 ring = random.randrange(1, 25)
                 ext = ext_gen()
 
-                hops = int(ring / 4) + 1  # 2 is the time in seconds before the call jumps to next ext
+                hops = int(ring / 4)
                 for hop in range(hops):
                     ext = ext_gen()
 
-                    yield Record(
+                    self.push(Record(
                         Record.INCOMING,
+                        #date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         number=number,
                         line=line,
                         ext=ext
-                    )
+                    ))
                     time.sleep(hop)
 
                 duration = duration_gen()
@@ -91,32 +92,32 @@ class Mockmonitor(plugins.Plugin):
                     answered = Record.VOICEMAIL
                     ext = 200
 
-                yield Record(
+                self.push(Record(
                     Record.RECEIVED,
-                    date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    #date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number,
                     ext=ext,
                     line=line,
                     ring=ring,
                     duration=duration,
                     answered=answered
-                )
+                ))
 
             else:
                 duration = duration_gen()
-                yield Record(
+                self.push(Record(
                     Record.OUTGOING,
-                    date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    #date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number_gen(),
                     line=line_gen(),
                     ext=ext_gen(),
                     ring=ring_gen(),
                     duration=duration,
                     answered=9 if not bool(duration) and random.randrange(1, 7) == 6 else int(bool(duration))
-                )
+                ))
 
             # Sleep for a random time between 1 and 5 seconds
-            time.sleep(1)
+            time.sleep(0.1)
 
 
 if __name__ == '__main__':

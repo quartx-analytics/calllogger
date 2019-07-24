@@ -27,8 +27,7 @@ class Record(MutableMapping):
 
     def __init__(self, calltype: int, **kwargs):
         self.call_type = calltype
-        if calltype != self.INCOMING:
-            kwargs["call_type"] = calltype
+        kwargs["call_type"] = calltype
 
         self.data = {}
         self.update(kwargs)

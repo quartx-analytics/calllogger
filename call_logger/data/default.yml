@@ -1,8 +1,5 @@
 # Global Settings
 settings:
-  # The frontend api url
-  frontend: "http://0.0.0.0/cdr/record/"
-
   timeout: 10 # Timeout in seconds before re-attemping connection on failure
   decay: 1.5 # Timeout decay to increate the timeout when connection keeps failing
   max_timeout: 300 # Max timeout if connection keeps failing
@@ -11,7 +8,7 @@ settings:
   plugin: SiemensHipathSerial
 
   # Authentication Token, used to authenticate with glaonna monitoring
-  token: 243a8f99d4686060d955d8bb5bb42decd7370d19afd92231116f40825afeacfd
+  token:
 
 
 ###################

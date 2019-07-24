@@ -12,7 +12,7 @@ from .record import Record
 from . import settings
 
 token = settings["settings"]["token"]
-url = "http://127.0.0.1:8080/monitor/cdr/record/"
+url = "http://glaonna.com/monitor/cdr/record/"
 timeout = settings["settings"]["timeout"]
 timeout_decay = settings["settings"]["decay"]
 timeout_max = settings["settings"]["max_timeout"]

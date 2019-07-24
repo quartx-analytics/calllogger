@@ -14,10 +14,10 @@ optional arguments:
                         Slow down the rate of mocked calls.
 
 # To send mock calls as fast as posible
-python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8080/
+python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/
 
 # To send mock calls at a more normal rate, including incoming calls
-python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8080/ -d 3
+python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/ -d 3
 """
 
 # Standard library
@@ -41,7 +41,7 @@ parser.add_argument(
 parser.add_argument(
     "-f",
     "--frontend",
-    help="The uri for the server e.g. 'http://127.0.0.1:8080', defaults to 'https://glaonna.com/.'",
+    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://glaonna.com/.'",
     default="https://glaonna.com/"
 )
 parser.add_argument(

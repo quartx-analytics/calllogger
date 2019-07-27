@@ -17,7 +17,7 @@ optional arguments:
 python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/
 
 # To send mock calls at a more normal rate, including incoming calls
-python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/ -d 3
+python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/ -s 3
 """
 
 # Standard library

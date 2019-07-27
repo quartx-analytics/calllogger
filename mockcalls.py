@@ -28,8 +28,8 @@ import time
 from urllib import parse as urlparse
 
 # Package
-from call_logger import plugins, api
-from call_logger.record import Record
+from quartx_call_logger import plugins, api
+from quartx_call_logger.record import Record
 
 
 # Create Parser to parse the required arguments

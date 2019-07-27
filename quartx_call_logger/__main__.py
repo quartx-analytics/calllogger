@@ -2,7 +2,7 @@
 import pkgutil
 
 # Package
-from call_logger import settings, plugins
+from quartx_call_logger import settings, plugins
 
 # Import all plugin's so they can be registered
 prefix = plugins.__name__ + "."

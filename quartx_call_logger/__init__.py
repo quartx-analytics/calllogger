@@ -27,7 +27,7 @@ import logging
 import sys
 
 # Package
-from call_logger.config import compile_settings
+from .config import compile_settings
 
 __all__ = ["settings"]
 

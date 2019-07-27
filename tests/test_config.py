@@ -1,4 +1,4 @@
-from call_logger import config
+from quartx_call_logger import config
 from unittest import mock
 
 

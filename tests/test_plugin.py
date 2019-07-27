@@ -1,8 +1,8 @@
 import pytest
 
 # Package
-from call_logger import plugins
-from call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
+from quartx_call_logger import plugins
+from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
 
 
 # noinspection PyUnusedLocal,PyRedeclaration,PyAbstractClass

@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
-from call_logger.api import API, url
-from call_logger.record import Record
+from quartx_call_logger.api import API, url
+from quartx_call_logger.record import Record
 import requests
 import queue
 

@@ -1,6 +1,6 @@
 import pytest
 
-from call_logger.record import Record
+from quartx_call_logger.record import Record
 
 
 @pytest.fixture

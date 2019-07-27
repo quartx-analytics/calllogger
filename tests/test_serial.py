@@ -3,9 +3,9 @@ import pytest
 import serial
 
 # Package
-from call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
-from call_logger.record import Record
-from call_logger import api
+from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
+from quartx_call_logger.record import Record
+from quartx_call_logger import api
 
 mock_data = b"""
 10.04.1923:19:06  2   104     00:00:0500441619251900                       2

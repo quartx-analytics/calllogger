@@ -4,22 +4,22 @@ from codecs import open
 
 setup = dict(
     version="0.1.1",
-    name="call-logger",
-    description="Call logger component for the phone system monitoring frontend.",
+    name="quartx-call-logger",
+    description="Call logger component for the QuartX phone system monitoring frontend.",
     keywords="siemens hipath phone call calls",
     author="William Forde,Michael Forde",
     author_email="willforde@gmail.com",
-    url="https://github.com/callmonitoring/call_logger",
-    license="BSD License",  # example license
+    url="https://quartx.ie/",
+    license="MIT License",
     platforms="OS Independent",
     python_requires=">=3.6",
     packages=find_packages(exclude=["tests"]),
     include_package_data=True,
     zip_safe=False,
     project_urls={
-        'Documentation': 'https://callmonitoring.github.io/call_monitoring/',
-        'Source': 'https://github.com/callmonitoring/call_logger',
-        'Tracker': 'https://github.com/callmonitoring/call_monitoring/issues',
+        'Documentation': '',
+        'Source': 'https://github.com/quartx-software/quartx-call-logger',
+        'Tracker': 'https://github.com/quartx-software/quartx-call-logger/issues',
     },
 )
 
@@ -45,19 +45,15 @@ setup["test_requires"] = ['pytest', 'pytest-cov', 'requests-mock']
 
 classifiers = setup.setdefault("classifiers", [])
 classifiers.extend([
+    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Intended Audience :: System Administrators",
     "Development Status :: 5 - Production/Stable",
-    "Environment :: No Input/Output (Daemon)",
-    "Framework :: Django",
-    "Framework :: Django :: 2.0"
+    "Environment :: No Input/Output (Daemon)"
 ])
 
 if setup.get("platforms") == "OS Independent":
     classifiers.append("Operating System :: OS Independent")
-
-if setup.get("license") == "BSD License":
-    classifiers.append("License :: OSI Approved :: BSD License")
 
 classifiers.append("Programming Language :: Python :: 3")
 for py_versions in ["Only", 3.6, 3.7]:

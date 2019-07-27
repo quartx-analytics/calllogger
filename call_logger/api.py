@@ -12,7 +12,7 @@ from .record import Record
 from . import settings
 
 token = settings["settings"]["token"]
-url = "http://glaonna.com/monitor/cdr/record/"
+url = "http://quartx.ie/monitor/cdr/record/"
 timeout = settings["settings"]["timeout"]
 timeout_decay = settings["settings"]["decay"]
 timeout_max = settings["settings"]["max_timeout"]

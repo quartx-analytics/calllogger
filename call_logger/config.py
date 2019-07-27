@@ -6,7 +6,7 @@ import os
 import appdirs
 
 # Location for user config files and logs
-CONFIG_DIR = appdirs.site_config_dir("glaonna")
+CONFIG_DIR = appdirs.site_config_dir("quartx")
 BASE_CONFIG = os.path.join(os.path.dirname(__file__), "data", "default.yml")
 USER_CONFIG = os.path.join(CONFIG_DIR, "call-logger.yml")
 

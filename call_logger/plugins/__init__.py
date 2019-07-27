@@ -131,7 +131,7 @@ class SerialPlugin(Plugin):
     def run(self) -> NoReturn:
         """
         Start the call monitoring loop. Reads a call record from the
-        serial interface, parse and push to glaonna monitoring.
+        serial interface, parse and push to QuartX Call Monitoring.
         """
         while self.running:
             # Open serial port connection

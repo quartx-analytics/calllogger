@@ -1,16 +1,14 @@
 [Unit]
-Description=Glaonna call logger
-
+Description=Quartx Call Logger
 
 [Service]
 ExecStart=/usr/bin/python /usr/local/lib/python_demo_service/python_demo_service.py
 Restart=on-failure
-Type=notify
+Type=simple
 
 # Disable Python's buffering of STDOUT and STDERR, so that output from the
 # service shows up immediately in systemd's logs
 Environment=PYTHONUNBUFFERED=1
-
 
 [Install]
 # Tell systemd to automatically start this service when the system boots

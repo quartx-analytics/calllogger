@@ -9,7 +9,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -f FRONTEND, --frontend FRONTEND
                         The uri for the server e.g. 'http://127.0.0.1:8080',
-                        defaults to 'https://glaonna.com/'
+                        defaults to 'https://quartx.ie/'
   -s [1], --slow-mode [1]
                         Slow down the rate of mocked calls.
 
@@ -41,8 +41,8 @@ parser.add_argument(
 parser.add_argument(
     "-f",
     "--frontend",
-    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://glaonna.com/.'",
-    default="https://glaonna.com/"
+    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://quartx.ie/.'",
+    default="https://quartx.ie/"
 )
 parser.add_argument(
     "-s",
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     api.token = args.token
 
     # Set the api url
-    base = urlparse.urlsplit("http://glaonna.com/monitor/cdr/record/")
+    base = urlparse.urlsplit(api.url)
     new = urlparse.urlsplit(args.frontend)
     api.url = urlparse.urlunsplit((new.scheme, new.netloc, base.path, base.query, base.fragment))
 

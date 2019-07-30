@@ -28,7 +28,7 @@ import time
 from urllib import parse as urlparse
 
 # Phonenumbers
-from phonenumbers import example_number_for_type, PhoneNumberType, PhoneNumberFormat, format_number, is_valid_number
+import phonenumbers
 
 # Package
 from quartx_call_logger import plugins, api
@@ -79,15 +79,15 @@ def number_gen():
     while True:
         # 2 in 3 chance its a random customer
         if ran == 1:
-            number_type = PhoneNumberType.MOBILE
+            number_type = phonenumbers.PhoneNumberType.MOBILE
         elif ran == 2:
-            number_type = PhoneNumberType.VOIP
+            number_type = phonenumbers.PhoneNumberType.VOIP
         else:
-            number_type = PhoneNumberType.FIXED_LINE
+            number_type = phonenumbers.PhoneNumberType.FIXED_LINE
 
-        num_obj = example_number_for_type("IE", number_type)
-        if is_valid_number(num_obj):
-            return format_number(num_obj, PhoneNumberFormat.E164)
+        num_obj = phonenumbers.example_number_for_type("IE", number_type)
+        if phonenumbers.is_valid_number(num_obj):
+            return phonenumbers.format_number(num_obj, phonenumbers.PhoneNumberFormat.E164)
 
 
 def ext_gen():

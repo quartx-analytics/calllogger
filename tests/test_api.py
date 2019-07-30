@@ -93,7 +93,7 @@ def test_run_500(api, record, requests_mock, req_callback):
     requests_mock.post(url, text=req_callback.resp(""), status_code=500)
     api.run()
 
-    assert api.queue.empty()
+    assert not api.queue.empty()
     assert req_callback.called is True
 
 

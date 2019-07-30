@@ -43,6 +43,19 @@ class API(threading.Thread):
     def push(self, record: Record):
         self.queue.put(record)
 
+    def re_push(self, record: Record):
+        # There is no point in saving incoming records for later processing
+        # sense the incoming call would have ended by then
+        if record.call_type in IGNORE_ON_ERROR:
+            logger.debug(f"Ignoring Incoming record: {record}")
+        else:
+            try:
+                # We can't wait to add to queue
+                # as this would cause a dead lock
+                self.queue.put_nowait(record)
+            except queue.Full:
+                logger.debug(f"Queue full, throwing away record: {record}")
+
     def run(self):
         """Send queued call logs to the monitoring server."""
         session = self.session
@@ -59,23 +72,15 @@ class API(threading.Thread):
                 resp = session.post(url, json=record.data, timeout=self.timeout)
             except (requests.ConnectionError, requests.Timeout) as e:
                 logger.error(e)
-
-                # There is no point in saving incoming records for later processing
-                # sense the incoming call would have ended by then
-                if record.call_type in IGNORE_ON_ERROR:
-                    logger.debug(f"Ignoring Incoming record: {record}")
-                else:
-                    try:
-                        # We can't wait to add to queue
-                        # as this would cause a dead lock
-                        record_queue.put_nowait(record)
-                    except queue.Full:
-                        logger.debug(f"Queue full, throwing away record: {record}")
+                self.re_push(record)
 
                 # Sleep for a specified amount of time
                 # before reattempting connection
-                if not isinstance(e, requests.Timeout):
-                    self._sleep()
+                msg = f"Re-attempting connection in: {self.timeout} seconds"
+                if isinstance(e, requests.Timeout):
+                    self._sleep(f"Request timed out, {msg}")
+                else:
+                    self._sleep(msg)
 
             else:
                 # Check if response was actually accepted
@@ -92,26 +97,30 @@ class API(threading.Thread):
             logger.error(record)
             logger.error(e)
 
-            if resp.status_code in (401, 403):
+            try:
+                data = resp.json()
+            except json.decoder.JSONDecodeError:
+                logger.debug("error response was not a valid json response.")
+                if len(resp.content) <= 100:
+                    logger.error(resp.content)
+            else:
+                logger.error(data)
+
+            # Quit if not authorized
+            if resp.status_code in (401, 402, 403, 498, 499):
                 logger.info("Quiting as given token thoes not have access to create call logs.")
                 self.running.clear()
                 return
-            elif resp.status_code == 400:
-                logger.error(f"record was rejected")
-                logger.info(resp.json())
-            else:
-                try:
-                    data = resp.json()
-                except json.decoder.JSONDecodeError:
-                    logger.debug("error response was not a valid json object.")
-                else:
-                    logger.error(data)
 
-            self._sleep()
+            # Server is expereancing problems
+            # Reattempt request later
+            elif resp.status_code in (404, 408) or resp.status_code >= 500:
+                self.re_push(record)
+                self._sleep(f"Re-attempting request in: {self.timeout} seconds")
         else:
             self.timeout = timeout
 
-    def _sleep(self):
-        logger.debug(f"Reattempting connection in: {self.timeout} seconds")
+    def _sleep(self, msg):
+        logger.debug(msg)
         time.sleep(self.timeout)
         self.timeout = min(timeout_max, self.timeout * timeout_decay)

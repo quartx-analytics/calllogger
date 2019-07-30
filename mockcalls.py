@@ -27,6 +27,9 @@ import random
 import time
 from urllib import parse as urlparse
 
+# Phonenumbers
+from phonenumbers import example_number_for_type, PhoneNumberType, PhoneNumberFormat, format_number, is_valid_number
+
 # Package
 from quartx_call_logger import plugins, api
 from quartx_call_logger.record import Record
@@ -58,34 +61,33 @@ parser.add_argument(
 
 def number_gen():
     """Generate a random phone number"""
-    ran = random.randrange(3)
+    ran = random.randrange(5)
     # 1 in 3 chance its a regular customar
     if ran == 0:
         common_custumors = [
-                            '857739075',  # Michael Forde
-                            '873565643',  # Tom Baker
-                            '853435640',  # Jerry Cremin
-                            '277663604',  # Louie Walsh
-                            '107975846',  # Tim Barra
-                            '213265621',  # Mike Twomey
-                            '850546045',  # Philip Murray
-                            '877640458',  # Maura Jenkins
-                            ]
-        num = random.randrange(0, len(common_custumors))
-        return "+353%s" % common_custumors[num]
+            '857739075',  # Michael Forde
+            '873565643',  # Tom Baker
+            '853435640',  # Jerry Cremin
+            '277663604',  # Louie Walsh
+            '107975846',  # Tim Barra
+            '213265621',  # Mike Twomey
+            '850546045',  # Philip Murray
+            '877640458',  # Maura Jenkins
+        ]
+        return "+353{}".format(random.choice(common_custumors))
 
-    # 2 in 3 chance its a random customer
-    elif ran == 1:
-        # random mobile numbers
-        prefix = random.randrange(85, 87)
-        num = random.randrange(1000000, 9999999)
-        return "+353{}{}".format(prefix, num)
+    while True:
+        # 2 in 3 chance its a random customer
+        if ran == 1:
+            number_type = PhoneNumberType.MOBILE
+        elif ran == 2:
+            number_type = PhoneNumberType.VOIP
+        else:
+            number_type = PhoneNumberType.FIXED_LINE
 
-    else:
-        # random landline numbers
-        prefix = random.randrange(10, 90)
-        num = random.randrange(1000000, 9999999)
-        return "+353{}{}".format(prefix, num)
+        num_obj = example_number_for_type("IE", number_type)
+        if is_valid_number(num_obj):
+            return format_number(num_obj, PhoneNumberFormat.E164)
 
 
 def ext_gen():

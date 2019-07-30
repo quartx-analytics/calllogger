@@ -3,6 +3,7 @@ import threading
 import logging
 import queue
 import time
+import json
 
 # Third party imports
 import requests
@@ -89,8 +90,6 @@ class API(threading.Thread):
             resp.raise_for_status()
         except requests.HTTPError as e:
             logger.error(record)
-            logger.error(resp.status_code)
-            logger.error(resp.reason)
             logger.error(e)
 
             if resp.status_code in (401, 403):
@@ -98,8 +97,15 @@ class API(threading.Thread):
                 self.running.clear()
                 return
             elif resp.status_code == 400:
-                logger.info(f"record was rejected")
+                logger.error(f"record was rejected")
                 logger.info(resp.json())
+            else:
+                try:
+                    data = resp.json()
+                except json.decoder.JSONDecodeError:
+                    logger.debug("error response was not a valid json object.")
+                else:
+                    logger.error(data)
 
             self._sleep()
         else:

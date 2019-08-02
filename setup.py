@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup as finalize, find_packages
 from codecs import open
+import os
 
 setup = dict(
     version="0.1.1",
@@ -28,15 +29,26 @@ setup = dict(
 # ######
 
 setup["long_description_content_type"] = "text/markdown"
-with open("README.md", "r", encoding="utf-8") as stream:
-    setup["long_description"] = stream.read()
+if os.path.exists("README.md"):
+    with open("README.md", "r", encoding="utf-8") as stream:
+        setup["long_description"] = stream.read()
 
 
 # Dependencies
 # ############
 
-setup["install_requires"] = [line.strip() for line in open("requirements.txt")]
-setup["test_requires"] = ['pytest', 'pytest-cov', 'requests-mock']
+#setup["install_requires"] = [line.strip() for line in open("requirements.txt")]
+#setup["test_requires"] = [line.strip() for line in open("requirements-dev.txt")]
+setup["install_requires"] = [
+    "pytest",
+    "pytest-cov",
+    "requests-mock",
+    "pyserial",
+    "requests",
+    "appdirs",
+    "systemd-python",
+    "pyyaml",
+]
 
 
 # Classifiers

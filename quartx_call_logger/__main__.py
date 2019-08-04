@@ -10,7 +10,11 @@ for _, modname, _ in pkgutil.iter_modules(plugins.__path__, prefix):
     __import__(modname)
 
 
-def main(plugin_name):
+def main(plugin_name=None):
+    # Select the plugin from the settings if not given
+    if plugin_name is None:
+        plugin_name = settings["settings"]["plugin"]
+
     plugin_settings = settings.get(plugin_name, {})
     plugin_settings.update({
         "timeout": settings["settings"]["timeout"],
@@ -28,5 +32,4 @@ def main(plugin_name):
 
 # Start the call monitoring software
 if __name__ == "__main__":
-    name = settings["settings"]["plugin"]
-    main(name)
+    main()

@@ -1,4 +1,5 @@
 # Standard lib
+import pkg_resources
 import yaml
 import os
 
@@ -7,7 +8,6 @@ import appdirs
 
 # Location for user config files and logs
 CONFIG_DIR = appdirs.site_config_dir("quartx")
-BASE_CONFIG = os.path.join(os.path.dirname(__file__), "data", "default.yml")
 USER_CONFIG = os.path.join(CONFIG_DIR, "call-logger.yml")
 
 
@@ -21,8 +21,8 @@ def update_recursively(base, custom):
 
 
 def compile_settings() -> dict:
-    with open(BASE_CONFIG) as stream:
-        settings = yaml.safe_load(stream.read())
+    default_settings = pkg_resources.resource_string(__name__, os.path.join("data", "default.yml"))
+    settings = yaml.safe_load(default_settings)
 
     if os.path.exists(USER_CONFIG):
         with open(USER_CONFIG) as stream:

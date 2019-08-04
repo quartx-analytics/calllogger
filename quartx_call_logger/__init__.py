@@ -30,6 +30,7 @@ import sys
 from .config import compile_settings
 
 __all__ = ["settings"]
+__version__ = "0.2.0"
 
 
 class CusstomStreamHandler(logging.StreamHandler):

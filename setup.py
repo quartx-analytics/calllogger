@@ -38,6 +38,7 @@ aren’t already installed
 from setuptools import setup as finalize, find_packages
 from codecs import open
 import os
+import re
 
 # The root path of this file
 this_directory = os.path.abspath(os.path.dirname(__file__))
@@ -114,9 +115,9 @@ setup = dict(
 )
 
 # Add readme as long description
-if os.path.exists(os.path.join(this_directory, "README.md")):
-    setup["long_description_content_type"] = "text/markdown"
-    with open(os.path.join(this_directory, "README.md"), "r", encoding="utf-8") as stream:
+if os.path.exists(os.path.join(this_directory, "README.rst")):
+    setup["long_description_content_type"] = "text/x-rst"
+    with open(os.path.join(this_directory, "README.rst"), "r", encoding="utf-8") as stream:
         setup["long_description"] = stream.read()
 
 # Dependencies for normal install
@@ -135,6 +136,15 @@ setup["extras_require"] = {
             "requests-mock"
         ]
     }
+
+# Extract version from package
+with open(os.path.join("quartx-call-logger", "__init__.py"), 'rb') as opened:
+    search_refind = r'__version__ = ["\'](\d+\.\d+\.\d+)["\']'
+    verdata = re.search(search_refind, opened.read())
+    if verdata:
+        setup["version"] = verdata.group(1)
+    else:
+        raise RuntimeError("Unable to extract version number")
 
 # Actually call setup
 finalize(**setup)

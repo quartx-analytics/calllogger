@@ -2,7 +2,7 @@
 Description=Quartx Call Logger
 
 [Service]
-ExecStart=/usr/bin/python /usr/local/lib/python_demo_service/python_demo_service.py
+ExecStart=/usr/bin/call-logger
 Restart=on-failure
 Type=simple
 
@@ -11,5 +11,4 @@ Type=simple
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
-# Tell systemd to automatically start this service when the system boots
 WantedBy=default.target

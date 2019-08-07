@@ -37,7 +37,7 @@ Configuration
 -------------
 
 The Configuration for this package is located in ``/Library/Application Support/quartx`` on MacOS,
-``/etc/xdg/quartx`` on Unix systems or ``C:\ProgramData\quartx\quartx`` on Windows.
+``/etc/xdg/quartx`` on Unix/Linux or ``C:\ProgramData\quartx\quartx`` on Windows.
 
 First we download the base configuration file from github so we can modifiy it. The following commands are for Linux/Unix.
 ::
@@ -45,9 +45,8 @@ First we download the base configuration file from github so we can modifiy it. 
     sudo mkdir -p /etc/xdg/quartx
     sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/quartx_call_logger/data/default.yml > /etc/xdg/quartx/call-logger.yml
 
-At the moment only one setting is required to be set by the user, that is the ``token``.
-The token is the authentication key used to authenticate the user and identify who the call logs belong to.
-Contact Quartx Call Monitoring for the token key.
+Currently the only required settings is the ``token``. The token is the authentication key used to authenticate
+the user and identify who the call logs belong to. Contact Quartx Call Monitoring for the token key.
 ::
 
     sudo nano /etc/xdg/quartx/call-logger.yml
@@ -55,10 +54,8 @@ Contact Quartx Call Monitoring for the token key.
     token: 3bf6940a6bc249a729e7e4fdd5350bb4887d2dac942a553b198f2dfc678055bf
     ...
 
-If running under Linux then the systemd unit file should be installed.
-::
-
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/quartx-call-logger.service > /etc/systemd/system/call-logger.service
+The plugin settings may also need to be changed depending on the system running this software.
+i.e. the serial port serial baud rate settings
 
 
 Usage
@@ -68,3 +65,10 @@ The call logger can be run with just one single command when on Linux.
 ::
 
     call-logger
+
+To run the call-logger as a server you can install the systemd service file
+::
+
+    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/quartx-call-logger.service > /etc/systemd/system/call-logger.service
+    sudo systemctl enable --now call-logger.service
+

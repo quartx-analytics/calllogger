@@ -12,7 +12,7 @@ class SiemensHipathSerial(plugins.SerialPlugin):
     def decode(self, line: bytes) -> str:
         return line.decode("ASCII")
 
-    def parse(self, output: str):
+    def parse(self, line: str) -> Record:
         """
         Parse call logs received from the a Siemans Hipath serial interface.
 
@@ -31,13 +31,13 @@ class SiemensHipathSerial(plugins.SerialPlugin):
              ring=7, duration=0, answered=0, call_type=2)
         """
         # Parse the CDR
-        raw_date = output[:16]
-        line = output[16:19].strip()
-        ext = output[22:25].strip()
-        ring = output[25:30].strip()
-        duration = output[30:38].strip()
-        number = output[38:53].strip()
-        call_type = int(output[74:77].strip())
+        raw_date = line[:16]
+        line = line[16:19].strip()
+        ext = line[22:25].strip()
+        ring = line[25:30].strip()
+        duration = line[30:38].strip()
+        number = line[38:53].strip()
+        call_type = int(line[74:77].strip())
 
         # Parse the received record
         call = Record(call_type, line=int(line) if line else 0)
@@ -54,7 +54,7 @@ class SiemensHipathSerial(plugins.SerialPlugin):
 
         elif not call.call_type == Record.INCOMING:
             self.logger.error(f"unexpected call type: {call_type}")
-            self.logger.error(output)
+            self.logger.error(line)
 
         # Return processed call record
         return call

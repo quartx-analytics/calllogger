@@ -1,5 +1,5 @@
-.. image:: https://api.codacy.com/project/badge/Grade/6c9fd43bcc494c85b49c85bf03352808
-    :target: https://www.codacy.com/app/quartx-manager/quartx-call-logger?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quartx-software/quartx-call-logger&amp;utm_campaign=Badge_Grade
+.. image:: https://api.codacy.com/project/badge/Grade/af3dc404e10e4a8f9f8e79823ff654e9
+    :target: https://www.codacy.com/app/Quartx/quartx-call-logger?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quartx-software/quartx-call-logger&amp;utm_campaign=Badge_Grade
 
 .. image:: https://travis-ci.org/quartx-software/quartx-call-logger.svg?branch=master
     :target: https://travis-ci.org/quartx-software/quartx-call-logger

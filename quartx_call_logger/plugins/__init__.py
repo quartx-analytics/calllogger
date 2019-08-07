@@ -93,12 +93,12 @@ class SerialPlugin(Plugin):
         ser.port = port
 
     @abc.abstractmethod
-    def decode(self, line: bytes) -> str:  # pragma: no cover
+    def decode(self, data: bytes) -> str:  # pragma: no cover
         """Overide to handel decoding of serial data."""
         pass
 
     @abc.abstractmethod
-    def parse(self, line: str) -> Record:  # pragma: no cover
+    def parse(self, data: str) -> Record:  # pragma: no cover
         """Overide to handel parsing of serial data."""
         pass
 

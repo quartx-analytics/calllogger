@@ -138,7 +138,7 @@ setup["extras_require"] = {
     }
 
 # Extract version from package
-with open(os.path.join("quartx-call-logger", "__init__.py"), 'rb') as opened:
+with open(os.path.join("quartx_call_logger", "__init__.py"), 'r') as opened:
     search_refind = r'__version__ = ["\'](\d+\.\d+\.\d+)["\']'
     verdata = re.search(search_refind, opened.read())
     if verdata:

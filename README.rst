@@ -29,7 +29,7 @@ Install
 -------
 
 There are two ways to install this package. First is by using PYPI to install system wide, the other is by cloning
-the git repo and install using Pipenv to isolate the package from the rest of the system for development.
+the git repo and install using Pipenv, whitch isolates the package from the rest of the system for development.
 
 Production ::
 
@@ -64,6 +64,9 @@ the user and identify who the call logs belong to. Contact Quartx Call Monitorin
     token: 3bf6940a6bc249a729e7e4fdd5350bb4887d2dac942a553b198f2dfc678055bf
     ...
 
+The plugin settings may also need to be changed depending on the phone system.
+You can read the configuration comments to see what changes may be required.
+
 
 Usage
 -----
@@ -73,9 +76,8 @@ The call logger can be run with just one single command when on Linux.
 
     call-logger
 
-To run the call-logger as a server you can install the systemd service file
+To run the call-logger as a service you can install the systemd service file
 ::
 
     sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/quartx-call-logger.service > /etc/systemd/system/call-logger.service
     sudo systemctl enable --now call-logger.service
-

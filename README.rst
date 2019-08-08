@@ -11,8 +11,16 @@
 Quartx Call Logger
 ------------------
 
-Call logger component for the Quartx phone system monitoring frontend.
-http://www.quartx.ie/
+Call logger component for the Quartx phone system monitoring frontend. http://www.quartx.ie/
+This logger can monitor phone systems for CDR(Call Data Records) and send the records to the monitoring frontend.
+The monitoring frontend will then analyze the records and display them in a easy to view web interface.
+
+The currently supported phone systems are:
+* Siemens Hipath
+
+Support for new phone systems can be easily added through plugins.
+With the plugin system any system can be supported as long as the system as some sort of API or Serial Interface.
+The documentation on how to create a plugin can be found here.
 
 
 Install
@@ -53,9 +61,6 @@ the user and identify who the call logs belong to. Contact Quartx Call Monitorin
     ...
     token: 3bf6940a6bc249a729e7e4fdd5350bb4887d2dac942a553b198f2dfc678055bf
     ...
-
-The plugin settings may also need to be changed depending on the system running this software.
-i.e. the serial port serial baud rate settings
 
 
 Usage

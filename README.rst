@@ -12,6 +12,7 @@ Quartx Call Logger
 ------------------
 
 Call logger component for the Quartx phone system monitoring frontend. http://www.quartx.ie/
+
 This logger can monitor phone systems for CDR(Call Data Records) and send the records to the monitoring frontend.
 The monitoring frontend will then analyze the records and display them in a easy to view web interface.
 

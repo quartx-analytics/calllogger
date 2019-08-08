@@ -17,10 +17,11 @@ This logger can monitor phone systems for CDR(Call Data Records) and send the re
 The monitoring frontend will then analyze the records and display them in a easy to view web interface.
 
 The currently supported phone systems are:
-* Siemens Hipath
+
+    * Siemens Hipath
 
 Support for new phone systems can be easily added through plugins.
-With the plugin system any system can be supported as long as the system as some sort of API or Serial Interface.
+With the plugin system any system can be supported as long as the system has some sort of API or Serial Interface.
 The documentation on how to create a plugin can be found here.
 
 

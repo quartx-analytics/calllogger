@@ -11,6 +11,6 @@ Welcome to Quartx Call Logger's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
 
    plugins

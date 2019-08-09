@@ -47,24 +47,29 @@ Record API
 Plugin API
 ----------
 
-.. autoclass:: quartx_call_logger.plugins.Plugin
+.. autoclass:: quartx_call_logger.plugins.Plugin()
     :members:
     :exclude-members: timeout, timeout_decay, max_timeout, logger
 
     .. attribute:: timeout
         :annotation: = 10
 
-        The timeout setting in seconds
+        The timeout setting in seconds. Can be changed in the user config.
 
     .. attribute:: timeout_decay
         :annotation: = 1.5
 
-        The timeout decay, used to increase the timeout after each failed connection
+        The timeout decay, used to increase the timeout after each failed connection. Can be changed in the user config.
 
     .. attribute:: max_timeout
         :annotation: = 300
 
-        The max timeout in seconds, the timeout will not decay past this point
+        The max timeout in seconds, the timeout will not decay past this point. Can be changed in the user config.
+
+    .. attribute:: base_timeout
+        :annotation: = 10
+
+        The base timeout value without decay
 
     .. attribute:: logger
         :annotation: = logging.Logger

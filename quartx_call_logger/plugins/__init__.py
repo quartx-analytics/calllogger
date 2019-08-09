@@ -44,7 +44,11 @@ class Plugin(metaclass=abc.ABCMeta):
         self.max_timeout: int = max_timeout
         self.base_timeout: int = timeout
 
-    def start(self):
+    def start(self, **settings):
+        # Update the internal settings
+        self.__dict__.update(settings)
+        self.base_timeout = self.timeout
+
         try:
             self.run()
         except KeyboardInterrupt:

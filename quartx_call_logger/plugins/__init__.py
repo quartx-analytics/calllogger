@@ -19,31 +19,29 @@ class DuplicatePlugin(ValueError):
 
 
 class Plugin(metaclass=abc.ABCMeta):
-    """This is the Base class for all phone system parsers."""
+    """
+    This is the Base Plugin class for all phone system plugins.
+
+    This class is not ment to be called directly, but subclassed by a Plugin.
+    """
 
     # noinspection PyMethodOverriding, PyMethodParameters
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         logger.debug(f"Registering plugin: {cls.__name__} {cls}")
-        if cls.__name__.lower() in plugins:
+        if cls.__name__.lower() in registered_plugins:
             raise DuplicatePlugin(f"Plugin with name '{cls.__name__.lower()}' already exists")
         else:
-            plugins[cls.__name__.lower()] = cls
+            registered_plugins[cls.__name__.lower()] = cls
 
     def __init__(self, timeout=10, max_timeout=300, decay=1.5, **settings):
         self._api_thread = api.API()
         self._api_thread.start()
 
-        #: The logger object associated with this plugin
         self.logger: logging.Logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
-        #: The timeout setting in seconds
         self.timeout: int = timeout
-        #: The timeout decay, the timeout will get longer after each failed connection
         self.timeout_decay: float = decay
-        #: The max timeout in seconds, the timeout will not decay past this point
         self.max_timeout: int = max_timeout
-        #: The base timeout setting without decay applied
         self.base_timeout: int = timeout
 
     def start(self):
@@ -63,7 +61,7 @@ class Plugin(metaclass=abc.ABCMeta):
         return self._api_thread.running.is_set()
 
     def push(self, record: Record) -> NoReturn:
-        """Send a call log to the api."""
+        """Send a call log record to the call monitoring API."""
         self.logger.info(record)
         self._api_thread.push(record)
 
@@ -74,15 +72,17 @@ class Plugin(metaclass=abc.ABCMeta):
 
 
 # All register plugin's
-plugins: Dict[str, Type[Plugin]] = {}
+registered_plugins: Dict[str, Type[Plugin]] = {}
 
 
 class SerialPlugin(Plugin):
     """
     This is an extended plugin with serial interface support.
 
-    :param str port: The port/path to the serial interface.
-    :param int rate: The serial baud rate to use.
+    This class is not ment to be called directly, but subclassed by a Plugin.
+
+    :param port: The port/path to the serial interface.
+    :param rate: The serial baud rate to use.
     """
     def __init__(self, port: str, rate: int, **settings):
         super(SerialPlugin, self).__init__(**settings)
@@ -94,12 +94,22 @@ class SerialPlugin(Plugin):
 
     @abc.abstractmethod
     def decode(self, data: bytes) -> str:  # pragma: no cover
-        """Overide to handel decoding of serial data."""
+        """
+        Overide this method to handel decoding of serial data.
+
+        :param data: The raw data line from the serial interface as type ``bytes``.
+        :returns: The decoded into data line as type ``str``.
+        """
         pass
 
     @abc.abstractmethod
     def parse(self, data: str) -> Record:  # pragma: no cover
-        """Overide to handel parsing of serial data."""
+        """
+        Overide this method to handel parsing of serial data.
+
+        :param data: The decoded data line.
+        :returns: A :class:`quartx_call_logger.record.Record` object.
+        """
         pass
 
     def __open(self) -> bool:
@@ -159,6 +169,6 @@ def get_plugin(plugin_name: str) -> Type[Plugin]:
     """Return pluging matching the given name."""
     try:
         # Load required plugin
-        return plugins[plugin_name.lower()]
+        return registered_plugins[plugin_name.lower()]
     except KeyError:
         raise KeyError(f"plugin not found: {plugin_name.lower()}")

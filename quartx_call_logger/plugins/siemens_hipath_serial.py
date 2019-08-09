@@ -2,11 +2,10 @@
 from datetime import datetime, timezone
 
 # Package imports
-from .. import plugins
-from ..record import Record
+from . import SerialPlugin, Record
 
 
-class SiemensHipathSerial(plugins.SerialPlugin):
+class SiemensHipathSerial(SerialPlugin):
     """Data object for call logs."""
 
     def decode(self, data: bytes) -> str:

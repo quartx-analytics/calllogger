@@ -5,14 +5,36 @@ from typing import Iterator
 
 class Record(MutableMapping):
     """
-    Required fields for Incoming calls
-    -> number, line, ext
+    This class is a dictionary like object, subclassed from MutableMapping.
 
-    Fields for Received & Outgoing calls
-    -> number, line, ext, ring, duration
+    The fields that are used for Incoming calls:
 
-    Optional fields for Received & Outgoing calls
-    -> answered, date
+        * **number** (*str*) - The phone number of the call.
+        * **line** (*int*) - The line number that the call is on.
+        * **ext** (*int*) - The extention number that the call is on.
+
+    The fields that are used for Received & Outgoing calls:
+
+        * **number** (*str*) - The phone number of the call.
+        * **line** (*int*) - The line number that the call is on.
+        * **ext** (*int*) - The extention number that the call is on.
+        * **ring** (*int*) - The time in seconds that the caller was ringing for.
+        * **duration** (*int*) - The duration of the call in seconds.
+        * **answered** (*int*) (*optional*) Flag to indecate if the call was answered.
+        * **date** (*datetime*) (*optional*) The datetime of the call, optional but recommended.
+
+    .. note:: **duration** & **ring** may also be in the format of "hh:mm:ss".
+
+    :cvar int NOT_ANSWERED:  Mark as not answered
+    :cvar int ANSWERED:  Mark as answered
+    :cvar int VOICEMAIL:  Mark as farwarded to voicemail
+
+    :cvar int INCOMING:  Mark as an incoming call
+    :cvar int RECEIVED:  Mark as a reveived call
+    :cvar int OUTGOING:  Mark as a call outgoing call
+
+    :param int calltype: The type of call record, incoming/reveived/outgoing
+    :param kwargs: Any field can be passed in as a keyword argument
     """
 
     # Answered field

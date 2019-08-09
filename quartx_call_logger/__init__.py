@@ -32,6 +32,8 @@ from .config import compile_settings
 __all__ = ["settings"]
 __version__ = "0.2.0"
 
+# TODO: Check the systemd unit file and see if it can only restart on failer and not normal exit
+
 
 class CusstomStreamHandler(logging.StreamHandler):
     """

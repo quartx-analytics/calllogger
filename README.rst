@@ -7,6 +7,10 @@
 .. image:: https://coveralls.io/repos/github/quartx-software/quartx-call-logger/badge.svg?branch=master
     :target: https://coveralls.io/github/quartx-software/quartx-call-logger?branch=master
 
+.. image:: https://readthedocs.org/projects/quartx-call-logger/badge/?version=latest
+    :target: https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 
 Quartx Call Logger
 ------------------

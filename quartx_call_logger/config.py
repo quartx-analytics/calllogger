@@ -21,7 +21,7 @@ def update_recursively(base, custom):
 
 
 def compile_settings() -> dict:
-    default_settings = pkg_resources.resource_string(__name__, os.path.join("data", "default.yml"))
+    default_settings = pkg_resources.resource_string(__name__, os.path.join("data", "defaults.yml"))
     settings = yaml.safe_load(default_settings)
 
     if os.path.exists(USER_CONFIG):

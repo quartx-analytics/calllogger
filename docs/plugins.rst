@@ -8,10 +8,11 @@ To create a plugin you first need to create a new module in the
 plugins directory of the quartx_call_logger package.
 Then create a class that inherits from either :class:`quartx_call_logger.plugins.Plugin` or
 :class:`quartx_call_logger.plugins.SerialPlugin`.
+When the call logger start up it scans for the plugin directory for plugins and registors them automatically.
 
 There is one method that is required in the plugin class, "run".
 This method is the main entry point for the plugin. This method should be
-using a loop that checks the state of the plugin property ``sefl.running``, and
+using a loop that checks the state of the plugin property ``self.running``, and
 when true the loop should continue monitoring the call logs.
 
 .. code-block:: python
@@ -34,7 +35,20 @@ when true the loop should continue monitoring the call logs.
 Settings
 --------
 
-create documentation on how to do settings and how they are handeled and passed to the plugins.
+If there are any required settings for the plugin, they should be added to the defaults.yml configuration file.
+This file is located in ``/quartx_call_logger/data/defaults.yml``. These settings are then passed to the plugin
+constructor whenever the plugin is initialized.
+
+Example settings configuration::
+
+    SiemensHipathSerial:
+      # Port & baud rate settings required to communicate with the Siemen Hipath serial interface
+      # port: The port where the serial device is located. e.g. /dev/ttyUSB0 on GNU/Linux or COM3 on Windows
+      # rate: Baud rate used when communicating with the serial interface, such as 9600
+      port: /dev/ttyUSB0
+      rate: 9600
+
+.. note:: The name for the plugin settings need to be the exact name given to the plugin class
 
 
 Record API

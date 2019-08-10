@@ -8,7 +8,8 @@ To create a plugin you first need to create a new module in the
 plugins directory of the quartx_call_logger package.
 Then create a class that inherits from either :class:`quartx_call_logger.plugins.Plugin` or
 :class:`quartx_call_logger.plugins.SerialPlugin`.
-When the call logger start up it scans for the plugin directory for plugins and registors them automatically.
+
+When the call logger starts up it scans the plugin directory for plugins and registers them automatically.
 
 There is one method that is required in the plugin class, "run".
 This method is the main entry point for the plugin. This method should be
@@ -35,7 +36,7 @@ when true the loop should continue monitoring the call logs.
 Settings
 --------
 
-If there are any required settings for the plugin, they should be added to the defaults.yml configuration file.
+If there are any required settings for the plugin, they should be added to the ``defaults.yml`` configuration file.
 This file is located in ``/quartx_call_logger/data/defaults.yml``. These settings are then passed to the plugin
 constructor whenever the plugin is initialized.
 
@@ -48,7 +49,7 @@ Example settings configuration::
       port: /dev/ttyUSB0
       rate: 9600
 
-.. note:: The name for the plugin settings need to be the exact name given to the plugin class
+.. note:: The name for the plugin settings needs to be the exact name given to the plugin class.
 
 
 Record API

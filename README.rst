@@ -85,3 +85,10 @@ To run the call-logger as a service you can install the systemd service file
 
     sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/quartx-call-logger.service > /etc/systemd/system/call-logger.service
     sudo systemctl enable --now call-logger.service
+
+
+Contribution
+------------
+
+Support for other phone systems can be added through plugins.
+Documentation for creating plugins can be found at readthedocs.

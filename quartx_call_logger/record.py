@@ -20,10 +20,12 @@ class Record(MutableMapping):
         * **ext** (*int*) - The extention number that the call is on.
         * **ring** (*int*) - The time in seconds that the caller was ringing for.
         * **duration** (*int*) - The duration of the call in seconds.
-        * **answered** (*int*) (*optional*) Flag to indecate if the call was answered.
+        * **answered** (*int*/*bool*) (*optional*) Flag to indecate if the call was answered.
         * **date** (*datetime*) (*optional*) The datetime of the call, optional but recommended.
 
-    .. note:: **duration** & **ring** may also be in the format of "hh:mm:ss".
+    .. note:: **duration** & **ring** may also be in the format of ``HH:MM:SS``.
+
+    .. note:: **date** must be in the ISO 8601 format e.g. ``2019-08-11T01:49:49+00:00``. UTC is preferred.
 
     :cvar int NOT_ANSWERED:  Mark as not answered
     :cvar int ANSWERED:  Mark as answered

@@ -25,7 +25,6 @@ python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8
 import argparse
 import random
 import time
-from urllib import parse as urlparse
 
 # Phonenumbers
 import phonenumbers
@@ -182,9 +181,7 @@ if __name__ == '__main__':
     api.token = args.token
 
     # Set the api url
-    base = urlparse.urlsplit(api.url)
-    new = urlparse.urlsplit(args.frontend)
-    api.url = urlparse.urlunsplit((new.scheme, new.netloc, base.path, base.query, base.fragment))
+    api.set_url(args.frontend)
 
     # Start the plugin
     plugin = Mockmonitor(args.slow_mode)

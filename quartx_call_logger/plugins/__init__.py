@@ -1,6 +1,7 @@
 # Standard library
 from typing import Dict, Type, NoReturn
 import logging
+import queue
 import time
 import abc
 
@@ -35,7 +36,8 @@ class Plugin(metaclass=abc.ABCMeta):
             registered_plugins[cls.__name__.lower()] = cls
 
     def __init__(self, timeout=10, max_timeout=300, decay=1.5, **settings):
-        self._api_thread = api.API()
+        self.queue = queue.Queue(10_000)
+        self._api_thread = api.API(self.queue)
         self._api_thread.start()
 
         self.logger: logging.Logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -67,7 +69,7 @@ class Plugin(metaclass=abc.ABCMeta):
     def push(self, record: Record) -> NoReturn:
         """Send a call log record to the call monitoring API."""
         self.logger.info(record)
-        self._api_thread.push(record)
+        self.queue.put(record)
 
     @abc.abstractmethod
     def run(self) -> NoReturn:  # pragma: no cover

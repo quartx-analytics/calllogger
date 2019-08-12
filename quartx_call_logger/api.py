@@ -1,14 +1,15 @@
 # Standard lib
+from urllib import parse as urlparse
 import threading
 import logging
 import queue
 import time
 import json
 
-# Third party imports
+# Third party
 import requests
 
-# Package imports
+# Package
 from .record import Record
 from . import settings
 
@@ -23,14 +24,22 @@ logger = logging.getLogger(f"{__name__}.api")
 IGNORE_ON_ERROR = [Record.INCOMING]
 
 
+def set_url(frontend_url):
+    """Set the api url"""
+    global url
+    base = urlparse.urlsplit(url)
+    new = urlparse.urlsplit(frontend_url)
+    url = urlparse.urlunsplit((new.scheme, new.netloc, base.path, base.query, base.fragment))
+
+
 class API(threading.Thread):
     """Threaded class to monitor for call logs and send them to the monitoring service."""
 
-    def __init__(self):
+    def __init__(self, call_queue):
         super().__init__()
-        self.timeout = timeout
-        self.queue = queue.Queue(10_000)
         self.running = threading.Event()
+        self.queue = call_queue
+        self.timeout = timeout
         self.running.set()
         self.daemon = True
 
@@ -39,9 +48,6 @@ class API(threading.Thread):
         session.headers["Authorization"] = f"Token {token}"
         session.headers["Content-Type"] = "application/json; charset=utf-8"
         session.headers["Accept"] = "application/json"
-
-    def push(self, record: Record):
-        self.queue.put(record)
 
     def re_push(self, record: Record):
         # There is no point in saving incoming records for later processing

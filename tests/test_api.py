@@ -8,7 +8,7 @@ import queue
 
 @pytest.fixture
 def api():
-    obj = API()
+    obj = API(queue.Queue(10))
     obj.timeout = 0.01
     with mock.patch.object(obj, "running") as mocker:
         mocker.is_set.side_effect = [True, False]
@@ -39,7 +39,7 @@ def req_callback():
 
 def test_push(api, record):
     assert api.queue.empty()
-    api.push(record)
+    api.queue.put(record)
     assert not api.queue.empty()
 
 
@@ -53,7 +53,7 @@ def test_empty_queue(api, requests_mock, req_callback):
 
 
 def test_run_201(api, record, requests_mock, req_callback):
-    api.push(record)
+    api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"success": True}), status_code=201)
     api.run()
 
@@ -62,7 +62,7 @@ def test_run_201(api, record, requests_mock, req_callback):
 
 
 def test_run_400(api, record, requests_mock, req_callback):
-    api.push(record)
+    api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"error": "field is missing"}), status_code=400)
     api.run()
 
@@ -71,7 +71,7 @@ def test_run_400(api, record, requests_mock, req_callback):
 
 
 def test_run_401(api, record, requests_mock, req_callback):
-    api.push(record)
+    api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"error": "permission required"}), status_code=401)
     api.run()
 
@@ -80,7 +80,7 @@ def test_run_401(api, record, requests_mock, req_callback):
 
 
 def test_run_403(api, record, requests_mock, req_callback):
-    api.push(record)
+    api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"error": "access forbidden"}), status_code=403)
     api.run()
 
@@ -89,7 +89,7 @@ def test_run_403(api, record, requests_mock, req_callback):
 
 
 def test_run_500(api, record, requests_mock, req_callback):
-    api.push(record)
+    api.queue.put(record)
     requests_mock.post(url, text=req_callback.resp(""), status_code=500)
     api.run()
 
@@ -98,7 +98,7 @@ def test_run_500(api, record, requests_mock, req_callback):
 
 
 def test_exception_timeout(api, record):
-    api.push(record)
+    api.queue.put(record)
     with mock.patch.object(api, "session") as mocker:
         mocker.post.side_effect = requests.Timeout
         api.run()
@@ -106,7 +106,7 @@ def test_exception_timeout(api, record):
 
 
 def test_exception_connection_error(api, record):
-    api.push(record)
+    api.queue.put(record)
     with mock.patch.object(api, "session") as mocker:
         mocker.post.side_effect = requests.ConnectionError
         api.run()
@@ -115,7 +115,7 @@ def test_exception_connection_error(api, record):
 
 def test_exception_connection_error_incoming(api):
     record = Record(0, number="0876521354", line=1, ext=102)
-    api.push(record)
+    api.queue.put(record)
     with mock.patch.object(api, "session") as mocker:
         mocker.post.side_effect = requests.ConnectionError
         api.run()
@@ -125,7 +125,7 @@ def test_exception_connection_error_incoming(api):
 def test_exception_queue_full(api, record):
     with mock.patch.object(api, "queue", spec=True) as queue_mock:
         queue_mock.put_nowait.side_effect = queue.Full
-        api.push(record)
+        api.queue.put(record)
 
         with mock.patch.object(api, "session") as req_mock:
             req_mock.post.side_effect = requests.Timeout

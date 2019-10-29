@@ -9,7 +9,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -f FRONTEND, --frontend FRONTEND
                         The uri for the server e.g. 'http://127.0.0.1:8080',
-                        defaults to 'https://quartx.ie/'
+                        defaults to 'https://stage.quartx.ie/'
   -s [1], --slow-mode [1]
                         Slow down the rate of mocked calls.
 
@@ -43,8 +43,8 @@ parser.add_argument(
 parser.add_argument(
     "-f",
     "--frontend",
-    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://quartx.ie/.'",
-    default="https://quartx.ie/"
+    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://stage.quartx.ie/.'",
+    default="https://stage.quartx.ie/"
 )
 parser.add_argument(
     "-s",

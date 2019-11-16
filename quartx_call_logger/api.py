@@ -48,6 +48,7 @@ class API(threading.Thread):
         session.headers["Authorization"] = f"Token {token}"
         session.headers["Content-Type"] = "application/json; charset=utf-8"
         session.headers["Accept"] = "application/json"
+        session.verify = False
 
     def re_push(self, record: Record):
         # There is no point in saving incoming records for later processing

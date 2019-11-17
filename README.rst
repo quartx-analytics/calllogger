@@ -38,6 +38,8 @@ the git repo and install using Pipenv, whitch isolates the package from the rest
 Production ::
 
     pip install quartx_call_logger
+    or
+    pip install git+https://github.com/quartx-software/quartx-call-logger.git
 
 Development ::
 

@@ -68,7 +68,6 @@ class Plugin(metaclass=abc.ABCMeta):
 
     def push(self, record: Record) -> NoReturn:
         """Send a call log record to the call monitoring API."""
-        self.logger.info(record)
         self.queue.put(record)
 
     @abc.abstractmethod
@@ -157,13 +156,11 @@ class SerialPlugin(Plugin):
             # Read the raw serial input and parse
             serial_line = self.__read()
             if serial_line:
-                self.logger.debug(f"Processing line: {serial_line.strip()}")
-
                 try:
                     # Parse the line wtih the selected parser
                     record = self.parse(serial_line)
                 except Exception as e:
-                    self.logger.error(f"Failed to process line: {serial_line}")
+                    self.logger.error(f"Failed to process line: {serial_line.strip()}")
                     self.logger.exception(e)
                 else:
                     # Push record to the cloud

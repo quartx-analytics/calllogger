@@ -5,7 +5,7 @@ from quartx_call_logger.record import Record
 
 @pytest.fixture
 def record():
-    return Record(1, number="0876521354", line=1, ext=102, ring=10, duration=0)
+    return Record(call_type=1, number="0876521354", line=1, ext=102, ring=10, duration=0)
 
 
 def test_len(record):

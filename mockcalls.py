@@ -129,7 +129,7 @@ class Mockmonitor(plugins.Plugin):
                         ext = ext_gen()
 
                         self.push(Record(
-                            Record.INCOMING,
+                            call_type=Record.INCOMING,
                             # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                             number=number,
                             line=line,
@@ -146,7 +146,7 @@ class Mockmonitor(plugins.Plugin):
                     ext = 200
 
                 self.push(Record(
-                    Record.RECEIVED,
+                    call_type=Record.RECEIVED,
                     # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number,
                     ext=ext,
@@ -159,7 +159,7 @@ class Mockmonitor(plugins.Plugin):
             else:
                 duration = duration_gen()
                 self.push(Record(
-                    Record.OUTGOING,
+                    call_type=Record.OUTGOING,
                     # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number_gen(),
                     line=line_gen(),
@@ -171,6 +171,10 @@ class Mockmonitor(plugins.Plugin):
 
             # Sleep for a random time between 1 and 5 seconds
             time.sleep(self.delay)
+
+    def push(self, record: Record):
+        print(record)
+        super(Mockmonitor, self).push(record)
 
 
 if __name__ == '__main__':

@@ -49,10 +49,7 @@ class Record(MutableMapping):
     RECEIVED = 1
     OUTGOING = 2
 
-    def __init__(self, calltype: int, **kwargs):
-        self.call_type = calltype
-        kwargs["call_type"] = calltype
-
+    def __init__(self, **kwargs):
         self.data = {}
         self.update(kwargs)
 
@@ -72,8 +69,18 @@ class Record(MutableMapping):
         return iter(self.data)
 
     def __repr__(self):
+        data = self.data.copy()
+        call_type = data.pop("call_type")
         data = ", ".join([f"{name}={repr(value)}" for name, value in self.items()])
-        return f"{self.__class__.__name__}({self.call_type}, {data})"
+        return f"{self.__class__.__name__}(call_type={call_type}, {data})"
 
     def copy(self):
         return self.data.copy()
+
+    @property
+    def call_type(self):
+        return int(self.data["call_type"])
+
+    def clean(self):
+        """Remove values with empty strings."""
+        return {k: v for k, v in self.data.items() if v != ""}

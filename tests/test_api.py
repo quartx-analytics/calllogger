@@ -17,7 +17,7 @@ def api():
 
 @pytest.fixture
 def record():
-    return Record(1, number="0876521354", line=1, ext=102, ring=10, duration=0)
+    return Record(call_type=1, number="0876521354", line=1, ext=102, ring=10, duration=0)
 
 
 @pytest.fixture
@@ -114,7 +114,7 @@ def test_exception_connection_error(api, record):
 
 
 def test_exception_connection_error_incoming(api):
-    record = Record(0, number="0876521354", line=1, ext=102)
+    record = Record(call_type=0, number="0876521354", line=1, ext=102)
     api.queue.put(record)
     with mock.patch.object(api, "session") as mocker:
         mocker.post.side_effect = requests.ConnectionError

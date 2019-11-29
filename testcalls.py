@@ -1,11 +1,36 @@
+"""
+Call logger Mocker
+
+positional arguments:
+  token                 The token that is used to authenticate with the
+                        monitoring server.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FRONTEND, --frontend FRONTEND
+                        The uri for the server e.g. 'http://127.0.0.1:8080',
+                        defaults to 'https://stage.quartx.ie/'
+  -s [1], --slow-mode [1]
+                        Slow down the rate of mocked calls.
+
+# To send mock calls as fast as posible
+python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/
+
+# To send mock calls at a more normal rate, including incoming calls
+python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/ -s 3
+"""
+
+# Standard library
 from unittest import mock
-import pytest
+import argparse
 import serial
+import time
 
 # Package
-from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
-from quartx_call_logger.record import Record
 from quartx_call_logger import api
+from quartx_call_logger.record import Record
+from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
+
 
 mock_data = b"""
 10.04.1923:19:06  2   104     00:00:0500441619251900                       2
@@ -64,78 +89,57 @@ mock_data = b"""
 01.01.0000:00:00  8                                                     23 2
 """.strip().split(b"\n")
 
+# Create Parser to parse the required arguments
+parser = argparse.ArgumentParser(description="Call logger")
+parser.add_argument(
+    "token",
+    help="The required token used to authenticate with the monitoring server."
+)
+parser.add_argument(
+    "-f",
+    "--frontend",
+    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://stage.quartx.ie/.'",
+    default="https://stage.quartx.ie/"
+)
+parser.add_argument(
+    "-s",
+    "--slow-mode",
+    nargs="?",
+    type=int,
+    const=1,
+    default=0,
+    metavar="1",
+    help="Slow down the rate of mocked calls. This also enables incoming call logs."
+)
 
-@pytest.fixture
-def mock_api():
-    with mock.patch.object(api, "API") as mocker:
-        mocker.return_value.running.return_value.is_set.return_value = True
-        yield mocker
+
+class TestCallmonitor(SiemensHipathSerial):
+    def __init__(self, delay: int, **kwargs):
+        patcher = mock.patch.object(serial, "Serial", spec=True)
+        mock_class = patcher.start()
+        mock_class.return_value.is_open = True
+        mock_class.return_value.readline.side_effect = [*mock_data, KeyboardInterrupt]
+        super(TestCallmonitor, self).__init__(**kwargs)
+        self.delay = delay
+
+    def push(self, record: Record):
+        """Send a call log record to the call monitoring API."""
+        record.pop("date", "")
+        print(record)
+        super(TestCallmonitor, self).push(record)
+        time.sleep(self.delay)
 
 
-@pytest.fixture
-def mock_serial():
-    with mock.patch.object(serial, "Serial", spec=True) as mocker:
-        def open_on_request():
-            mocker.return_value.is_open = True
-        mocker.return_value.open.side_effect = open_on_request
-        mocker.return_value.is_open = False
-        yield mocker
+if __name__ == '__main__':
+    # Fetch authentication token from command line
+    args = parser.parse_args()
 
+    # Set the api token
+    api.token = args.token
 
-@pytest.fixture(params=mock_data)
-def serial_params(request, mock_serial):
-    mock_serial.return_value.readline.side_effect = [request.param, KeyboardInterrupt]
-    return mock_serial
+    # Set the api url
+    api.set_url(args.frontend)
 
-
-def test_call_logs(mock_api, serial_params):
-    """Test the serial parser with different lines of call data."""
-    def push(record):
-        # Check if we have a Record class
-        assert isinstance(record, Record)
-
-        # The expected values for a given call type
-        required_fields = ["number", "ext", "line"]
-        if record.call_type == record.OUTGOING or record.call_type == record.RECEIVED:
-            required_fields.extend(["ring", "duration"])
-
-        # Check if the required fields exists
-        for val in required_fields:
-            assert val in record
-
-    mock_api.return_value.push.side_effect = push
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600)
+    # Start the plugin
+    plugin = TestCallmonitor(args.slow_mode, port="/dev/ttyUSB0", rate=9600)
     plugin.start()
-
-
-def test_failed_connection(mock_api, mock_serial):
-    """Check that the SerialException is caught."""
-    mock_serial.return_value.open.side_effect = [serial.SerialException, KeyboardInterrupt]
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
-    plugin.start()
-
-    mock_serial.return_value.open.assert_called()
-
-
-def test_read_handled_exception(mock_api, mock_serial):
-    mock_serial.return_value.readline.side_effect = [serial.SerialException, KeyboardInterrupt]
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
-    plugin.start()
-
-    mock_serial.return_value.readline.assert_called()
-
-
-def test_read_unhandled_exception(mock_api, mock_serial):
-    mock_serial.return_value.readline.side_effect = RuntimeError
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
-    with pytest.raises(RuntimeError):
-        plugin.start()
-
-
-def test_parse_error(mock_api, mock_serial):
-    mock_serial.return_value.readline.side_effect = [b"dkdi", KeyboardInterrupt]
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
-    plugin.parse = mock.Mock(side_effect=RuntimeError)
-    plugin.start()
-
-    mock_serial.return_value.readline.assert_called()

@@ -76,7 +76,7 @@ class API(threading.Thread):
                 continue
 
             try:
-                resp = session.post(url, json=record.data, timeout=self.timeout)
+                resp = session.post(url, json=record.clean(), timeout=self.timeout)
             except (requests.ConnectionError, requests.Timeout) as e:
                 logger.error(e)
                 self.re_push(record)

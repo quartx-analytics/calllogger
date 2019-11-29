@@ -29,31 +29,22 @@ class SiemensHipathSerial(SerialPlugin):
         Call(date="2019-03-01T21:35:45Z", line=3, ext=58, number="0922735086",
              ring=7, duration=0, answered=0, call_type=2)
         """
-        # Parse the CDR
-        raw_date = data[:16]
-        line = data[16:19].strip()
-        ext = data[22:25].strip()
-        ring = data[25:30].strip()
-        duration = data[30:38].strip()
-        number = data[38:53].strip()
-        call_type = int(data[74:77].strip())
-
         # Parse the received record
-        call = Record(call_type, line=int(line) if line else 0)
+        call = Record()
 
-        # Common
-        call["number"] = number if number else "000000000"
-        call["ext"] = int(ext) if ext else 0
-
-        # Received & Outgoing calls share common data points
-        if call.call_type == Record.RECEIVED or call.call_type == Record.OUTGOING:
-            call["date"] = datetime.strptime(raw_date, "%d.%m.%y%X").astimezone(timezone.utc).isoformat()
-            call["duration"] = duration
-            call["ring"] = ring
-
-        elif not call.call_type == Record.INCOMING:
-            self.logger.error(f"unexpected call type: {call_type}")
-            self.logger.error(data)
+        # Parse the CDR data
+        call["date"] = datetime.strptime(data[:16], "%d.%m.%y%X").astimezone(timezone.utc).isoformat()  # DateTime
+        call["line"] = data[16:19].strip()  # Line
+        call["ext"] = data[19:25].strip()  # Extension
+        call["ring"] = data[25:30].strip()  # ring duration
+        call["duration"] = data[30:38].strip()  # call duration
+        call["number"] = data[38:63].strip()  # phone number
+        call["charges"] = data[63:74].strip()  # call charges
+        call["call_type"] = data[74:76].strip()  # call type
+        call["acct"] = data[76:87].strip()  # ACCT
+        call["msn"] = data[87:88].strip()  # MSN
+        call["seizure_code"] = data[88:93].strip()  # seizure code
+        call["lcr"] = data[93:95].strip()  # LCR
 
         # Return processed call record
         return call

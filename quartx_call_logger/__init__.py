@@ -25,13 +25,16 @@ SOFTWARE.
 # Standard library
 import logging
 import sys
+import os
 
 # Third Party
 import sentry_sdk
 
-# Sentry setup
-sentry_sdk.init("https://31a1124e3ac34d2eb30d764211cacfe8@sentry.io/1839719")
 __version__ = "0.3.0"
+
+# Sentry setup
+if os.environ.get("DISABLE_SENTRY", 0):
+    sentry_sdk.init("https://31a1124e3ac34d2eb30d764211cacfe8@sentry.io/1839719")
 
 
 class CusstomStreamHandler(logging.StreamHandler):

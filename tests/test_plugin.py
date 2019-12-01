@@ -8,7 +8,7 @@ from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
 # noinspection PyUnusedLocal,PyRedeclaration,PyAbstractClass
 def test_dup_plugin():
     """Test that DuplicatePlugin is raised when Plugin name already exists."""
-    with pytest.raises(plugins.DuplicatePlugin):
+    with pytest.raises(ValueError):
         class Test1(plugins.Plugin):
             pass
 

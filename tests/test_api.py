@@ -1,14 +1,29 @@
 import pytest
 from unittest import mock
-from quartx_call_logger.api import API, url
+from quartx_call_logger.api import API
 from quartx_call_logger.record import Record
+from quartx_call_logger import settings
+from urllib import parse as urlparse
+import threading
 import requests
 import queue
 
 
 @pytest.fixture
+def url():
+    return urlparse.urlunsplit((
+        "https" if settings.SSL else "http",  # scheme
+        settings.DOMAIN,  # netloc
+        "/monitor/cdr/record/",  # path,
+        "",  # query
+        "",  # fragment
+    ))
+
+
+@pytest.fixture
 def api():
-    obj = API(queue.Queue(10))
+    running = threading.Event()
+    obj = API(queue.Queue(10), running)
     obj.timeout = 0.01
     with mock.patch.object(obj, "running") as mocker:
         mocker.is_set.side_effect = [True, False]
@@ -43,7 +58,7 @@ def test_push(api, record):
     assert not api.queue.empty()
 
 
-def test_empty_queue(api, requests_mock, req_callback):
+def test_empty_queue(url, api, requests_mock, req_callback):
     assert api.queue.empty()
     requests_mock.post(url, text=req_callback.resp(""), status_code=201)
     api.run()
@@ -52,7 +67,7 @@ def test_empty_queue(api, requests_mock, req_callback):
     assert req_callback.called is False
 
 
-def test_run_201(api, record, requests_mock, req_callback):
+def test_run_201(url, api, record, requests_mock, req_callback):
     api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"success": True}), status_code=201)
     api.run()
@@ -61,7 +76,7 @@ def test_run_201(api, record, requests_mock, req_callback):
     assert req_callback.called is True
 
 
-def test_run_400(api, record, requests_mock, req_callback):
+def test_run_400(url, api, record, requests_mock, req_callback):
     api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"error": "field is missing"}), status_code=400)
     api.run()
@@ -70,7 +85,7 @@ def test_run_400(api, record, requests_mock, req_callback):
     assert req_callback.called is True
 
 
-def test_run_401(api, record, requests_mock, req_callback):
+def test_run_401(url, api, record, requests_mock, req_callback):
     api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"error": "permission required"}), status_code=401)
     api.run()
@@ -79,7 +94,7 @@ def test_run_401(api, record, requests_mock, req_callback):
     assert req_callback.called is True
 
 
-def test_run_403(api, record, requests_mock, req_callback):
+def test_run_403(url, api, record, requests_mock, req_callback):
     api.queue.put(record)
     requests_mock.post(url, json=req_callback.resp({"error": "access forbidden"}), status_code=403)
     api.run()
@@ -88,7 +103,7 @@ def test_run_403(api, record, requests_mock, req_callback):
     assert req_callback.called is True
 
 
-def test_run_500(api, record, requests_mock, req_callback):
+def test_run_500(url, api, record, requests_mock, req_callback):
     api.queue.put(record)
     requests_mock.post(url, text=req_callback.resp(""), status_code=500)
     api.run()

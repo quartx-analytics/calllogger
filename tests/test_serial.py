@@ -5,7 +5,7 @@ import serial
 # Package
 from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
 from quartx_call_logger.record import Record
-from quartx_call_logger import api
+from quartx_call_logger import api, settings
 
 mock_data = b"""
 10.04.1923:19:06  2   104     00:00:0500441619251900                       2
@@ -64,6 +64,8 @@ mock_data = b"""
 01.01.0000:00:00  8                                                     23 2
 """.strip().split(b"\n")
 
+settings.TIMEOUT = 0.01
+
 
 @pytest.fixture
 def mock_api():
@@ -96,7 +98,7 @@ def test_call_logs(mock_api, serial_params):
 
         # The expected values for a given call type
         required_fields = ["number", "ext", "line"]
-        if record.call_type == record.OUTGOING or record.call_type == record.RECEIVED:
+        if record.call_type == 2 or record.call_type == 1:
             required_fields.extend(["ring", "duration"])
 
         # Check if the required fields exists
@@ -111,7 +113,7 @@ def test_call_logs(mock_api, serial_params):
 def test_failed_connection(mock_api, mock_serial):
     """Check that the SerialException is caught."""
     mock_serial.return_value.open.side_effect = [serial.SerialException, KeyboardInterrupt]
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
+    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600)
     plugin.start()
 
     mock_serial.return_value.open.assert_called()
@@ -119,7 +121,7 @@ def test_failed_connection(mock_api, mock_serial):
 
 def test_read_handled_exception(mock_api, mock_serial):
     mock_serial.return_value.readline.side_effect = [serial.SerialException, KeyboardInterrupt]
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
+    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600)
     plugin.start()
 
     mock_serial.return_value.readline.assert_called()
@@ -127,14 +129,14 @@ def test_read_handled_exception(mock_api, mock_serial):
 
 def test_read_unhandled_exception(mock_api, mock_serial):
     mock_serial.return_value.readline.side_effect = RuntimeError
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
+    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600)
     with pytest.raises(RuntimeError):
         plugin.start()
 
 
 def test_parse_error(mock_api, mock_serial):
     mock_serial.return_value.readline.side_effect = [b"dkdi", KeyboardInterrupt]
-    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600, timeout=0.01)
+    plugin = SiemensHipathSerial("/dev/ttyUSB0", 9600)
     plugin.parse = mock.Mock(side_effect=RuntimeError)
     plugin.start()
 

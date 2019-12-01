@@ -29,16 +29,9 @@ import sys
 # Third Party
 import sentry_sdk
 
-# Package
-from .config import compile_settings
-
-__all__ = ["settings"]
-__version__ = "0.2.0"
-
 # Sentry setup
 sentry_sdk.init("https://31a1124e3ac34d2eb30d764211cacfe8@sentry.io/1839719")
-
-# TODO: Check the systemd unit file and see if it can only restart on failer and not normal exit
+__version__ = "0.3.0"
 
 
 class CusstomStreamHandler(logging.StreamHandler):
@@ -67,7 +60,4 @@ cli_handler.setFormatter(logging.Formatter("%(levelname)-5s: %(message)s"))
 cli_handler.setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.addHandler(cli_handler)
-logger.setLevel(logging.DEBUG)
-
-# The global call logger settings
-settings = compile_settings()
+logger.setLevel(logging.INFO)

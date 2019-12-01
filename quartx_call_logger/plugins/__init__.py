@@ -1,5 +1,6 @@
 # Standard library
 from typing import Dict, Type, NoReturn
+import threading
 import logging
 import queue
 import time
@@ -9,66 +10,69 @@ import abc
 import serial
 
 # Package imports
-from .. import api
-from ..record import Record
+from quartx_call_logger import api, settings
+from quartx_call_logger.record import Record
 
 logger = logging.getLogger(__name__)
 
-
-class DuplicatePlugin(ValueError):
-    pass
+__all__ = ["Plugin", "SerialPlugin"]
 
 
 class Plugin(metaclass=abc.ABCMeta):
     """
     This is the Base Plugin class for all phone system plugins.
 
-    This class is not ment to be called directly, but subclassed by a Plugin.
+    .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
+
+    # Call logger settings
+    settings = settings
 
     # noinspection PyMethodOverriding, PyMethodParameters
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         logger.debug(f"Registering plugin: {cls.__name__} {cls}")
+
+        # Register plugin
         if cls.__name__.lower() in registered_plugins:
-            raise DuplicatePlugin(f"Plugin with name '{cls.__name__.lower()}' already exists")
+            raise ValueError(f"Plugin with name '{cls.__name__.lower()}' already exists")
         else:
             registered_plugins[cls.__name__.lower()] = cls
 
-    def __init__(self, timeout=10, max_timeout=300, decay=1.5, **settings):
-        self.queue = queue.Queue(10_000)
-        self._api_thread = api.API(self.queue)
+    def __init__(self):
+        # Setup buffer queue
+        self._queue = queue.Queue(settings.QUEUE_SIZE)
+
+        # Running Flag, Indecates that the API is still working
+        self._running = threading.Event()
+        self._running.set()
+
+        # Start the API thread to monitor for call records and send them to server
+        self._api_thread = api.API(self._queue, self._running)
         self._api_thread.start()
 
+        #: Create plugin specific logger with the name of the Sub classed plugin
         self.logger: logging.Logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        self.timeout: int = timeout
-        self.timeout_decay: float = decay
-        self.max_timeout: int = max_timeout
-        self.base_timeout: int = timeout
 
-    def start(self, **settings):
-        # Update the internal settings
-        self.__dict__.update(settings)
-        self.base_timeout = self.timeout
+        #: Public settings
+        self.settings = settings
 
+    def start(self) -> NoReturn:
         try:
             self.run()
         except KeyboardInterrupt:
             self.logger.debug("Keyboard Interrupt accepted.")
-        except Exception as err:
-            self.logger.debug("unhandled expection: %s", str(err), exc_info=True)
-            raise
         finally:
-            self._api_thread.running.clear()
+            self._running.clear()
 
     @property
     def running(self) -> bool:
-        """Flag to indecate that everything is working and ready to keep monitoring."""
-        return self._api_thread.running.is_set()
+        """Flag to indicate that everything is working and ready to keep monitoring."""
+        return self._running.is_set()
 
     def push(self, record: Record) -> NoReturn:
         """Send a call log record to the call monitoring API."""
-        self.queue.put(record)
+        self._queue.put(record)
 
     @abc.abstractmethod
     def run(self) -> NoReturn:  # pragma: no cover
@@ -84,13 +88,13 @@ class SerialPlugin(Plugin):
     """
     This is an extended plugin with serial interface support.
 
-    This class is not ment to be called directly, but subclassed by a Plugin.
+    .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
 
     :param port: The port/path to the serial interface.
     :param rate: The serial baud rate to use.
     """
-    def __init__(self, port: str, rate: int, **settings):
-        super(SerialPlugin, self).__init__(**settings)
+    def __init__(self, port: str, rate: int):
+        super(SerialPlugin, self).__init__()
 
         # Setup serial interface
         self.sserver = ser = serial.Serial()
@@ -122,23 +126,23 @@ class SerialPlugin(Plugin):
         try:
             # Attemp to open serial port
             self.sserver.open()
-        except serial.SerialException as e:
+        except serial.SerialException:
             # Sleep for a while before reattempting connection
-            self.logger.error(e)
-            self.logger.info(f"Retrying in {self.timeout} seconds")
-            time.sleep(self.timeout)
+            self.logger.error("Failed to open serila connection")
+            self.logger.info(f"Retrying in {settings.TIMEOUT} seconds")
+            time.sleep(settings.TIMEOUT)
             return False
         else:
             self.logger.debug(f"Conection made to serial interface: {self.sserver.port}")
             return True
 
     def __read(self) -> str:
-        """Read in a call line from the serial interface."""
+        """Read in a line from the serial interface."""
         try:
             line = self.sserver.readline()
-        except serial.SerialException as e:
+        except serial.SerialException:
             self.sserver.close()
-            self.logger.error(e)
+            self.logger.error("Failed to read serial line")
         else:
             # Decode the line into unicode
             return self.decode(line)
@@ -160,8 +164,8 @@ class SerialPlugin(Plugin):
                     # Parse the line wtih the selected parser
                     record = self.parse(serial_line)
                 except Exception as e:
-                    self.logger.error(f"Failed to process line: {serial_line.strip()}")
-                    self.logger.exception(e)
+                    self.logger.error(f"Failed to parse serial line", extra={"data": serial_line})
+                    self.logger.debug(e)
                 else:
                     # Push record to the cloud
                     if record:
@@ -171,7 +175,6 @@ class SerialPlugin(Plugin):
 def get_plugin(plugin_name: str) -> Type[Plugin]:
     """Return pluging matching the given name."""
     try:
-        # Load required plugin
         return registered_plugins[plugin_name.lower()]
     except KeyError:
         raise KeyError(f"plugin not found: {plugin_name.lower()}")

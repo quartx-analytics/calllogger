@@ -27,7 +27,7 @@ import serial
 import time
 
 # Package
-from quartx_call_logger import api
+from quartx_call_logger import settings
 from quartx_call_logger.record import Record
 from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
 
@@ -96,10 +96,22 @@ parser.add_argument(
     help="The required token used to authenticate with the monitoring server."
 )
 parser.add_argument(
-    "-f",
-    "--frontend",
-    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://stage.quartx.ie/.'",
-    default="https://stage.quartx.ie/"
+    "-d",
+    "--domain",
+    help="The domain of the server e.g. '127.0.0.1:8080' or 'quartx.ie', defaults to 'stage.quartx.ie'.",
+    default="stage.quartx.ie"
+)
+parser.add_argument(
+    "-l",
+    "--no-ssl",
+    action="store_false",
+    help="Disable SSL mode (https)."
+)
+parser.add_argument(
+    "-n",
+    "--no-verify",
+    action="store_false",
+    help="Disable SSL verification."
 )
 parser.add_argument(
     "-s",
@@ -133,12 +145,11 @@ class TestCallmonitor(SiemensHipathSerial):
 if __name__ == '__main__':
     # Fetch authentication token from command line
     args = parser.parse_args()
-
-    # Set the api token
-    api.token = args.token
-
-    # Set the api url
-    api.set_url(args.frontend)
+    settings.set_token(args.token)
+    settings.set_plugin("TestCallmonitor", {"port": "/dev/ttyUSB0", "rate": 9600})
+    settings.DOMAIN = args.domain
+    settings.SSL = args.no_ssl
+    settings.SSL_VERIFY = args.no_verify
 
     # Start the plugin
     plugin = TestCallmonitor(args.slow_mode, port="/dev/ttyUSB0", rate=9600)

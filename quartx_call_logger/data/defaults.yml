@@ -1,14 +1,17 @@
 # Global Settings
 settings:
-  timeout: 10 # Timeout in seconds before re-attemping connection on failure
-  decay: 1.5 # Timeout decay to increate the timeout when connection keeps failing
-  max_timeout: 300 # Max timeout if connection keeps failing
+  # timeout: 10 # Timeout in seconds before re-attemping connection on failure
+  # decay: 1.5 # Timeout decay to increate the timeout when connection keeps failing
+  # max_timeout: 300 # Max timeout if connection keeps failing
 
   # The plugin that is use for communicating with the phone system
   plugin: SiemensHipathSerial
 
   # Authentication Token, used to authenticate with QuartX Call Monitoring
   token:
+
+  # Queue Size
+  # queue_size: 10000
 
 
 ###################

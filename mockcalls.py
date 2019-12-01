@@ -7,9 +7,9 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f FRONTEND, --frontend FRONTEND
-                        The uri for the server e.g. 'http://127.0.0.1:8080',
-                        defaults to 'https://stage.quartx.ie/'
+  -d DOMAIN, --domain DOMAIN
+                        The domain of the server e.g. '127.0.0.1:8080' or 'quartx.ie',
+                        defaults to 'stage.quartx.ie'.
   -s [1], --slow-mode [1]
                         Slow down the rate of mocked calls.
 
@@ -30,7 +30,7 @@ import time
 import phonenumbers
 
 # Package
-from quartx_call_logger import plugins, api
+from quartx_call_logger import plugins, settings
 from quartx_call_logger.record import Record
 
 
@@ -41,10 +41,22 @@ parser.add_argument(
     help="The required token used to authenticate with the monitoring server."
 )
 parser.add_argument(
-    "-f",
-    "--frontend",
-    help="The uri for the server e.g. 'http://127.0.0.1:8000', defaults to 'https://stage.quartx.ie/.'",
-    default="https://stage.quartx.ie/"
+    "-d",
+    "--domain",
+    help="The domain of the server e.g. '127.0.0.1:8080' or 'quartx.ie', defaults to 'stage.quartx.ie'.",
+    default="stage.quartx.ie"
+)
+parser.add_argument(
+    "-l",
+    "--no-ssl",
+    action="store_false",
+    help="Disable SSL mode (https)."
+)
+parser.add_argument(
+    "-v",
+    "--no-verify",
+    action="store_false",
+    help="Disable SSL verification."
 )
 parser.add_argument(
     "-s",
@@ -110,8 +122,8 @@ def ring_gen():
 
 
 class Mockmonitor(plugins.Plugin):
-    def __init__(self, delay: int, **kwargs):
-        super(Mockmonitor, self).__init__(**kwargs)
+    def __init__(self, delay: int):
+        super(Mockmonitor, self).__init__()
         self.delay = delay
 
     def run(self):
@@ -180,12 +192,8 @@ class Mockmonitor(plugins.Plugin):
 if __name__ == '__main__':
     # Fetch authentication token from command line
     args = parser.parse_args()
-
-    # Set the api token
-    api.token = args.token
-
-    # Set the api url
-    api.set_url(args.frontend)
+    settings.set_token(args.token)
+    settings.DOMAIN = args.domain
 
     # Start the plugin
     plugin = Mockmonitor(args.slow_mode)

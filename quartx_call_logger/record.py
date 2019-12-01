@@ -7,51 +7,43 @@ class Record(MutableMapping):
     """
     This class is a dictionary like object, subclassed from MutableMapping.
 
-    The fields that are used for Incoming calls:
+    Fields that are common to all call types.
 
-        * **number** (*str*) - The phone number of the call.
+        * **call_type** (*int*) - The type of call record, incoming/received/outgoing
         * **line** (*int*) - The line number that the call is on.
         * **ext** (*int*) - The extention number that the call is on.
+        * **number** (*str*) - (*optional*) The phone number of the caller. If not givin, '+353000000000' is used.
+        * **date** (*datetime*) - (*optional*) The datetime of the call, optional but recommended.
 
-    The fields that are used for Received & Outgoing calls:
+    Extra fields that are used for Received & Outgoing calls:
 
-        * **number** (*str*) - The phone number of the call.
-        * **line** (*int*) - The line number that the call is on.
-        * **ext** (*int*) - The extention number that the call is on.
-        * **ring** (*int*) - The time in seconds that the caller was ringing for.
-        * **duration** (*int*) - The duration of the call in seconds.
-        * **answered** (*int*/*bool*) (*optional*) Flag to indecate if the call was answered.
-        * **date** (*datetime*) (*optional*) The datetime of the call, optional but recommended.
+        * **ring** (*int*) - (*optional*) The time in seconds that the caller was ringing for. Defaults = 0
+        * **duration** (*int*) - (*optional*) The duration of the call in seconds. Defaults = 0
+        * **answered** (*int*/*bool*) - (*optional*) Indicate if call was answered. Determined by duration if not given.
 
     .. note:: **duration** & **ring** may also be in the format of ``HH:MM:SS``.
 
     .. note:: **date** must be in the ISO 8601 format e.g. ``2019-08-11T01:49:49+00:00``. UTC is preferred.
 
-    :cvar int NOT_ANSWERED:  Mark as not answered
-    :cvar int ANSWERED:  Mark as answered
-    :cvar int VOICEMAIL:  Mark as farwarded to voicemail
+    There are 10 possible call types. Currently only the first 3 are processed, this will change in the future
+    when we have more data to determine best way to process them.:
 
-    :cvar int INCOMING:  Mark as an incoming call
-    :cvar int RECEIVED:  Mark as a reveived call
-    :cvar int OUTGOING:  Mark as a call outgoing call
+        * **0** Incoming call.
+        * **1** Received call.
+        * **2** Outgoing call.
+        * **3** Received call (Other Service).
+        * **4** Outgoing call (Other Service).
+        * **5** Received call (Farwarded).
+        * **6** Outgoing call (Farwarded).
+        * **7** Received conference call.
+        * **8** Outgoing conference call.
+        * **9** Outgoing call Via Farwarded.
 
-    :param int calltype: The type of call record, incoming/reveived/outgoing
     :param kwargs: Any field can be passed in as a keyword argument
     """
 
-    # Answered field
-    NOT_ANSWERED = 0
-    ANSWERED = 1
-    VOICEMAIL = 2
-
-    # Calltype field
-    INCOMING = 0
-    RECEIVED = 1
-    OUTGOING = 2
-
     def __init__(self, **kwargs):
-        self.data = {}
-        self.update(kwargs)
+        self.data = dict(kwargs)
 
     def __setitem__(self, k, v) -> None:
         self.data[k] = v

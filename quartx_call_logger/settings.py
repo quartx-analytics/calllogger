@@ -17,15 +17,16 @@ def set_token(token: str) -> NoReturn:
         scope.user = {"id": token}
 
 
-def set_plugin(plugin_name: str, plugin_settings: Dict) -> NoReturn:
+def set_plugin(plugin_name: str, plugin_settings: Dict = None) -> NoReturn:
     """Set the Plugin settings and sentry contexts."""
-    globals()["PLUGIN_SETTINGS"] = plugin_settings
+    globals()["PLUGIN_SETTINGS"] = {} if plugin_settings is None else plugin_settings
     globals()["PLUGIN_NAME"] = plugin_name
 
     with configure_scope() as scope:
         scope.set_tag("plugin", plugin_name)
-        for key, val in plugin_settings.items():
-            scope.set_extra(key, val)
+        if plugin_settings:
+            for key, val in plugin_settings.items():
+                scope.set_extra(key, val)
 
 
 # Setup

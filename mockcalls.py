@@ -141,7 +141,7 @@ class Mockmonitor(plugins.Plugin):
                         ext = ext_gen()
 
                         self.push(Record(
-                            call_type=Record.INCOMING,
+                            call_type=0,
                             # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                             number=number,
                             line=line,
@@ -154,11 +154,11 @@ class Mockmonitor(plugins.Plugin):
 
                 # One if 4 change of been answered by voicmail
                 if answered and random.randrange(1, 5) == 1:
-                    answered = Record.VOICEMAIL
+                    answered = 2
                     ext = 200
 
                 self.push(Record(
-                    call_type=Record.RECEIVED,
+                    call_type=1,
                     # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number,
                     ext=ext,
@@ -171,7 +171,7 @@ class Mockmonitor(plugins.Plugin):
             else:
                 duration = duration_gen()
                 self.push(Record(
-                    call_type=Record.OUTGOING,
+                    call_type=2,
                     # date=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                     number=number_gen(),
                     line=line_gen(),
@@ -193,7 +193,10 @@ if __name__ == '__main__':
     # Fetch authentication token from command line
     args = parser.parse_args()
     settings.set_token(args.token)
+    settings.set_plugin("Mockmonitor")
     settings.DOMAIN = args.domain
+    settings.SSL = args.no_ssl
+    settings.SSL_VERIFY = args.no_verify
 
     # Start the plugin
     plugin = Mockmonitor(args.slow_mode)

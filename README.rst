@@ -15,7 +15,7 @@
 Quartx Call Logger
 ------------------
 
-Call logger component for the Quartx phone system monitoring frontend. http://www.quartx.ie/
+Call logger component for the Quartx phone system monitoring frontend. https://quartx.ie/
 
 This logger can monitor phone systems for CDR(Call Data Records) and send the records to the monitoring frontend.
 The monitoring frontend will then analyze the records and display them in a easy to view web interface.
@@ -27,18 +27,16 @@ The currently supported phone systems are:
 Support for new phone systems can be easily added through plugins.
 With the plugin system any system can be supported as long as the system has some sort of API or Serial Interface.
 The documentation on how to create a plugin can be found here.
+https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest.
 
 
 Install
 -------
 
-There are two ways to install this package. First is by using PYPI to install system wide, the other is by cloning
-the git repo and install using Pipenv, whitch isolates the package from the rest of the system for development.
+Currently only install from git repo is supported, but PyPI support will be added later.
 
 Production ::
 
-    pip install quartx_call_logger
-    or
     pip install git+https://github.com/quartx-software/quartx-call-logger.git
 
 Development ::
@@ -59,7 +57,7 @@ First we download the base configuration file from github so we can modifiy it. 
 ::
 
     sudo mkdir -p /etc/xdg/quartx
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/quartx_call_logger/data/defaults.yml > /etc/xdg/quartx/call-logger.yml
+    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/call-logger.yml > /etc/xdg/quartx/call-logger.yml
 
 Currently the only required settings is the ``token``. The token is the authentication key used to authenticate
 the user and identify who the call logs belong to. Contact Quartx Call Monitoring for the token key.
@@ -67,7 +65,7 @@ the user and identify who the call logs belong to. Contact Quartx Call Monitorin
 
     sudo nano /etc/xdg/quartx/call-logger.yml
     ...
-    token: 3bf6940a6bc249a729e7e4fdd5350bb4887d2dac942a553b198f2dfc678055bf
+    token: bd6a567386f79329b156a042a1aac9f44726e736
     ...
 
 The plugin settings may also need to be changed depending on the phone system.
@@ -85,7 +83,7 @@ The call logger can be run with just one single command when on Linux.
 To run the call-logger as a service you can install the systemd service file
 ::
 
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/quartx-call-logger.service > /etc/systemd/system/call-logger.service
+    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/quartx-call-logger.service > /etc/systemd/system/call-logger.service
     sudo systemctl enable --now call-logger.service
 
 
@@ -94,3 +92,4 @@ Contribution
 
 Support for other phone systems can be added through plugins.
 Documentation for creating plugins can be found at readthedocs.
+https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest.

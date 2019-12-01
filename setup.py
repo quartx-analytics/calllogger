@@ -122,10 +122,11 @@ if os.path.exists(os.path.join(this_directory, "README.rst")):
 
 # Dependencies for normal install
 setup["install_requires"] = [
+    "sentry-sdk",
     "pyserial",
     "requests",
     "appdirs",
-    "pyyaml"
+    "pyyaml",
 ]
 
 # Dependencies for devlopment install

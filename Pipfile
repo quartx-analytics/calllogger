@@ -7,7 +7,6 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 requests-mock = "*"
-phonenumbers = "*"
 
 [packages]
 pyserial = "*"

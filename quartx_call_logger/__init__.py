@@ -33,7 +33,7 @@ import sentry_sdk
 __version__ = "0.3.0"
 
 # Sentry setup
-if os.environ.get("DISABLE_SENTRY", "0") == "1":
+if os.environ.get("DISABLE_SENTRY", "0") == "0":
     sentry_sdk.init("https://31a1124e3ac34d2eb30d764211cacfe8@sentry.io/1839719")
 
 

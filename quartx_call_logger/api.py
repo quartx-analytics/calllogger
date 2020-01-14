@@ -33,7 +33,7 @@ class API(threading.Thread):
         self.url = urlparse.urlunsplit((
             "https" if settings.SSL else "http",  # scheme
             settings.DOMAIN,                      # netloc
-            "/monitor/cdr/record/",               # path,
+            "/api/v1/monitor/cdr/",               # path,
             "",                                   # query
             "",                                   # fragment
         ))

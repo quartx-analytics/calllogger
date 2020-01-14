@@ -12,6 +12,7 @@ import requests
 
 # Package
 from . import settings
+from quartx_call_logger.record import Record
 
 logger = logging.getLogger(f"{__name__}")
 
@@ -45,10 +46,10 @@ class API(threading.Thread):
         session.headers["Accept"] = "application/json"
         session.verify = settings.SSL_VERIFY
 
-    def re_push(self, record: Dict):
+    def re_push(self, record: Record):
         # There is no point in saving incoming records for later processing
         # sense the incoming call would have ended by then
-        if record["call_type"] == INCOMING:
+        if record.call_type == INCOMING:
             logger.debug(f"Ignoring Incoming record: {record}")
         else:
             try:
@@ -66,15 +67,18 @@ class API(threading.Thread):
         while self.running.is_set():
             try:
                 # Fetch the call record from the queue
-                record: Dict = record_queue.get(timeout=0.1).clean()
+                record: Record = record_queue.get(timeout=0.1)
             except queue.Empty:
                 continue
 
+            # Remove items with empty strings as value.
+            cdrdata = record.clean()
+
             try:
-                resp = session.post(self.url, json=record, timeout=self.timeout)
+                resp = session.post(self.url, json=cdrdata, timeout=self.timeout)
             except (requests.ConnectionError, requests.Timeout) as e:
                 self.re_push(record)
-                extra_context = {"record": record, "headers": session.headers, "exception": e}
+                extra_context = {"record": cdrdata, "headers": session.headers, "exception": e}
 
                 # Sleep for a specified amount of time before reattempting connection
                 msg = f"Re-attempting connection in: {self.timeout} seconds"
@@ -87,7 +91,7 @@ class API(threading.Thread):
 
             else:
                 # Check if response was actually accepted
-                self._check_status(resp, record)
+                self._check_status(resp, cdrdata)
 
             # Record has been logged
             self.queue.task_done()

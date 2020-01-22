@@ -71,14 +71,11 @@ class API(threading.Thread):
             except queue.Empty:
                 continue
 
-            # Remove items with empty strings as value.
-            cdrdata = record.clean()
-
             try:
-                resp = session.post(self.url, json=cdrdata, timeout=self.timeout)
+                resp = session.post(self.url, json=record, timeout=self.timeout)
             except (requests.ConnectionError, requests.Timeout) as e:
                 self.re_push(record)
-                extra_context = {"record": cdrdata, "headers": session.headers, "exception": e}
+                extra_context = {"record": record, "headers": session.headers, "exception": e}
 
                 # Sleep for a specified amount of time before reattempting connection
                 msg = f"Re-attempting connection in: {self.timeout} seconds"
@@ -91,12 +88,12 @@ class API(threading.Thread):
 
             else:
                 # Check if response was actually accepted
-                self._check_status(resp, cdrdata)
+                self._check_status(resp, record)
 
             # Record has been logged
             self.queue.task_done()
 
-    def _check_status(self, resp: requests.Response, record: Dict):
+    def _check_status(self, resp: requests.Response, record: Record):
         """Check the status of the response, logging any errors."""
         try:
             resp.raise_for_status()

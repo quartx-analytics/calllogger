@@ -72,7 +72,8 @@ class Plugin(metaclass=abc.ABCMeta):
 
     def push(self, record: Record) -> NoReturn:
         """Send a call log record to the call monitoring API."""
-        self._queue.put(record)
+        cleaned = record.clean()
+        self._queue.put(cleaned)
 
     @abc.abstractmethod
     def run(self) -> NoReturn:  # pragma: no cover

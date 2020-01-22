@@ -1,11 +1,10 @@
 # Standard lib
-from collections.abc import MutableMapping
 from typing import Iterator
 
 
-class Record(MutableMapping):
+class Record(dict):
     """
-    This class is a dictionary like object, subclassed from MutableMapping.
+    This class is a dictionary like object.
 
     Fields that are common to all call types.
 
@@ -38,41 +37,21 @@ class Record(MutableMapping):
         * **7** Received conference call.
         * **8** Outgoing conference call.
         * **9** Outgoing call Via Farwarded.
-
-    :param kwargs: Any field can be passed in as a keyword argument
     """
 
-    def __init__(self, **kwargs):
-        self.data = dict(kwargs)
-
-    def __setitem__(self, k, v) -> None:
-        self.data[k] = v
-
-    def __delitem__(self, k) -> None:
-        del self.data[k]
-
-    def __getitem__(self, k):
-        return self.data[k]
-
-    def __len__(self) -> int:
-        return len(self.data)
-
-    def __iter__(self) -> Iterator:
-        return iter(self.data)
-
     def __repr__(self):
-        data = self.data.copy()
+        data = self.copy()
         call_type = data.pop("call_type")
-        data = ", ".join([f"{name}={repr(value)}" for name, value in self.items()])
+        data = ", ".join([f"{name}={repr(value)}" for name, value in data.items()])
         return f"{self.__class__.__name__}(call_type={call_type}, {data})"
 
     def copy(self):
-        return self.data.copy()
+        return self.__class__(self)
 
     @property
     def call_type(self):
-        return int(self.data["call_type"])
+        return int(self["call_type"])
 
     def clean(self):
-        """Remove values with empty strings."""
-        return {k: v for k, v in self.data.items() if v != ""}
+        """Return a copy of the data with empty strings removed."""
+        return self.__class__({k: v for k, v in self.items() if v != ""})

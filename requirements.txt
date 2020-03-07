@@ -18,5 +18,5 @@ requests==2.22.0
 requests-mock==1.7.0
 sentry-sdk==0.13.4
 six==1.13.0
-urllib3==1.25.7
+urllib3==1.25.8
 wcwidth==0.1.7

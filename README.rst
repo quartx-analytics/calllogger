@@ -37,7 +37,7 @@ Currently only install from git repo is supported, but PyPI support will be adde
 
 Production ::
 
-    pip install git+https://github.com/quartx-software/quartx-call-logger.git
+    sudo pip3 install git+https://github.com/quartx-software/quartx-call-logger.git
 
 Development ::
 

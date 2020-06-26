@@ -2,7 +2,7 @@
 Description=Quartx Call Logger
 
 [Service]
-ExecStart=/usr/bin/call-logger
+ExecStart=/usr/local/bin/call-logger
 Restart=on-failure
 Type=simple
 

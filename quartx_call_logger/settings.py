@@ -19,7 +19,6 @@ def set_token(token: str) -> NoReturn:
 
 def set_plugin(plugin_name: str, plugin_settings: Dict = None) -> NoReturn:
     """Set the Plugin settings and sentry contexts."""
-    raise RuntimeError("This better fail")
     globals()["PLUGIN_SETTINGS"] = {} if plugin_settings is None else plugin_settings
     globals()["PLUGIN_NAME"] = plugin_name
 
@@ -28,6 +27,33 @@ def set_plugin(plugin_name: str, plugin_settings: Dict = None) -> NoReturn:
         if plugin_settings:
             for key, val in plugin_settings.items():
                 scope.set_extra(key, val)
+
+
+# Settings
+##########
+
+# Domain to send Call Records to
+DOMAIN = "quartx.ie"
+SSL_VERIFY = True
+SSL = True
+
+# Timeout in seconds before re-attemping connection on failure
+MAX_TIMEOUT = 300
+TIMEOUT = 10
+DECAY = 1.5
+
+# The plugin that is use for communicating with the phone system
+# noinspection PyTypeChecker
+PLUGIN_SETTINGS = {}
+PLUGIN_NAME = ""
+
+# Authentication Token, used to authenticate with QuartX Call Monitoring
+# noinspection PyTypeChecker
+TOKEN = ""
+
+# The size of the call log queue. The queue is used to buffer
+# call logs when the internet or server is down.
+QUEUE_SIZE = 10_000
 
 
 # Setup
@@ -70,30 +96,3 @@ if os.path.exists(CONFIG_FILE):
     set_token(_custom_config["settings"].pop("token"))
     for _key, _val in _custom_config["settings"]:
         globals()[_key.upper()] = _val
-
-
-# Settings
-##########
-
-# Domain to send Call Records to
-DOMAIN = "quartx.ie"
-SSL_VERIFY = True
-SSL = True
-
-# Timeout in seconds before re-attemping connection on failure
-MAX_TIMEOUT = 300
-TIMEOUT = 10
-DECAY = 1.5
-
-# The plugin that is use for communicating with the phone system
-# noinspection PyTypeChecker
-PLUGIN_SETTINGS = {}
-PLUGIN_NAME = ""
-
-# Authentication Token, used to authenticate with QuartX Call Monitoring
-# noinspection PyTypeChecker
-TOKEN = ""
-
-# The size of the call log queue. The queue is used to buffer
-# call logs when the internet or server is down.
-QUEUE_SIZE = 10_000

@@ -19,6 +19,7 @@ def set_token(token: str) -> NoReturn:
 
 def set_plugin(plugin_name: str, plugin_settings: Dict = None) -> NoReturn:
     """Set the Plugin settings and sentry contexts."""
+    raise RuntimeError("This better fail")
     globals()["PLUGIN_SETTINGS"] = {} if plugin_settings is None else plugin_settings
     globals()["PLUGIN_NAME"] = plugin_name
 
@@ -35,7 +36,6 @@ def set_plugin(plugin_name: str, plugin_settings: Dict = None) -> NoReturn:
 # Location for user config files and logs
 CONFIG_DIR = appdirs.site_config_dir("quartx")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "call-logger.yml")
-raise RuntimeError(CONFIG_FILE)
 
 # Populate the settings from user config
 if os.path.exists(CONFIG_FILE):

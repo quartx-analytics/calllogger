@@ -129,7 +129,7 @@ class SerialPlugin(Plugin):
             self.sserver.open()
         except serial.SerialException:
             # Sleep for a while before reattempting connection
-            self.logger.error("Failed to open serila connection")
+            self.logger.error("Failed to open serial connection")
             self.logger.info(f"Retrying in {settings.TIMEOUT} seconds")
             time.sleep(settings.TIMEOUT)
             return False

@@ -35,6 +35,7 @@ def set_plugin(plugin_name: str, plugin_settings: Dict = None) -> NoReturn:
 # Location for user config files and logs
 CONFIG_DIR = appdirs.site_config_dir("quartx")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "call-logger.yml")
+print(CONFIG_FILE)
 
 # Populate the settings from user config
 if os.path.exists(CONFIG_FILE):

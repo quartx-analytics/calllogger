@@ -35,6 +35,10 @@ Install
 
 Currently only install from git repo is supported, but PyPI support will be added later.
 
+Dependencies ::
+    
+    sudo apt-get install python3-pip git
+
 Production ::
 
     sudo pip3 install git+https://github.com/quartx-software/quartx-call-logger.git

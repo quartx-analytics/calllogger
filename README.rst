@@ -89,7 +89,8 @@ The call logger can be run with just one single command when on Linux.
 To run the call-logger as a service you can install the systemd service file
 ::
 
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/quartx-call-logger.service > /etc/systemd/system/call-logger.service
+    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/quartx-call-logger.service > call-logger.service
+    sudo cp call-logger.service /etc/systemd/system/call-logger.service
     sudo systemctl enable --now call-logger.service
 
 

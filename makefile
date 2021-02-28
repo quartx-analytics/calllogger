@@ -13,4 +13,5 @@ help:
 # target: update - Update pip venv packages
 update:
 	pipenv update
-	pipenv run pip freeze > requirements.txt
+	pipenv lock -r > requirements.txt
+	pipenv lock -r --dev-only > requirements-dev.txt

@@ -84,7 +84,7 @@ setup = dict(
     python_requires=">=3.6",
 
     # Keywords used in pip search
-    keywords="siemens hipath phone call calls",
+    keywords="python phone telephone",
 
     # The platform this package supports
     platforms="OS Independent",

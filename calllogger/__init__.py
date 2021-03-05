@@ -84,3 +84,9 @@ logging.config.dictConfig({
         }
     }
 })
+
+from .record import CallDataRecord
+from .plugins import (
+    BasePlugin,
+    SerialPlugin,
+)

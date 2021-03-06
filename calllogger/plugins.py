@@ -149,7 +149,7 @@ class SerialPlugin(BasePlugin):
         """
         return decoded_line
 
-    def __parse(self, validated_line: str) -> Union[CallDataRecord, None]:
+    def __parse(self, validated_line: str) -> CallDataRecord:
         try:
             # Parse the line wtih the selected parser
             record = self.parse(validated_line)
@@ -158,7 +158,6 @@ class SerialPlugin(BasePlugin):
                 "serial_line": validated_line,
                 "original_error": str(e),
             })
-            return None
         else:
             # Add raw line to record
             record.raw = validated_line

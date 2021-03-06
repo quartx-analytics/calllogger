@@ -3,6 +3,9 @@ from typing import Dict, Union
 
 
 class CallDataRecord:
+    """A Call Data Record."""
+    __slots__ = ("_data", "raw")
+
     def __init__(self, call_type):
         self._data: Dict[str, Union[int, bool, str]] = dict(
             call_type=int(call_type),

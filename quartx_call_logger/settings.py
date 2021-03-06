@@ -39,7 +39,7 @@ SSL = True
 
 # Timeout in seconds before re-attemping connection on failure
 MAX_TIMEOUT = 300
-TIMEOUT = 10
+TIMEOUT = 3
 DECAY = 1.5
 
 # The plugin that is use for communicating with the phone system
@@ -54,45 +54,3 @@ TOKEN = ""
 # The size of the call log queue. The queue is used to buffer
 # call logs when the internet or server is down.
 QUEUE_SIZE = 10_000
-
-
-# Setup
-#######
-
-# Location for user config files and logs
-CONFIG_DIR = appdirs.site_config_dir("quartx")
-CONFIG_FILE = os.path.join(CONFIG_DIR, "call-logger.yml")
-
-# Populate the settings from user config
-if os.path.exists(CONFIG_FILE):
-    with open(CONFIG_FILE) as stream:
-        _custom_config = yaml.safe_load(stream.read())
-
-    # Validate that required settings are given
-    if "settings" not in _custom_config:
-        _msg = f"missing required settings. please set required settings in config file: {CONFIG_FILE}"
-        raise RuntimeError(_msg)
-
-    # Validate that the token is set
-    if not _custom_config["settings"].get("token"):
-        _msg = f"missing required token. please set token in config file: {CONFIG_FILE}"
-        raise RuntimeError(_msg)
-
-    # Validate that a plugin is specified
-    if not _custom_config["settings"].get("plugin"):
-        _msg = f"missing required plugin. please set which plugin to use in config file: {CONFIG_FILE}"
-        raise RuntimeError(_msg)
-
-    # Validate that settings exists for specified plugin
-    if _custom_config["settings"]["plugin"] not in _custom_config:
-        _plugin = _custom_config["settings"]["plugin"]
-        _msg = f"missing required plugin settings. please set plugin settings " \
-               f"for {_plugin} in config file: {CONFIG_FILE}"
-        raise RuntimeError(_msg)
-
-    # Populate values
-    _plugin_name = _custom_config["settings"].pop("plugin")
-    set_plugin(_plugin_name, _custom_config[_plugin_name])
-    set_token(_custom_config["settings"].pop("token"))
-    for _key, _val in _custom_config["settings"]:
-        globals()[_key.upper()] = _val

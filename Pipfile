@@ -11,6 +11,7 @@ pytest-cov = "*"
 sentry-sdk = "*"
 python-environ = "*"
 pyserial = "*"
+paho-mqtt = "*"
 
 [requires]
 python_version = "3.9"

@@ -32,16 +32,6 @@ def set_plugin(plugin_name: str, plugin_settings: Dict = None) -> NoReturn:
 # Settings
 ##########
 
-# Domain to send Call Records to
-DOMAIN = "quartx.ie"
-SSL_VERIFY = True
-SSL = True
-
-# Timeout in seconds before re-attemping connection on failure
-MAX_TIMEOUT = 300
-TIMEOUT = 3
-DECAY = 1.5
-
 # The plugin that is use for communicating with the phone system
 # noinspection PyTypeChecker
 PLUGIN_SETTINGS = {}
@@ -50,7 +40,3 @@ PLUGIN_NAME = ""
 # Authentication Token, used to authenticate with QuartX Call Monitoring
 # noinspection PyTypeChecker
 TOKEN = ""
-
-# The size of the call log queue. The queue is used to buffer
-# call logs when the internet or server is down.
-QUEUE_SIZE = 10_000

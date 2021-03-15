@@ -24,29 +24,21 @@ SOFTWARE.
 
 __version__ = "0.4.0"
 
-# Third Party
+# Standard lib
 import logging.config
+
+# Third Party
 import sentry_sdk
-import environ
-
-# Precast environment variables
-env = environ.Env(
-    DEBUG=(bool, False),
-    SENTRY_DSN=(str, ""),
-)
-
-
-def filter_events(event, _):
-    """Filter sentry events."""
-    return event
-
+from sentry_sdk.integrations.threading import ThreadingIntegration
+from decouple import config
 
 # Setup Sentry
-if sentry_dsn := env("SENTRY_DSN"):
+if sentry_dsn := config("SENTRY_DSN", ""):
     sentry_sdk.init(
         sentry_dsn,
         release=__version__,
-        before_send=filter_events,
+        environment=config("ENVIRONMENT", "Testing"),
+        integrations=[ThreadingIntegration(propagate_hub=True)],
     )
 
 # Setup Logging
@@ -65,7 +57,6 @@ logging.config.dictConfig({
     "handlers": {
         "console_messages": {
             "class": "logging.StreamHandler",
-            "level": "DEBUG" if env("DEBUG") else "INFO",
             "stream": "ext://sys.stdout",
             "filters": ["only_messages"],
             "formatter": "levelname",
@@ -80,11 +71,12 @@ logging.config.dictConfig({
     "loggers": {
         __name__: {
             "handlers": ["console_messages", "console_errors"],
-            "level": "DEBUG"
+            "level": "DEBUG" if config("DEBUG", False, cast=bool) else "INFO",
         }
     }
 })
 
+__all__ = ["CallDataRecord", "BasePlugin", "SerialPlugin"]
 from .record import CallDataRecord
 from .plugins import (
     BasePlugin,

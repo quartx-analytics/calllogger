@@ -2,18 +2,18 @@
 from typing import NoReturn, Union
 import threading
 import logging
-import queue
 import abc
 
 # Third party
 import serial
 
-# Package imports
+# Local
 from calllogger import CallDataRecord
 from calllogger.utils import Timeout
+from calllogger.conf import settings
 
 
-class BasePlugin(metaclass=abc.ABCMeta):
+class BasePlugin(threading.Thread, metaclass=abc.ABCMeta):
     """
     This is the Base Plugin class for all phone system plugins.
 
@@ -21,40 +21,31 @@ class BasePlugin(metaclass=abc.ABCMeta):
     """
 
     def __init__(self):
-        # Setup buffer queue
-        self._queue = queue.Queue(settings.QUEUE_SIZE)
+        super(BasePlugin, self).__init__()
 
-        # Running Flag, Indecates that the API is still working
-        self._running = threading.Event()
-        self._running.set()
+        #: Plugin logging object, Send log messages to console.
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
-        # Start the API thread to monitor for call records and send them to server
-        self._api_thread = api.API(self._queue, self._running)
-        self._api_thread.start()
-
-        #: Create plugin specific logger with the name of the Sub classed plugin
-        self.logger: logging.Logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
-        #: Public settings
-        self.settings = settings
+        #: Timeout control, Used to control the timeout decay when repeatedly called.
         self.timeout = Timeout(settings)
 
-    def start(self) -> NoReturn:
-        try:
-            self.run()
-        except KeyboardInterrupt:
-            self.logger.debug("Keyboard Interrupt accepted.")
-        finally:
-            self._running.clear()
+    def log(self, msg: str, *args, lvl: int = logging.INFO, **kwargs) -> NoReturn:
+        """
+        Send log message to console/server.
 
-    @property
-    def running(self) -> bool:
-        """Flag to indicate that everything is working and ready to keep monitoring."""
-        return self._running.is_set()
+        :param msg: The log message.
+        :param lvl: The logging level, default to INFO.
+        """
+        self.logger.log(lvl, msg, *args, **kwargs)
 
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""
-        self._queue.put(record)
+        self._queue.put(record.data)
+
+    @property
+    def is_running(self) -> bool:
+        """Flag to indicate that everything is working and ready to keep monitoring."""
+        return self._running.is_set()
 
     @abc.abstractmethod
     def run(self) -> NoReturn:  # pragma: no cover
@@ -65,25 +56,25 @@ class BasePlugin(metaclass=abc.ABCMeta):
 # noinspection PyMethodMayBeStatic
 class SerialPlugin(BasePlugin):
     """
-    This is an extended plugin with serial interface support.
+    This is an extended base plugin with serial interface support.
 
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
-
-    :param port: The port/path to the serial interface.
-    :param rate: The serial baud rate to use.
     """
-    def __init__(self, port: str, rate: int):
-        super(SerialPlugin, self).__init__()
 
-        # Setup serial interface
-        self.sserver = ser = serial.Serial()
-        ser.baudrate = rate
-        ser.port = port
+    # Plugin settings
+    baudrate: int
+    port: str
+
+    def __init__(self):
+        super(SerialPlugin, self).__init__()
+        self.sserver = serial.Serial()
 
     def __open(self) -> bool:
         """Open a connection to the serial interface, returning True if successful else False."""
         try:
-            # Attemp to open serial port
+            # We set the port & rate here to allow them to be changed on the fly
+            self.sserver.baudrate = self.baudrate
+            self.sserver.port = self.port
             self.sserver.open()
         except serial.SerialException:
             self.logger.error("Failed to open serial connection", extra={
@@ -129,13 +120,19 @@ class SerialPlugin(BasePlugin):
 
     def __validate(self, decoded_line: str) -> Union[str, bool]:
         try:
-            return self.validate(decoded_line)
+            validated = self.validate(decoded_line)
         except Exception as e:
             self.logger.error("Failed to validate serial line", extra={
                 "serial_line": decoded_line,
-                "original_error": str(e)
+                "original_error": str(e),
             })
             return False
+        else:
+            if validated is False:
+                self.logger.error("Serial line is invalid", extra={
+                    "serial_line": decoded_line,
+                })
+            return validated
 
     def validate(self, decoded_line: str) -> Union[str, bool]:  # pragma: no cover
         """
@@ -178,7 +175,7 @@ class SerialPlugin(BasePlugin):
         Start the call monitoring loop. Reads a call record from the
         serial interface, parse and push to QuartX Call Monitoring.
         """
-        while self.running:
+        while self.is_running:
             # Open serial port connection
             if not (self.sserver.is_open or self.__open()):
                 # Sleep for a while before reattempting connection

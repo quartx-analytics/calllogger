@@ -14,4 +14,4 @@ help:
 update:
 	pipenv update
 	pipenv lock -r > requirements.txt
-	pipenv lock -r --dev-only > requirements-dev.txt
+	pipenv lock --dev-only -r > requirements-dev.txt

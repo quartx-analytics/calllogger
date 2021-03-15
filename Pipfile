@@ -8,10 +8,10 @@ pytest = "*"
 pytest-cov = "*"
 
 [packages]
+python-decouple = "*"
 sentry-sdk = "*"
-python-environ = "*"
 pyserial = "*"
-paho-mqtt = "*"
+requests = "*"
 
 [requires]
 python_version = "3.9"

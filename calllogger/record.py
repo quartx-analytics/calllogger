@@ -4,16 +4,12 @@ from typing import Dict, Union
 
 class CallDataRecord:
     """A Call Data Record."""
-    __slots__ = ("data", "raw")
 
     def __init__(self, call_type):
         self.data: Dict[str, Union[int, bool, str]] = dict(
             call_type=int(call_type),
             date=datetime.now().astimezone(timezone.utc).isoformat()
         )
-
-        # The raw line that was parsed, Used by the serial parser
-        self.raw = ""
 
     def date(self, date: str, fmt: str = "%d.%m.%y%X", tz: timezone = timezone.utc):
         """

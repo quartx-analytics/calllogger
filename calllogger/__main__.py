@@ -1,34 +1,64 @@
 # Standard Lib
+from queue import Queue
 import pkg_resources
+import threading
+import sys
+
+# Third Party
+from sentry_sdk import configure_scope
 
 # Local
-import calllogger
+from calllogger.conf import settings, TokenAuth
+from calllogger.services.cdr import CDRWorker
 
 
-def main():
+def get_plugin():
+    # Installed Plugin Entrypoints
+    installed_plugins = {plugin.get_class().__name__.lower(): plugin for plugin in
+                         pkg_resources.iter_entry_points("calllogger.plugin")}
+
+    # Select plugin
+    selected_plugin = settings.plugin.lower()
+    if selected_plugin in installed_plugins:
+        return installed_plugins[selected_plugin].get_class()
+    elif installed_plugins:
+        print("Specified plugin not found:", settings.plugin)
+        print("Available plugins are:")
+        for plugin in installed_plugins.values():
+            print("-->", plugin.get_class().__name__)
+    else:
+        print("No plugins are installed")
+
+    # Ws only get here if the selected
+    # plugin was not found
+    sys.exit()
 
 
-# Installed Plugin EntryPoints
-# https://setuptools.readthedocs.io/en/latest/pkg_resources.html#entrypoint-objects
-INSTALLED_PLUGINS = {plugin.name: plugin for plugin in pkg_resources.iter_entry_points("calllogger.plugin")}
+def main_logger():
+    queue = Queue(settings.queue_size)
+    running = threading.Event()
+    running.set()
 
-# Setup buffer queue
-self._queue = queue.Queue(settings.QUEUE_SIZE)
+    # Configure the sentry user
+    with configure_scope() as scope:
+        # noinspection PyDunderSlots, PyUnresolvedReferences
+        scope.user = {"id": settings.token}
 
-# Running Flag, Indecates that the API is still working
-self._running = threading.Event()
-self._running.set()
+    # Start the plugin thread to monitor for call records
+    plugin = get_plugin()
+    plugin_thread = plugin(queue=queue, running=running)
+    plugin_thread.start()
 
-# Start the API thread to monitor for call records and send them to server
-self._api_thread = api.API(self._queue, self._running)
-self._api_thread.start()
+    # Start the CDR worker to monitor the record queue
+    token_auth = TokenAuth(settings.token)
+    cdr_thread = CDRWorker(queue, running, token_auth)
+    cdr_thread.start()
 
-try:
-    self.run()
-except KeyboardInterrupt:
-    self.logger.debug("Keyboard Interrupt accepted.")
-finally:
-    self._running.clear()
+    # Sinse both threads have the same running event
+    # If one dies, so should the other.
+    plugin_thread.join()
+    cdr_thread.join()
+
 
 if __name__ == "__main__":
-    pass
+    main_logger()

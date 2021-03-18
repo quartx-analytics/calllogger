@@ -19,7 +19,7 @@ cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")
 Record = Dict[str, Union[str, int]]
 
 
-class API(Thread):
+class CDRWorker(Thread):
     """
     Threaded class to monitor the call record queue and send the records
     to the QuartX monitoring service.
@@ -42,6 +42,15 @@ class API(Thread):
         self.session.auth = token
 
     def run(self):
+        try:
+            self.entrypoint()
+        except Exception as err:
+            capture_exception(err)
+            self.running.clear()
+            # TODO: See whats the better option to do here, quick or try again
+            raise
+
+    def entrypoint(self):
         """Process the call record queue."""
         while self.running.is_set():
             with push_scope() as scope:

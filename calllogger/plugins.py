@@ -1,11 +1,13 @@
 # Standard library
 from typing import NoReturn, Union
-import threading
+from threading import Event, Thread
 import logging
+import queue
 import abc
 
 # Third party
 import serial
+from sentry_sdk import push_scope, capture_exception
 
 # Local
 from calllogger import CallDataRecord
@@ -13,21 +15,49 @@ from calllogger.utils import Timeout
 from calllogger.conf import settings
 
 
-class BasePlugin(threading.Thread, metaclass=abc.ABCMeta):
+class CleanInitABC(abc.ABCMeta):
+    """
+    Metaclass to intercept the init call and it's arguments.
+    Instead of passing arguments to init, assign them after the fact.
+    """
+
+    def __call__(cls, *args, **kwargs):
+        # Extract Internal arguments only
+        call_queue = kwargs.pop("queue")
+        running = kwargs.pop("running")
+
+        # Continue with the call
+        inst = super().__call__(*args, **kwargs)
+        inst._queue = call_queue
+        inst._running = running
+        return inst
+
+
+class BasePlugin(Thread, metaclass=CleanInitABC):
     """
     This is the Base Plugin class for all phone system plugins.
 
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
 
-    def __init__(self):
-        super(BasePlugin, self).__init__()
+    _queue: queue.Queue
+    _running: Event
 
-        #: Plugin logging object, Send log messages to console.
+    def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        super(BasePlugin, self).__init__()
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
         self.timeout = Timeout(settings)
+
+    def run(self):
+        try:
+            self.entrypoint()
+        except Exception as err:
+            capture_exception(err)
+            self._running.clear()
+            # TODO: See whats the better option to do here, quick or try again
+            raise
 
     def log(self, msg: str, *args, lvl: int = logging.INFO, **kwargs) -> NoReturn:
         """
@@ -48,8 +78,8 @@ class BasePlugin(threading.Thread, metaclass=abc.ABCMeta):
         return self._running.is_set()
 
     @abc.abstractmethod
-    def run(self) -> NoReturn:  # pragma: no cover
-        """Main entry point for plugins. Must be overridden."""
+    def entrypoint(self) -> NoReturn:  # pragma: no cover
+        """Main entry point for the plugins. Must be overridden."""
         pass
 
 
@@ -62,8 +92,8 @@ class SerialPlugin(BasePlugin):
     """
 
     # Plugin settings
-    baudrate: int
-    port: str
+    baudrate: int = 9600
+    port: str = "/dev/ttyUSB0"
 
     def __init__(self):
         super(SerialPlugin, self).__init__()
@@ -90,23 +120,17 @@ class SerialPlugin(BasePlugin):
         """Read in a line from the serial interface."""
         try:
             return self.sserver.readline()
-        except serial.SerialException:
-            self.logger.error("Failed to read serial line", extra={
-                "baudrate": self.sserver.baudrate,
-                "port": self.sserver.port,
-            })
+        except serial.SerialException as err:
             # Refresh the serial interface by closing the serial connection
+            capture_exception(err)
             self.sserver.close()
             return None
 
     def __decode(self, raw: bytes) -> str:
         try:
             return self.decode(raw)
-        except Exception as e:
-            self.logger.error("Failed to decode serial line", extra={
-                "serial_line": repr(raw),
-                "original_error": str(e)
-            })
+        except Exception as err:
+            capture_exception(err)
 
     def decode(self, raw: bytes) -> str:  # pragma: no cover
         """
@@ -121,17 +145,12 @@ class SerialPlugin(BasePlugin):
     def __validate(self, decoded_line: str) -> Union[str, bool]:
         try:
             validated = self.validate(decoded_line)
-        except Exception as e:
-            self.logger.error("Failed to validate serial line", extra={
-                "serial_line": decoded_line,
-                "original_error": str(e),
-            })
+        except Exception as err:
+            capture_exception(err)
             return False
         else:
             if validated is False:
-                self.logger.error("Serial line is invalid", extra={
-                    "serial_line": decoded_line,
-                })
+                self.logger.error("Serial line is invalid")
             return validated
 
     def validate(self, decoded_line: str) -> Union[str, bool]:  # pragma: no cover
@@ -149,16 +168,9 @@ class SerialPlugin(BasePlugin):
     def __parse(self, validated_line: str) -> CallDataRecord:
         try:
             # Parse the line wtih the selected parser
-            record = self.parse(validated_line)
-        except Exception as e:
-            self.logger.error(f"Failed to parse serial line", extra={
-                "serial_line": validated_line,
-                "original_error": str(e),
-            })
-        else:
-            # Add raw line to record
-            record.raw = validated_line
-            return record
+            return self.parse(validated_line)
+        except Exception as err:
+            capture_exception(err)
 
     @abc.abstractmethod
     def parse(self, validated_line: str) -> CallDataRecord:  # pragma: no cover
@@ -170,35 +182,42 @@ class SerialPlugin(BasePlugin):
         """
         pass
 
-    def run(self) -> NoReturn:
+    def entrypoint(self) -> NoReturn:
         """
         Start the call monitoring loop. Reads a call record from the
         serial interface, parse and push to QuartX Call Monitoring.
         """
         while self.is_running:
-            # Open serial port connection
-            if not (self.sserver.is_open or self.__open()):
-                # Sleep for a while before reattempting connection
-                self.timeout.sleep()
-                continue
-            else:
-                self.timeout.reset()
+            with push_scope() as scope:
+                scope.set_extra("baudrate", self.baudrate)
+                scope.set_extra("port", self.port)
 
-            # Read the raw serial line
-            raw_line = self.__read()
-            if raw_line is None:
-                continue
+                # Open serial port connection
+                if not (self.sserver.is_open or self.__open()):
+                    # Sleep for a while before reattempting connection
+                    self.timeout.sleep()
+                    continue
+                else:
+                    self.timeout.reset()
 
-            # Decode the serial line
-            decoded_line = self.__decode(raw_line)
-            if decoded_line is None:
-                continue
+                # Read the raw serial line
+                raw_line = self.__read()
+                if raw_line is None:
+                    continue
 
-            # Validate the decoded serial line
-            validated_line = self.__validate(decoded_line)
-            if validated_line is False:
-                continue
+                # Decode the serial line
+                scope.set_extra("raw_line", raw_line)
+                decoded_line = self.__decode(raw_line)
+                if decoded_line is None:
+                    continue
 
-            # Parse the serial line and push to the cloud
-            if record := self.__parse(validated_line):
-                self.push(record)
+                # Validate the decoded serial line
+                scope.set_extra("decoded_line", decoded_line)
+                validated_line = self.__validate(decoded_line)
+                if validated_line is False:
+                    continue
+
+                # Parse the serial line and push to the cloud
+                scope.set_extra("validated_line", validated_line)
+                if record := self.__parse(validated_line):
+                    self.push(record)

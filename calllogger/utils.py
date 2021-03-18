@@ -52,7 +52,7 @@ class Timeout:
 
 
 def decode_response(resp: requests.Response, limit=1000) -> Union[str, dict]:
-    """Decode the response body using json if possible else limit body to 1000 characters."""
+    """Decode requests response body using json if possible else limit body to 1000 characters."""
     try:
         return resp.json()
     except json.decoder.JSONDecodeError:

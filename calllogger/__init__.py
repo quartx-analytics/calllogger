@@ -39,6 +39,7 @@ if sentry_dsn := config("SENTRY_DSN", ""):
         release=__version__,
         environment=config("ENVIRONMENT", "Testing"),
         integrations=[ThreadingIntegration(propagate_hub=True)],
+        max_breadcrumbs=25,
     )
 
 # Setup Logging

@@ -29,30 +29,35 @@ class CDRWorker(Thread):
     :param token: The authentication token for the monitoring service.
     """
 
-    def __init__(self, call_queue: queue.Queue, running: Event, token: TokenAuth, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, call_queue: queue.Queue, running: Event, token: TokenAuth):
+        super().__init__(name=f"Thread-{self.__class__.__name__}")
 
         # Attributes
-        self.timeout = Timeout(settings)
+        self.timeout = Timeout(settings, self)
         self.queue = call_queue
-        self.running = running
+        self._running = running
 
         # Session
         self.session = requests.Session()
         self.session.auth = token
+
+    @property
+    def is_running(self) -> bool:
+        """Flag to indicate that everything is working and ready to keep monitoring."""
+        return self._running.is_set()
 
     def run(self):
         try:
             self.entrypoint()
         except Exception as err:
             capture_exception(err)
-            self.running.clear()
+            self._running.clear()
             # TODO: See whats the better option to do here, quick or try again
             raise
 
     def entrypoint(self):
         """Process the call record queue."""
-        while self.running.is_set():
+        while self.is_running:
             with push_scope() as scope:
                 try:
                     record: Record = self.queue.get(timeout=0.1)
@@ -99,7 +104,7 @@ class CDRWorker(Thread):
         # Quit if not authorized
         if status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
             logger.info("Quitting as the token does not have the required permissions or has been revoked.")
-            self.running.clear()
+            self._running.clear()
 
         # Server is expereancing problems, reattempting request later
         elif status_code in (codes.not_found, codes.request_timeout) or status_code >= codes.server_error:

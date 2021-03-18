@@ -29,15 +29,19 @@ class Timeout:
         reset neeeds to be called to undo the timeout decay.
     """
 
-    def __init__(self, settings):
+    def __init__(self, settings, thread):
         self._settings = settings
         self._timeout = settings.timeout
+        self._thread = thread
 
     def sleep(self):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.info("Retrying in '%d' seconds", self._timeout)
-        time.sleep(self._timeout)
-        self._timeout = min(self._settings.max_timeout, self._timeout * self._settings.decay)
+        timeout = self._timeout * 2
+        while timeout > 0 and self._thread.is_running:
+            time.sleep(.5)
+            timeout -= 1
+        self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
 
     def reset(self):
         """Reset the timeout value by undoing the timeout decay."""

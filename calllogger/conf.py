@@ -17,6 +17,29 @@ class TokenAuth(AuthBase):
         return req
 
 
+def merge_settings(cls, settings_store: dict = None, prefix="", **defaults):
+    # Merge class, instance and defaults together
+    settings_store.update(**cls.__dict__, **defaults)
+
+    missing = []
+    # Check if all settings with annotations have a environment variable set for them
+    for key, cast in cls.__dict__.get("__annotations__", {}).items():
+        default = settings_store.get(key, undefined)
+        env_key = f"{prefix}_{key}".upper()
+        try:
+            setting = config(env_key, default, cast)
+            settings_store[key] = setting
+        except UndefinedValueError:
+            missing.append(f"Missing required environment variable: {env_key}")
+
+    # Report any settings the require an
+    # environment variable to be set
+    if missing:
+        for msg in missing:
+            print(msg)
+        sys.exit()
+
+
 class Settings:
     """
     Settings class that allows settings
@@ -33,30 +56,7 @@ class Settings:
     token: str = "dfdfs"
 
     def __init__(self):
-        missing_settings = []
-        self.settings = {k: v for k, v in self.__class__.__dict__.items() if not k.startswith("__")}
-        for key, cast in self.__class__.__dict__.get('__annotations__', {}).items():
-            default = self.settings.get(key, undefined)
-            try:
-                self.settings[key] = config(key.upper(), default, cast)
-            except UndefinedValueError:
-                msg = f"Missing required environment variable: {key.upper()}"
-                missing_settings.append(msg)
-
-        if missing_settings:
-            for msg in missing_settings:
-                print(msg)
-            sys.exit()
-
-    def __getitem__(self, item):
-        return self.settings[item]
-
-    def __getattr__(self, item):
-        try:
-            return self[item]
-        except KeyError:
-            msg = "'{0}' object has no attribute '{1}'"
-            raise AttributeError(msg.format(self.__class__.__name__, item))
+        merge_settings(self.__class__, self.__dict__)
 
 
 settings = Settings()

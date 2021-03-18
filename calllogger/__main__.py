@@ -46,7 +46,7 @@ def main_logger():
 
     # Start the plugin thread to monitor for call records
     plugin = get_plugin()
-    plugin_thread = plugin(queue=queue, running=running)
+    plugin_thread = plugin(_queue=queue, _running=running)
     plugin_thread.start()
 
     # Start the CDR worker to monitor the record queue
@@ -56,8 +56,13 @@ def main_logger():
 
     # Sinse both threads have the same running event
     # If one dies, so should the other.
-    plugin_thread.join()
-    cdr_thread.join()
+    try:
+        plugin_thread.join()
+        cdr_thread.join()
+    except KeyboardInterrupt:
+        # This will allow the threads
+        # to gracefully shutdown
+        running.clear()
 
 
 if __name__ == "__main__":

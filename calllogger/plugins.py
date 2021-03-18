@@ -1,8 +1,8 @@
 # Standard library
 from typing import NoReturn, Union
 from threading import Event, Thread
+from queue import Queue
 import logging
-import queue
 import abc
 
 # Third party
@@ -12,24 +12,18 @@ from sentry_sdk import push_scope, capture_exception
 # Local
 from calllogger import CallDataRecord
 from calllogger.utils import Timeout
-from calllogger.conf import settings
+from calllogger.conf import settings, merge_settings
 
 
 class CleanInitABC(abc.ABCMeta):
     """
-    Metaclass to intercept the init call and it's arguments.
-    Instead of passing arguments to init, assign them after the fact.
+    Metaclass to intercept the init call and add the arguments after instantiation.
+    This will also check the environment variables for overrides.
     """
 
-    def __call__(cls, *args, **kwargs):
-        # Extract Internal arguments only
-        call_queue = kwargs.pop("queue")
-        running = kwargs.pop("running")
-
-        # Continue with the call
-        inst = super().__call__(*args, **kwargs)
-        inst._queue = call_queue
-        inst._running = running
+    def __call__(cls, **kwargs):
+        inst = super().__call__()
+        merge_settings(cls, inst.__dict__, prefix="plugin", **kwargs)
         return inst
 
 
@@ -40,15 +34,15 @@ class BasePlugin(Thread, metaclass=CleanInitABC):
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
 
-    _queue: queue.Queue
+    _queue: Queue
     _running: Event
 
     def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        super(BasePlugin, self).__init__()
+        super(BasePlugin, self).__init__(name=f"Thread-{self.__class__.__name__}")
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
-        self.timeout = Timeout(settings)
+        self.timeout = Timeout(settings, self)
 
     def run(self):
         try:

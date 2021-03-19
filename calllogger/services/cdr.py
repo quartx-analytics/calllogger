@@ -65,7 +65,7 @@ class CDRWorker(Thread):
                     continue
 
                 # Keep retrying to push the record if request fails
-                while self.push_record(record, scope):
+                while self.push_record(record, scope) and self.is_running:
                     self.timeout.sleep()
 
                 self.timeout.reset()

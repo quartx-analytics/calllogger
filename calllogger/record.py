@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from typing import Dict, Union
 
+__all__ = ["CallDataRecord"]
+
 
 class CallDataRecord:
     """A Call Data Record."""

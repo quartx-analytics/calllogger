@@ -36,7 +36,7 @@ Install
 Currently only install from git repo is supported, but PyPI support will be added later.
 
 Dependencies ::
-    
+
     sudo apt-get install python3-pip git
 
 Production ::
@@ -63,7 +63,7 @@ First we download the base configuration file from github so we can modifiy it. 
     sudo mkdir -p /etc/xdg/quartx
     sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/call-logger.yml > call-logger.yml
     sudo cp call-logger.yml /etc/xdg/quartx/call-logger.yml
-    
+
 
 Currently the only required settings is the ``token``. The token is the authentication key used to authenticate
 the user and identify who the call logs belong to. Contact Quartx Call Monitoring for the token key.
@@ -100,3 +100,9 @@ Contribution
 Support for other phone systems can be added through plugins.
 Documentation for creating plugins can be found at readthedocs.
 https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest.
+
+```
+pipenv update
+pipenv lock -r > requirements.txt
+pipenv lock --dev-only -r > requirements-dev.txt
+```

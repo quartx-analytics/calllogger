@@ -10,9 +10,11 @@ import serial
 from sentry_sdk import push_scope, capture_exception
 
 # Local
-from calllogger import CallDataRecord
+from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
 from calllogger.conf import settings, merge_settings
+
+__all__ = ["BasePlugin", "SerialPlugin"]
 
 
 class CleanInitABC(abc.ABCMeta):

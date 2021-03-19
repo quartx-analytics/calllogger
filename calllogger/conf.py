@@ -5,6 +5,8 @@ import sys
 from decouple import config, undefined, UndefinedValueError
 from requests.auth import AuthBase
 
+__all__ = ["TokenAuth", "settings", "merge_settings"]
+
 
 class TokenAuth(AuthBase):
     """Requests Token authentication class."""

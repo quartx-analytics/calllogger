@@ -8,4 +8,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag calllogger:latest
+        run: docker build . --file Dockerfile --tag --build-arg SENTRY_DSN=${{ secrets.SENTRY_DSN }} calllogger:latest

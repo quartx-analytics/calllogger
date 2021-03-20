@@ -5,7 +5,8 @@ FROM python:3.9-alpine
 ENV PYTHONUNBUFFERED 1
 
 # Enbed the sentry DSN
-ENV SENTRY_DSN https://31a1124e3ac34d2eb30d764211cacfe8@o321896.ingest.sentry.io/1839719
+ARG SENTRY_DSN=""
+ENV SENTRY_DSN $SENTRY_DSN
 ENV ENVIRONMENT Deployed
 
 # Update the base image

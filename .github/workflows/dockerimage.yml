@@ -26,8 +26,8 @@ jobs:
           push: true
           file: Dockerfile
           tags: quartx/calllogger:latest
-          build-args:
-            - SENTRY_DSN="${{ secrets.SENTRY_DSN }}"
+          build-args: |
+            SENTRY_DSN="${{ secrets.SENTRY_DSN }}"
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

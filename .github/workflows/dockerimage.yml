@@ -28,6 +28,8 @@ jobs:
           tags: ghcr.io/quartx/call-logger:latest
           build-args: |
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          secrets: |
+            GIT_AUTH_TOKEN=${{ github.token }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

@@ -6,6 +6,11 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Set Environment Variables
+        run: |
+          echo "IMAGE=ghcr.io/${{ github.repository_owner }}/calllogger" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
@@ -22,6 +27,11 @@ jobs:
         with:
           push: true
           file: Dockerfile
-          tags: ghcr.io/${{ github.repository_owner }}/calllogger:latest
+          tags: |
+            ${{ env.IMAGE }}:latest
           build-args: |
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.authors=${{ github.repository_owner }}
+            org.opencontainers.image.created=${{ env.BUILD_DATE }}

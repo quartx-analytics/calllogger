@@ -25,11 +25,9 @@ jobs:
         with:
           push: true
           file: Dockerfile
-          tags: ghcr.io/quartx/call-logger:latest
+          tags: ghcr.io/${{ github.repository_owner }}/calllogger:latest
           build-args: |
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-          secrets: |
-            GIT_AUTH_TOKEN=${{ github.token }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

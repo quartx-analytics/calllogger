@@ -25,7 +25,7 @@ jobs:
         with:
           push: true
           file: Dockerfile
-          tags: ghcr.io/quartx/calllogger:latest
+          tags: ghcr.io/quartx/call-logger:latest
           build-args: |
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
 

@@ -28,6 +28,3 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/calllogger:latest
           build-args: |
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}

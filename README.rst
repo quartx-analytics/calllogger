@@ -8,6 +8,10 @@
     :target: https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://api.codeclimate.com/v1/badges/c0d513f139aa33e2d4b6/maintainability
+   :target: https://codeclimate.com/github/quartx-analytics/calllogger/maintainability
+   :alt: Maintainability
+
 
 Quartx Call Logger
 ------------------

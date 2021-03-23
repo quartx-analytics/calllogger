@@ -30,9 +30,7 @@ jobs:
         pytest --cov
 
     - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+      uses: AndreMiras/coveralls-python-action@develop
 
     - name: Set Environment Variables
       run: |

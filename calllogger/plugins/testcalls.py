@@ -1,42 +1,12 @@
-"""
-Call logger Mocker
-
-positional arguments:
-  token                 The required token used to authenticate with the
-                        monitoring server.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -d DOMAIN, --domain DOMAIN
-                        The domain of the server e.g. '127.0.0.1:8080' or
-                        'quartx.ie', defaults to 'stage.quartx.ie'.
-  -l, --no-ssl          Disable SSL mode (https).
-  -n, --no-verify       Disable SSL verification.
-  -s [1], --slow-mode [1]
-                        Slow down the rate of mocked calls. This also enables
-                        incoming call logs.
-
-# To send mock calls as fast as posible
-python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/
-
-# To send mock calls at a more normal rate, including incoming calls
-python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/ -s 3
-"""
-
 # Standard library
 from unittest import mock
 import argparse
 import serial
 import time
-import os
-
-# Disable sentry logging for tests
-os.environ["DISABLE_SENTRY"] = "1"
 
 # Package
-from quartx_call_logger import settings
-from quartx_call_logger.record import Record
-from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
+from calllogger.conf import settings
+from calllogger.record import CallDataRecord
 
 
 mock_data = b"""

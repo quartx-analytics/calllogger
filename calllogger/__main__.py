@@ -9,7 +9,7 @@ from sentry_sdk import configure_scope
 
 # Local
 from calllogger.conf import settings, TokenAuth
-from calllogger.services.cdr import CDRWorker
+from calllogger.api.cdr import CDRWorker
 
 
 def get_plugin():

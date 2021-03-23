@@ -52,7 +52,7 @@ class BasePlugin(Thread, metaclass=CleanInitABC):
         except Exception as err:
             capture_exception(err)
             self._running.clear()
-            # TODO: See whats the better option to do here, quick or try again
+            # TODO: See whats the better option to do here, quit or try again
             raise
 
     def log(self, msg: str, *args, lvl: int = logging.INFO, **kwargs) -> NoReturn:

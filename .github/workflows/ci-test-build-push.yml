@@ -1,4 +1,4 @@
-name: Test, Build, Push Python application
+name: Test-Build-Push Python application
 
 on:
   push:

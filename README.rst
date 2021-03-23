@@ -1,12 +1,7 @@
-.. image:: https://travis-ci.org/quartx-software/quartx-call-logger.svg?branch=master
-    :target: https://travis-ci.org/quartx-software/quartx-call-logger
+.. image:: https://github.com/github/docs/actions/workflows/main.yml/badge.svg?branch=rework
 
-.. image:: https://coveralls.io/repos/github/quartx-software/quartx-call-logger/badge.svg?branch=master
-    :target: https://coveralls.io/github/quartx-software/quartx-call-logger?branch=master
-
-.. image:: https://readthedocs.org/projects/quartx-call-logger/badge/?version=latest
-    :target: https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+.. image:: https://coveralls.io/repos/github/quartx-analytics/calllogger/badge.svg?branch=rework
+    :target: https://coveralls.io/github/quartx-analytics/calllogger?branch=rework
 
 .. image:: https://api.codeclimate.com/v1/badges/c0d513f139aa33e2d4b6/maintainability
    :target: https://codeclimate.com/github/quartx-analytics/calllogger/maintainability

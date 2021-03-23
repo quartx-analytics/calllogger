@@ -37,10 +37,10 @@ class Mockmonitor(BasePlugin):
         return callset[random.randrange(len(callset))]
 
     def rand_line(self) -> int:
-        return random.randrange(1, self.lines+1)
+        return random.randrange(1, self.lines + 1)
 
     def rand_ext(self) -> int:
-        return random.randrange(100, 100+self.exts)
+        return random.randrange(100, 100 + self.exts)
 
     def entrypoint(self) -> NoReturn:
         while self.is_running:

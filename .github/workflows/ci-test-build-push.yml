@@ -27,7 +27,12 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest
+        pytest --cov
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set Environment Variables
       run: |

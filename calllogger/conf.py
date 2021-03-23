@@ -22,12 +22,13 @@ class TokenAuth(AuthBase):
 def merge_settings(cls, settings_store: dict = None, prefix="", **defaults):
     # Merge class, instance and defaults together
     settings_store.update(**cls.__dict__, **defaults)
+    prefix = f"{prefix}_" if prefix else ""
 
     missing = []
     # Check if all settings with annotations have a environment variable set for them
     for key, cast in cls.__dict__.get("__annotations__", {}).items():
         default = settings_store.get(key, undefined)
-        env_key = f"{prefix}_{key}".upper()
+        env_key = f"{prefix}{key}".upper()
         try:
             setting = config(env_key, default, cast)
             settings_store[key] = setting
@@ -55,7 +56,7 @@ class Settings:
     domain: str = "https://quartx.ie"
     debug: bool = False
     plugin: str = "SiemensHipathSerial"
-    token: str = "dfdfs"
+    token: str = "dsfsdf234sdr345"
 
     def __init__(self):
         merge_settings(self.__class__, self.__dict__)

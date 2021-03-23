@@ -52,9 +52,6 @@ class Timeout:
     def value(self) -> int:
         return self._timeout
 
-    def __int__(self):
-        return self._timeout
-
 
 def decode_response(resp: requests.Response, limit=1000) -> Union[str, dict]:
     """Decode requests response body using json if possible else limit body to 1000 characters."""

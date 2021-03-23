@@ -1,23 +1,17 @@
-import pytest
-from unittest import mock
-from quartx_call_logger.api import API
-from quartx_call_logger.record import Record
-from quartx_call_logger import settings
+# Standard Lib
 from urllib import parse as urlparse
+from unittest import mock
 import threading
-import requests
 import queue
 
+# Third Party
+import requests
+import pytest
 
-@pytest.fixture
-def url():
-    return urlparse.urlunsplit((
-        "https" if settings.SSL else "http",  # scheme
-        settings.DOMAIN,  # netloc
-        "/monitor/cdr/record/",  # path,
-        "",  # query
-        "",  # fragment
-    ))
+# Local
+from calllogger.api import cdr
+from calllogger.record import CallDataRecord
+from calllogger.conf import settings
 
 
 @pytest.fixture

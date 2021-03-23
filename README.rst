@@ -1,4 +1,4 @@
-.. image:: https://github.com/github/docs/actions/workflows/main.yml/badge.svg?branch=rework
+.. image:: https://github.com/github/docs/actions/workflows/ci-test-build-push.yml/badge.svg?branch=rework
     :alt: Github Actions
 
 .. image:: https://coveralls.io/repos/github/quartx-analytics/calllogger/badge.svg?branch=rework

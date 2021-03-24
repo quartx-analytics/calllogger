@@ -33,14 +33,13 @@ from sentry_sdk.integrations.threading import ThreadingIntegration
 from decouple import config
 
 # Setup Sentry
-if sentry_dsn := config("SENTRY_DSN", ""):
-    sentry_sdk.init(
-        sentry_dsn,
-        release=__version__,
-        environment=config("ENVIRONMENT", "Testing"),
-        integrations=[ThreadingIntegration(propagate_hub=True)],
-        max_breadcrumbs=25,
-    )
+sentry_sdk.init(
+    config("SENTRY_DSN", ""),
+    release=__version__,
+    environment=config("ENVIRONMENT", "Testing"),
+    integrations=[ThreadingIntegration(propagate_hub=True)],
+    max_breadcrumbs=25,
+)
 
 # Setup Logging
 logging.config.dictConfig({

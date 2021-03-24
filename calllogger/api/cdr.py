@@ -83,7 +83,7 @@ class CDRWorker(Thread):
                 retry = True
 
             # Check status code to deside what to do next
-            elif isinstance(err, requests.HTTPError) and err.response:
+            elif isinstance(err, requests.HTTPError) and err.response is not None:
                 logger.warning("API request failed with status code: %s", err.response.status_code)
                 scope.set_extra("response", decode_response(err.response))
                 scope.set_extra("status_code", err.response.status_code)

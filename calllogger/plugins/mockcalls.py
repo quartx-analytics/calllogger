@@ -24,7 +24,7 @@ callset = [
 ]
 
 
-class Mockmonitor(BasePlugin):
+class MockCalls(BasePlugin):
     """Generate random call records continuously."""
 
     sleep: float = 1.5  # Time in seconds to delay, 0 will skip incoming and push at full speed.

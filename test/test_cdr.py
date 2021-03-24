@@ -59,12 +59,12 @@ def test_2xx(api, record, requests_mock, status_code, mocker):
     api.entrypoint()
 
     assert api.queue.empty()
-    assert requests_mock.called is True
+    assert requests_mock.called
     assert push_spy.call_count == 1
 
 
-@pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503])
-def test_retry_requests(api, record, requests_mock, bad_code, mocker):
+@pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
+def test_retry_requests(api, record, requests_mock, mocker, bad_code):
     """Test that the request"""
     # This is required to allow the loop to run twice
     mocked = mocker.patch.object(api, "_running")
@@ -72,36 +72,47 @@ def test_retry_requests(api, record, requests_mock, bad_code, mocker):
 
     api.queue.put(record)
     requests_mock.post(cdr.cdr_url, response_list=[
-        {"status_code": bad_code, "json": {"error": "field is missing"}},
+        {"status_code": bad_code} if isinstance(bad_code, int) else {"exc": bad_code},
         {"status_code": 201, "json": {"success": True}},
     ])
     push_spy = mocker.spy(api, "push_record")
     api.entrypoint()
 
     assert api.queue.empty()
-    assert requests_mock.called is True
+    assert requests_mock.called
     assert push_spy.call_count == 2
 
 
-@pytest.mark.parametrize("exc", [requests.ConnectionError, requests.Timeout])
-def test_connection_errors(api, record, requests_mock, exc, mocker):
+@pytest.mark.parametrize("bad_code", [400, 401])
+def test_no_retry_requests(api, record, requests_mock, mocker, bad_code):
     """Test that the request"""
     # This is required to allow the loop to run twice
     mocked = mocker.patch.object(api, "_running")
     mocked.is_set.side_effect = [True, True, False]
 
     api.queue.put(record)
-    requests_mock.post(cdr.cdr_url, response_list=[
-        {"exc": exc},
-        {"status_code": 201, "json": {"success": True}},
-    ])
+    requests_mock.post(cdr.cdr_url, status_code=bad_code, json={"success": False})
     push_spy = mocker.spy(api, "push_record")
     api.entrypoint()
 
     assert api.queue.empty()
-    assert requests_mock.called is True
-    assert push_spy.call_count == 2
+    assert requests_mock.called
+    assert push_spy.call_count == 1
 
+
+@pytest.mark.parametrize("bad_code", [401, 402, 403])
+def test_status_quit(api, record, requests_mock, mocker, bad_code):
+    """Test that the api quits for authorization failers."""
+    api.queue.put(record)
+    requests_mock.post(cdr.cdr_url, status_code=bad_code, json={"success": True})
+    push_spy = mocker.spy(api, "push_record")
+    running_spy = mocker.spy(api._running, "clear")
+    api.entrypoint()
+
+    assert api.queue.empty()
+    assert requests_mock.called
+    assert push_spy.call_count == 1
+    assert running_spy.called
 
 # def test_run_401(api, record, requests_mock):
 #     api.queue.put(record)

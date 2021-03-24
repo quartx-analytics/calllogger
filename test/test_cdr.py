@@ -126,12 +126,14 @@ def test_handled_exception(api, requests_mock, mocker):
     assert push_spy.call_count == 1
 
 
-# def test_unhandled_exception(api, mocker):
-#     api.queue.put(record)
-#     mocked = mocker.patch.object(api, "push_record")
-#     mocked.side_effect = RuntimeError
-#     api.run()
-#
-#     assert api.queue.empty()
-#     assert push_spy.call_count == 1
-#
+def test_unhandled_exception(api, mocker):
+    api.queue.put(record)
+    mocked = mocker.patch.object(api, "push_record")
+    mocked.side_effect = RuntimeError
+    running_spy = mocker.spy(api._running, "clear")
+    with pytest.raises(RuntimeError):
+        api.run()
+
+    assert api.queue.empty()
+    assert mocked.call_count == 1
+    assert running_spy.called

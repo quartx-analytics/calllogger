@@ -64,12 +64,14 @@ class CDRWorker(Thread):
                 except queue.Empty:
                     continue
 
-                # Keep retrying to push the record if request fails
-                while self.push_record(record, scope) and self.is_running:
-                    self.timeout.sleep()
+                try:
+                    # Keep retrying to push the record if request fails
+                    while self.push_record(record, scope) and self.is_running:
+                        self.timeout.sleep()
 
-                self.timeout.reset()
-                self.queue.task_done()
+                    self.timeout.reset()
+                finally:
+                    self.queue.task_done()
 
     def push_record(self, record: Record, scope) -> bool:
         """Push the record to the cloud. Returning True if request needs to be retried."""

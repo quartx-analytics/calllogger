@@ -65,7 +65,7 @@ def test_2xx(api, record, requests_mock, status_code, mocker):
 
 @pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
 def test_retry_requests(api, record, requests_mock, mocker, bad_code):
-    """Test that the request"""
+    """Test that the request gets retried on error."""
     # This is required to allow the loop to run twice
     mocked = mocker.patch.object(api, "_running")
     mocked.is_set.side_effect = [True, True, False]
@@ -114,64 +114,24 @@ def test_status_quit(api, record, requests_mock, mocker, bad_code):
     assert push_spy.call_count == 1
     assert running_spy.called
 
-# def test_run_401(api, record, requests_mock):
+
+def test_handled_exception(api, requests_mock, mocker):
+    """Test that a python exception is caught and record is ignored."""
+    api.queue.put(record)
+    requests_mock.post(cdr.cdr_url, exc=RuntimeError)
+    push_spy = mocker.spy(api, "push_record")
+    api.entrypoint()
+
+    assert api.queue.empty()
+    assert push_spy.call_count == 1
+
+
+# def test_unhandled_exception(api, mocker):
 #     api.queue.put(record)
-#     requests_mock.post(cdr.cdr_url, json={"error": "permission required"}, status_code=401)
-#     api.entrypoint()
+#     mocked = mocker.patch.object(api, "push_record")
+#     mocked.side_effect = RuntimeError
+#     api.run()
 #
 #     assert api.queue.empty()
-#     assert requests_mock.called is True
+#     assert push_spy.call_count == 1
 #
-#
-# def test_run_403(api, record, requests_mock):
-#     api.queue.put(record)
-#     requests_mock.post(cdr.cdr_url, json={"error": "access forbidden"}, status_code=403)
-#     api.entrypoint()
-#
-#     assert api.queue.empty()
-#     assert requests_mock.called is True
-#
-#
-# def test_run_500(api, record, requests_mock):
-#     api.queue.put(record)
-#     requests_mock.post(cdr.cdr_url, text="", status_code=500)
-#     api.entrypoint()
-#
-#     assert not api.queue.empty()
-#     assert requests_mock.called is True
-#
-#
-# def test_exception_timeout(api, record):
-#     api.queue.put(record)
-#     with mock.patch.object(api, "session") as mocker:
-#         mocker.post.side_effect = requests.Timeout
-#         api.run()
-#         mocker.post.assert_called()
-#
-#
-# def test_exception_connection_error(api, record):
-#     api.queue.put(record)
-#     with mock.patch.object(api, "session") as mocker:
-#         mocker.post.side_effect = requests.ConnectionError
-#         api.run()
-#         mocker.post.assert_called()
-#
-#
-# def test_exception_connection_error_incoming(api):
-#     record = CallDataRecord(call_type=0, number="0876521354", line=1, ext=102)
-#     api.queue.put(record)
-#     with mock.patch.object(api, "session") as mocker:
-#         mocker.post.side_effect = requests.ConnectionError
-#         api.entrypoint()
-#         mocker.post.assert_called()
-#
-#
-# def test_exception_queue_full(api, record):
-#     with mock.patch.object(api, "queue", spec=True) as queue_mock:
-#         queue_mock.put_nowait.side_effect = queue.Full
-#         api.queue.put(record)
-#
-#         with mock.patch.object(api, "session") as req_mock:
-#             req_mock.post.side_effect = requests.Timeout
-#             api.entrypoint()
-#             req_mock.post.assert_called()

@@ -4,6 +4,7 @@ import threading
 
 # Third Party
 import pytest
+import requests
 from requests_mock import Mocker
 
 # Local
@@ -50,7 +51,7 @@ def test_empty_queue(api, requests_mock: Mocker):
 
 
 @pytest.mark.parametrize("status_code", [200, 201, 202, 203, 204, 205, 206, 207, 208, 226])
-def test_run_2xx(api, record, requests_mock, status_code, mocker):
+def test_2xx(api, record, requests_mock, status_code, mocker):
     """Test that all 2xx status codes work as expected."""
     api.queue.put(record)
     requests_mock.post(cdr.cdr_url, json={"success": True}, status_code=status_code)
@@ -63,7 +64,7 @@ def test_run_2xx(api, record, requests_mock, status_code, mocker):
 
 
 @pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503])
-def test_run_bad_requests(api, record, requests_mock, bad_code, mocker):
+def test_retry_requests(api, record, requests_mock, bad_code, mocker):
     """Test that the request"""
     # This is required to allow the loop to run twice
     mocked = mocker.patch.object(api, "_running")
@@ -72,6 +73,26 @@ def test_run_bad_requests(api, record, requests_mock, bad_code, mocker):
     api.queue.put(record)
     requests_mock.post(cdr.cdr_url, response_list=[
         {"status_code": bad_code, "json": {"error": "field is missing"}},
+        {"status_code": 201, "json": {"success": True}},
+    ])
+    push_spy = mocker.spy(api, "push_record")
+    api.entrypoint()
+
+    assert api.queue.empty()
+    assert requests_mock.called is True
+    assert push_spy.call_count == 2
+
+
+@pytest.mark.parametrize("exc", [requests.ConnectionError, requests.Timeout])
+def test_connection_errors(api, record, requests_mock, exc, mocker):
+    """Test that the request"""
+    # This is required to allow the loop to run twice
+    mocked = mocker.patch.object(api, "_running")
+    mocked.is_set.side_effect = [True, True, False]
+
+    api.queue.put(record)
+    requests_mock.post(cdr.cdr_url, response_list=[
+        {"exc": exc},
         {"status_code": 201, "json": {"success": True}},
     ])
     push_spy = mocker.spy(api, "push_record")

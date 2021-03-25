@@ -7,6 +7,21 @@ __all__ = ["CallDataRecord"]
 class CallDataRecord:
     """A Call Data Record."""
 
+    INCOMING = 0
+    RECEIVED = 1
+    OUTGOING = 2
+    RECEIVED_OTHER = 3
+    OUTGOING_OTHER = 4
+    RECEIVED_FORWARDED = 5
+    OUTGOING_FORWARDED = 6
+    RECEIVED_CONFERENCE = 7
+    OUTGOING_CONFERENCE = 8
+    OUTGOING_VIA_FORWARDED = 9
+    RECEIVED_TRANSFERRED_INT = 35
+    OUTGOING_TRANSFERRED_INT = 36
+    RECEIVED_TRANSFERRED_EXT = 37
+    OUTGOING_TRANSFERRED_EXT = 38
+
     def __init__(self, call_type):
         self.data: Dict[str, Union[int, bool, str]] = dict(
             call_type=int(call_type),
@@ -29,9 +44,13 @@ class CallDataRecord:
             self.data["date"] = datetime.strptime(date, fmt).astimezone(tz).isoformat()
 
     @property
-    def call_type(self):
+    def call_type(self) -> int:
         """The type of call record."""
         return self.data["call_type"]
+
+    @call_type.setter
+    def call_type(self, value):
+        self.data["call_type"] = value
 
     @property
     def number(self) -> str:

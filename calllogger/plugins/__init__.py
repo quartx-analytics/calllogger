@@ -87,8 +87,9 @@ class SerialPlugin(BasePlugin):
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
 
-    # Plugin settings
+    #: The serial baudrate to use.
     baudrate: int = 9600
+    #: The serial port to comunicate with.
     port: str = "/dev/ttyUSB0"
 
     def __init__(self):

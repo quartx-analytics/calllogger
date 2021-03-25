@@ -6,7 +6,7 @@ import time
 from typing import NoReturn
 
 from calllogger.plugins import BasePlugin
-from calllogger.record import CallDataRecord
+from calllogger.record import CallDataRecord as Record
 
 # Set of predefined numbers to
 # create mock calls from
@@ -27,14 +27,28 @@ callset = [
 class MockCalls(BasePlugin):
     """Generate random call records continuously."""
 
-    sleep: float = 1.5  # Time in seconds to delay, 0 will skip incoming and push at full speed.
-    direction: float = 0.5  # Determine preferred call direction, Outgoing is 0 and Received is 1.
-    lines: int = 3  # Number of phone lines.
-    exts: int = 20  # Number of extensions.
+    #: Time in seconds to delay, 0 will skip incoming and push at full speed.
+    sleep: float = 1.5
+    #: Determine preferred call direction, Outgoing is 0 and Received is 1.
+    direction: float = 0.5
+    #: Number of phone lines.
+    lines: int = 3
+    #: Number of extensions.
+    exts: int = 20
+    #: Max time in seconds the ring can be.
+    max_ring: int = 20
+    #: Max time in seconds the duration can be.
+    max_duration: int = 7200
+    #: The chance that a duration will be 0(unanswered), 1 in {value} chance.
+    answered_chance: int = 5
+    #: The chance that a call will be transferred, 1 in {value} chance.
+    transferred_chance: int = 5
+    #: Extension that will auto forward calls
+    ext_forward: int = 105
 
     # noinspection PyMethodMayBeStatic
     def rand_number(self) -> str:
-        return callset[random.randrange(len(callset))]
+        return random.choice(callset)
 
     def rand_line(self) -> int:
         return random.randrange(1, self.lines + 1)
@@ -42,57 +56,79 @@ class MockCalls(BasePlugin):
     def rand_ext(self) -> int:
         return random.randrange(100, 100 + self.exts)
 
+    def rand_ring(self) -> int:
+        return random.randrange(1, self.max_ring)
+
+    def rand_duration(self) -> int:
+        return 0 if random.randrange(self.answered_chance) == 0 else random.randrange(0, self.max_duration)
+
+    def record(self, call_type: int) -> Record:
+        record = Record(call_type=call_type)
+        record.number = self.rand_number()
+        record.line = self.rand_line()
+        record.ext = self.rand_ext()
+        record.ring = self.rand_ring()
+        record.duration = self.rand_duration()
+        return record
+
     def entrypoint(self) -> NoReturn:
         while self.is_running:
-            # Generate random call data
-            number = self.rand_number()
-            line = self.rand_line()
-
             # Deside if call is Outgoing or Received
             if random.random() > self.direction:
-                self.outgoing(number, line)
+                self.outgoing()
             else:
-                self.received(number, line)
+                self.received()
 
             # Sleep between records if requested
             if self.sleep:
                 time.sleep(self.sleep)
 
-    def outgoing(self, number, line):
-        record = CallDataRecord(call_type=2)
-        record.number = number
-        record.line = line
-        record.ext = self.rand_ext()
-        record.ring = random.randrange(1, 20)
-        record.duration = 0 if random.randrange(5) == 0 else random.randrange(0, 10000)
+    def outgoing(self):
+        record = self.record(call_type=Record.OUTGOING)
         self.push(record)
 
-    def received(self, number, line):
-        duration = 0 if random.randrange(5) == 0 else random.randrange(0, 10000)
-        ring = random.randrange(1, 10)
-        ext = self.rand_ext()
+        if random.randrange(self.transferred_chance) == 0:
+            # Randomly choose internal or external transfer
+            record.ext = self.rand_ext()
+            if random.randrange(2):
+                record.call_type = Record.OUTGOING_TRANSFERRED_INT
+            else:
+                record.call_type = Record.OUTGOING_TRANSFERRED_EXT
+            self.push(record)
+
+    def received(self):
+        record = self.record(call_type=Record.RECEIVED)
 
         # If we are sleeping before the next record
         # We want to add the Incoming records
         if self.sleep:
-            # Use the ring time to select the delay and number
-            # of hops before jumping to next extention
-            for hop in range(int(ring / 4)):
-                ext = random.randrange(100, 125)
-
-                record = CallDataRecord(call_type=0)
-                record.number = number,
-                record.line = line,
-                record.ext = ext
+            # Use the ring time to select the delay
+            # and number of hops before call ends
+            for hop in range(int(record.ring / 4)):
+                record.call_type = Record.INCOMING
+                record.ext = self.rand_ext()
                 self.push(record)
-
                 time.sleep(hop)
 
-        # Send received record
-        record = CallDataRecord(call_type=1)
-        record.number = number
-        record.line = line
-        record.ext = ext
-        record.ring = ring
-        record.duration = duration
-        self.push(record)
+        # Mock an extension with auto fowarding enabled
+        if record.ext == self.ext_forward:
+            record.call_type = Record.RECEIVED_FORWARDED
+            self.push(record)
+
+        # Mock a transferred call
+        elif random.randrange(self.transferred_chance) == 0:
+            record.call_type = Record.RECEIVED
+            self.push(record)
+
+            # Randomly choose internal or external transfer
+            record.ext = self.rand_ext()
+            if random.randrange(2):
+                record.call_type = Record.RECEIVED_TRANSFERRED_INT
+            else:
+                record.call_type = Record.RECEIVED_TRANSFERRED_EXT
+            self.push(record)
+        else:
+            record.call_type = Record.RECEIVED
+            self.push(record)
+
+# TODO: Add support for OUTGOING_FORWARDED and OUTGOING_VIA_FORWARDED

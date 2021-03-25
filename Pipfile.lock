@@ -198,11 +198,11 @@
         },
         "phonenumbers": {
             "hashes": [
-                "sha256:964ecfcf261b98fa7a749ddabd289a484bef9ed8be42d2ed46c35c68c44683bd",
-                "sha256:975f1638a743ef53f1b80a8440159047f79ce484f28704b61479e119acc0a503"
+                "sha256:7c2b26ee026f765a8032fc2a333b46fa1860445c7ce6df3b717b9f6985106084",
+                "sha256:ee5a8508c4a414262abad92ec33f050347f681973ed0fb36e98b52bfe159f6b8"
             ],
             "index": "pypi",
-            "version": "==8.11.0"
+            "version": "==8.12.20"
         },
         "pluggy": {
             "hashes": [

@@ -2,10 +2,11 @@ import os
 
 # Test Defaults
 defaults = dict(
-    TOKEN="temp",
+    token="temp",
+    plugin="MockCalls",
 )
 
 # Add test defaults to environment
 for key, val in defaults.items():
     if key not in os.environ:
-        os.environ[key] = val
+        os.environ[key.upper()] = val

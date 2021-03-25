@@ -64,14 +64,22 @@ class Settings:
     to be override by environment variables.
     """
 
+    #: Timeout in seconds to sleep on errors.
     timeout: int = 3
+    #: Multiplier that increases the timeout on continuous errors.
     timeout_decay: float = 1.5
+    #: The max timeout can be after continuous decay.
     max_timeout: int = 300
+    #: Size of the call queue
     queue_size: int = 1_000
+    # The domain to send the call logs to, used in development.
     domain: str = "https://quartx.ie"
+    #: Set to true to enable debug logging.
     debug: bool = False
-    plugin: str = "SiemensHipathSerial"
-    token: str = "dsfs345"
+    #: Required -  The name of the plugin to use.
+    plugin: str
+    #: Required -  The CDR authentication token.
+    token: str
 
     def __init__(self):
         merge_settings(self.__class__, self.__dict__)
@@ -82,4 +90,3 @@ class Settings:
 
 
 settings = Settings()
-print(settings)

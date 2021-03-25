@@ -10,22 +10,29 @@ from sentry_sdk import configure_scope
 # Local
 from calllogger.conf import settings, TokenAuth
 from calllogger.api.cdr import CDRWorker
+from calllogger.plugins import internal_plugins
+
+
+def get_plugins() -> dict:
+    # Installed Plugin Entrypoints
+    installed_plugins = {plugin.get_class().__name__.lower(): plugin.get_class() for plugin in
+                         pkg_resources.iter_entry_points("calllogger.plugin")}
+    installed_plugins.update(internal_plugins)
+    return installed_plugins
 
 
 def get_plugin():
-    # Installed Plugin Entrypoints
-    installed_plugins = {plugin.get_class().__name__.lower(): plugin for plugin in
-                         pkg_resources.iter_entry_points("calllogger.plugin")}
+    installed_plugins = get_plugins()
 
     # Select plugin
     selected_plugin = settings.plugin.lower()
     if selected_plugin in installed_plugins:
-        return installed_plugins[selected_plugin].get_class()
+        return installed_plugins[selected_plugin]
     elif installed_plugins:
         print("Specified plugin not found:", settings.plugin)
         print("Available plugins are:")
         for plugin in installed_plugins.values():
-            print("-->", plugin.get_class().__name__)
+            print(f"--> {plugin.__name__}: {plugin.__doc__}", )
     else:
         print("No plugins are installed")
 

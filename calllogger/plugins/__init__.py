@@ -14,7 +14,8 @@ from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
 from calllogger.conf import settings, merge_settings
 
-__all__ = ["BasePlugin", "SerialPlugin"]
+# Registerd Internal plugins
+internal_plugins = {}
 
 
 class CleanInitABC(abc.ABCMeta):
@@ -218,3 +219,7 @@ class SerialPlugin(BasePlugin):
                 scope.set_extra("validated_line", validated_line)
                 if record := self.__parse(validated_line):
                     self.push(record)
+
+
+from .mockcalls import MockCalls
+internal_plugins[MockCalls.__name__.lower()] = MockCalls

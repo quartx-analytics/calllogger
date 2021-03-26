@@ -10,18 +10,27 @@ from calllogger.record import CallDataRecord as Record
 
 # Set of predefined numbers to
 # create mock calls from
-callset = [
-    "0857539075",  # Michael Forde
-    "0873575643",  # Tom Baker
-    "0853436640",  # Jerry Cremin
-    "0277665604",  # Louie Walsh
-    "0107974846",  # Tim Barra
-    "0213268621",  # Mike Twomey
-    "0850549045",  # Philip Murray
-    "0877644458",  # Maura Jenkins
+callset = {
+    "0857539075": "Michael Forde",
+    "0873575643": "Tom Baker",
+    "0853436640": "Jerry Cremin",
+    "0277665604": "Louie Walsh",
+    "0107974846": "Tim Barra",
+    "0213268621": "Mike Twomey",
+    "0850549045": "Philip Murray",
+    "0877644458": "Maura Jenkins",
+}
+numbers = (
     "0667126317", "0667124800", "0667199999", "0214274845",
     "0214365241", "016643658", "0212355545", "018302044",
-]
+)
+ext_names = {
+    101: "Office",
+    102: "Shop",
+}
+
+for number in numbers:
+    callset[number] = None
 
 
 class MockCalls(BasePlugin):
@@ -48,7 +57,7 @@ class MockCalls(BasePlugin):
 
     # noinspection PyMethodMayBeStatic
     def rand_number(self) -> str:
-        return random.choice(callset)
+        return random.choice(list(callset))
 
     def rand_line(self) -> int:
         return random.randrange(1, self.lines + 1)
@@ -69,6 +78,11 @@ class MockCalls(BasePlugin):
         record.ext = self.rand_ext()
         record.ring = self.rand_ring()
         record.duration = self.rand_duration()
+
+        # Add name if one exists
+        if name := callset[record.number]:
+            record.contact_name = name
+
         return record
 
     def entrypoint(self) -> NoReturn:
@@ -98,6 +112,7 @@ class MockCalls(BasePlugin):
 
     def received(self):
         record = self.record(call_type=Record.RECEIVED)
+        self.add_ext_name(record)
 
         # If we are sleeping before the next record
         # We want to add the Incoming records
@@ -107,6 +122,7 @@ class MockCalls(BasePlugin):
             for hop in range(int(record.ring / 4)):
                 record.call_type = Record.INCOMING
                 record.ext = self.rand_ext()
+                self.add_ext_name(record)
                 self.push(record)
                 time.sleep(hop)
 
@@ -130,5 +146,11 @@ class MockCalls(BasePlugin):
         else:
             record.call_type = Record.RECEIVED
             self.push(record)
+
+    # noinspection PyMethodMayBeStatic
+    def add_ext_name(self, record):
+        """Add extension name if exists."""
+        if name := ext_names.get(record.ext):
+            record.ext_name = name
 
 # TODO: Add support for OUTGOING_FORWARDED and OUTGOING_VIA_FORWARDED

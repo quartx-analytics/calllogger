@@ -25,14 +25,16 @@ jobs:
       run: |
         flake8
 
-    - name: Test with pytest
-      run: |
-        pytest --cov
+#    - name: Test with pytest
+#      run: |
+#        pytest --cov
 
     - name: Publish code coverage to CodeClimate
       uses: paambaati/codeclimate-action@v2.7.5
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_ID }}
+      with:
+        coverageCommand: coverage run -m pytest
 
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop

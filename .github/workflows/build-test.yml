@@ -29,6 +29,11 @@ jobs:
       run: |
         pytest --cov
 
+    - name: Publish code coverage to CodeClimate
+      uses: paambaati/codeclimate-action@v2.7.5
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_ID }}
+
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
 

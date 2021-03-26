@@ -153,4 +153,7 @@ class MockCalls(BasePlugin):
         if name := ext_names.get(record.ext):
             record.ext_name = name
 
+
 # TODO: Add support for OUTGOING_FORWARDED and OUTGOING_VIA_FORWARDED
+# TODO: Add support for simulating auto attendant
+# TODO: Add support for answering machines.

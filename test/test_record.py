@@ -49,6 +49,32 @@ def test_invalid_number(record, number):
     assert "number" not in record.data
 
 
+@pytest.mark.parametrize("contact_name", ["contact", "name"])
+def test_contact_name(record, contact_name):
+    record.contact_name = contact_name
+    assert "contact_name" in record.data
+    assert record.contact_name == contact_name
+
+
+@pytest.mark.parametrize("contact_name", ["", " "])
+def test_invalid_contact_name(record, contact_name):
+    record.contact_name = contact_name
+    assert "contact_name" not in record.data
+
+
+@pytest.mark.parametrize("contact_email", ["contact", "email@email.com"])
+def test_contact_email(record, contact_email):
+    record.contact_email = contact_email
+    assert "contact_email" in record.data
+    assert record.contact_email == contact_email
+
+
+@pytest.mark.parametrize("contact_email", ["", " "])
+def test_invalid_contact_email(record, contact_email):
+    record.contact_email = contact_email
+    assert "contact_email" not in record.data
+
+
 @pytest.mark.parametrize("line", ["1", 2])
 def test_line(record, line):
     record.line = line
@@ -73,6 +99,19 @@ def test_ext(record, ext):
 def test_invalid_ext(record, ext):
     record.ext = ext
     assert "ext" not in record.data
+
+
+@pytest.mark.parametrize("ext_name", ["extension", "name"])
+def test_ext_name(record, ext_name):
+    record.ext_name = ext_name
+    assert "ext_name" in record.data
+    assert record.ext_name == ext_name
+
+
+@pytest.mark.parametrize("ext_name", ["", " "])
+def test_invalid_ext_name(record, ext_name):
+    record.ext_name = ext_name
+    assert "ext_name" not in record.data
 
 
 @pytest.mark.parametrize("ring", ["20", 15, "00:15", "00:00:25"])

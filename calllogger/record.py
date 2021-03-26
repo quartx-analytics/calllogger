@@ -63,6 +63,24 @@ class CallDataRecord:
             self.data["number"] = value
 
     @property
+    def contact_name(self) -> str:
+        return self.data["contact_name"]
+
+    @contact_name.setter
+    def contact_name(self, value):
+        if value := value.strip():
+            self.data["contact_name"] = value
+
+    @property
+    def contact_email(self) -> str:
+        return self.data["contact_email"]
+
+    @contact_email.setter
+    def contact_email(self, value):
+        if value := value.strip():
+            self.data["contact_email"] = value
+
+    @property
     def line(self) -> Union[int, str]:
         """The line number that the call is on."""
         return self.data["line"]
@@ -81,6 +99,15 @@ class CallDataRecord:
     def ext(self, value):
         if isinstance(value, int) or (value := value.strip()):
             self.data["ext"] = value
+
+    @property
+    def ext_name(self) -> str:
+        return self.data["ext_name"]
+
+    @ext_name.setter
+    def ext_name(self, value):
+        if value := value.strip():
+            self.data["ext_name"] = value
 
     @property
     def ring(self) -> Union[int, str]:

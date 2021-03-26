@@ -28,7 +28,7 @@ class MockCalls(BasePlugin):
     """Generate random call records continuously."""
 
     #: Time in seconds to delay, 0 will skip incoming and push at full speed.
-    sleep: float = 1.5
+    sleep: float = 1
     #: Determine preferred call direction, Outgoing is 0 and Received is 1.
     direction: float = 0.5
     #: Number of phone lines.

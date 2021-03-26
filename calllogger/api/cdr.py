@@ -86,10 +86,15 @@ class CDRWorker(Thread):
 
             # Check status code to deside what to do next
             elif isinstance(err, requests.HTTPError) and err.response is not None:
-                logger.warning("API request failed with status code: %s", err.response.status_code)
+                logger.warning(
+                    "API request failed with status code: %s %s",
+                    err.response.status_code,
+                    err.response.reason
+                )
                 scope.set_extra("response", decode_response(err.response))
                 scope.set_extra("status_code", err.response.status_code)
                 scope.set_extra("elapsed", err.response.elapsed)
+                scope.set_extra("reason", err.response.reason)
                 retry = self.status_check(err.response.status_code)
             else:
                 # Unexpected error, Let sentry do the rest

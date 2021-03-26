@@ -28,16 +28,17 @@ def cmd_args() -> dict:
     return args
 
 
-def merge_settings(cls, settings_store: dict = None, prefix="", **defaults):
+def merge_settings(cls, settings_store: dict, prefix="", **defaults):
     # Merge class, instance and defaults together
-    settings_store.update(**cls.__dict__, **defaults)
+    defaults_store = dict(**cls.__dict__, **defaults)
     prefix = f"{prefix}_" if prefix else ""
+    settings_store.update(defaults)
     args = cmd_args()
     errors = []
 
     # Check if all settings with annotations have a environment variable set for them
     for key, cast in cls.__dict__.get("__annotations__", {}).items():
-        default = settings_store.get(key, undefined)
+        default = defaults_store.get(key, undefined)
         env_key = f"{prefix}{key}"
         try:
             if env_key in args:

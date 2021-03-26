@@ -14,7 +14,7 @@ from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
 from calllogger.conf import settings, merge_settings
 
-# Registerd Internal plugins
+logger = logging.getLogger(__name__)
 internal_plugins = {}
 
 
@@ -67,6 +67,7 @@ class BasePlugin(Thread, metaclass=CleanInitABC):
 
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""
+        logger.debug(record.data)
         self._queue.put(record.data)
 
     @property

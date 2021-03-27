@@ -22,6 +22,7 @@ jobs:
         pip install -r requirements.txt -r requirements-dev.txt
 
     - name: Lint with flake8
+      continue-on-error: true
       run: |
         flake8
 
@@ -30,6 +31,7 @@ jobs:
         coverage run -m pytest
 
     - name: Coveralls
+      continue-on-error: true
       uses: AndreMiras/coveralls-python-action@develop
 
     - name: Set Environment Variables

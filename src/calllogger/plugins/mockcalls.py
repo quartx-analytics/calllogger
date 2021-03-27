@@ -122,6 +122,11 @@ class MockCalls(BasePlugin):
                 record.call_type = Record.INCOMING
                 record.ext = self.rand_ext()
                 self.add_ext_name(record)
+
+                # Clean the record before pushing
+                # Looks better when debuging
+                record.data.pop("duration", None)
+                record.data.pop("ring", None)
                 self.push(record)
 
                 sleeper(self, self.sleep)

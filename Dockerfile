@@ -16,7 +16,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apk update
 
 # Add secrets & Environment Variables
-#RUN --mount=type=secret,id=sentry_dsn
+RUN --mount=type=secret,id=sentry_dsn
 ENV ENVIRONMENT Deployed
 
 # Install dependencies
@@ -27,7 +27,5 @@ RUN pip install --upgrade pip && \
 
 # Setup CallLogger
 COPY . /src
-#RUN pip install --no-cache-dir . && rm -rf /src
-RUN pip install --no-cache-dir /src
-RUN rm -rf /src
+RUN pip install --no-cache-dir /src && rm -rf /src
 CMD ["calllogger"]

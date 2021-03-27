@@ -21,15 +21,24 @@ __version__ = "0.4.0"
 
 # Standard lib
 import logging.config
+from pathlib import PosixPath
 
 # Third Party
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
 from decouple import config
 
+# Extract the sentry DSN from docker secret if exists
+secret_path = PosixPath("/run/secrets/sentry_dsn")
+if secret_path.exists():
+    with secret_path.open() as f:
+        sentry_dsn = f.read()
+else:
+    sentry_dsn = config("SENTRY_DSN", "")
+
 # Setup Sentry
 sentry_sdk.init(
-    config("SENTRY_DSN", ""),
+    sentry_dsn,
     release=__version__,
     environment=config("ENVIRONMENT", "Testing"),
     integrations=[ThreadingIntegration(propagate_hub=True)],

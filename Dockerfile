@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.2
 FROM python:3.9-alpine
 
 # Add Labels for OCI Image Format Specification
@@ -12,13 +13,12 @@ LABEL org.opencontainers.image.title="Quartx Call Logger"
 # sent straight to the terminal without buffering it first
 ENV PYTHONUNBUFFERED 1
 
-# Enbed the sentry DSN
-ARG SENTRY_DSN=""
-ENV SENTRY_DSN $SENTRY_DSN
-ENV ENVIRONMENT Deployed
-
 # Update the base image
 RUN apk update
+
+# Add secrets & Environment Variables
+RUN --mount=type=secret,id=sentry_dsn cat /run/secrets/sentry_dsn
+ENV ENVIRONMENT Deployed
 
 # Install dependencies
 COPY ./requirements.txt /

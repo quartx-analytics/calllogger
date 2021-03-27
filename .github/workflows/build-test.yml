@@ -55,7 +55,7 @@ jobs:
         file: Dockerfile
         tags: |
           ${{ env.IMAGE }}:latest
-        build-args: |
+        secrets: |
           SENTRY_DSN=${{ secrets.SENTRY_DSN }}
         labels: |
           org.opencontainers.image.source=https://github.com/${{ github.repository }}

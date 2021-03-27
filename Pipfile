@@ -15,6 +15,7 @@ pytest = "*"
 coverage = "*"
 pytest-mock = "*"
 requests-mock = "*"
+tox = "*"
 
 [requires]
 python_version = "3.9"

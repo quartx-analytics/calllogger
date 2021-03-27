@@ -2,7 +2,6 @@
 FROM python:3.9-alpine
 
 # Add Labels for OCI Image Format Specification
-LABEL maintainer="willforde@quartx.ie"
 LABEL org.opencontainers.image.vendor="Quartx"
 LABEL org.opencontainers.image.authors="William Forde"
 LABEL org.opencontainers.image.url="https://quartx.ie"
@@ -25,3 +24,8 @@ COPY ./requirements.txt /
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r /requirements.txt && \
     rm /requirements.txt
+
+# Setup CallLogger
+COPY . /src
+RUN cd /src && pip install --no-cache-dir . && rm -rf /src
+CMD ["calllogger"]

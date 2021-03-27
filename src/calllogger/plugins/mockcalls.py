@@ -1,10 +1,9 @@
 # Standard library
+from typing import NoReturn
 import random
-import time
 
 # Local
-from typing import NoReturn
-
+from calllogger.utils import sleeper
 from calllogger.plugins import BasePlugin
 from calllogger.record import CallDataRecord as Record
 
@@ -95,7 +94,7 @@ class MockCalls(BasePlugin):
 
             # Sleep between records if requested
             if self.sleep:
-                time.sleep(self.sleep)
+                sleeper(self, self.sleep)
 
     def outgoing(self):
         record = self.record(call_type=Record.OUTGOING)
@@ -124,7 +123,11 @@ class MockCalls(BasePlugin):
                 record.ext = self.rand_ext()
                 self.add_ext_name(record)
                 self.push(record)
-                time.sleep(hop)
+
+                sleeper(self, self.sleep)
+                # Break from loop if program is no longer running
+                if not self.is_running:
+                    break
 
         # Mock an extension with auto fowarding enabled
         if record.ext == self.ext_forward:

@@ -8,7 +8,7 @@ import json
 import requests
 
 logger = logging.getLogger(__name__)
-__all__ = ["OnlyMessages", "Timeout", "decode_response"]
+__all__ = ["OnlyMessages", "Timeout", "decode_response", "sleeper"]
 
 
 class OnlyMessages(logging.Filter):
@@ -38,10 +38,7 @@ class Timeout:
     def sleep(self):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.info("Retrying in '%d' seconds", self._timeout)
-        timeout = self._timeout * 2
-        while timeout > 0 and self._thread.is_running:
-            time.sleep(.5)
-            timeout -= 1
+        sleeper(self._thread, self._timeout)
         self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
 
     def reset(self):
@@ -62,3 +59,14 @@ def decode_response(resp: requests.Response, limit=1000) -> Union[str, dict]:
         return resp.text[:limit]
     else:
         return data[:limit] if isinstance(data, str) else data
+
+
+def sleeper(thread, timeout):
+    """
+    Sleep for a given amount of time
+    while checking if thread is running.
+    """
+    timeout = timeout * 2
+    while timeout > 0 and thread.is_running:
+        time.sleep(.5)
+        timeout -= 1

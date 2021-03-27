@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.0.0-experimental
+# syntax = docker/dockerfile:1.2
 FROM python:3.9-alpine
 
 # Add Labels for OCI Image Format Specification
@@ -17,7 +17,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apk update
 
 # Add secrets & Environment Variables
-RUN --mount=type=secret,id=sentry_dsn cat /run/secrets/sentry_dsn
+RUN --mount=type=secret,id=sentry_dsn
 ENV ENVIRONMENT Deployed
 
 # Install dependencies

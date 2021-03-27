@@ -73,4 +73,4 @@ def main_logger():
 
 
 if __name__ == "__main__":
-    main_logger()
+    sys.exit(main_logger())

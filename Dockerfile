@@ -19,13 +19,7 @@ RUN apk update
 RUN --mount=type=secret,id=sentry_dsn
 ENV ENVIRONMENT Deployed
 
-# Install dependencies
-COPY ./requirements.txt /
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r /requirements.txt && \
-    rm /requirements.txt
-
-# Setup CallLogger
+# Install as Package
 COPY . /src
-RUN pip install --no-cache-dir /src && rm -rf /src
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir /src && rm -rf /src
 CMD ["calllogger"]

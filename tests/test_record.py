@@ -19,21 +19,28 @@ def test_call_types(call_type):
     assert record.call_type == call_type
 
 
-def test_date(record):
+def test_date_obj(record):
+    date = datetime.now(timezone.utc).replace(microsecond=0)
+    record.date = date
+    assert "date" in record.data
+    assert record.date == date
+
+
+def test_date_str(record):
     fmt = "%d.%m.%y%X"
     tz = timezone.utc
-    date = datetime.now().replace(microsecond=0, tzinfo=tz)
-    record.date(date.strftime(fmt), fmt=fmt, tz=tz)
+    date = datetime.now(timezone.utc).replace(microsecond=0)
+    record.date_str(date.strftime(fmt), fmt=fmt, tz=tz)
     assert "date" in record.data
-    assert record.data["date"] == date.isoformat()
+    assert record.date == date
 
 
 @pytest.mark.parametrize("date", ["", " "])
 def test_invalid_date(record, date):
-    before = record.data["date"]
-    record.date(date)
+    before = record.date
+    record.date_str(date)
     assert "date" in record.data
-    assert record.data["date"] == before
+    assert record.date == before
 
 
 @pytest.mark.parametrize("number", ["0876159281", "066715325"])

@@ -4,6 +4,7 @@ from threading import Event, Thread
 from typing import Union, Dict
 import logging
 import queue
+import json
 
 # Third party
 import requests
@@ -12,7 +13,7 @@ from sentry_sdk import push_scope, capture_exception
 
 # Package
 from calllogger.conf import settings, TokenAuth
-from calllogger.utils import Timeout, decode_response
+from calllogger.utils import Timeout, decode_response, ComplexEncoder
 
 logger = logging.getLogger(f"{__name__}")
 cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")
@@ -39,6 +40,7 @@ class CDRWorker(Thread):
 
         # Session
         self.session = requests.Session()
+        self.session.headers["content_type"] = "application/json"
         self.session.auth = token
 
     @property
@@ -76,7 +78,8 @@ class CDRWorker(Thread):
     def push_record(self, record: Record, scope) -> bool:
         """Push the record to the cloud. Returning True if request needs to be retried."""
         try:
-            resp = self.session.post(cdr_url, json=record, timeout=self.timeout.value)
+            data = json.dumps(record, cls=ComplexEncoder)
+            resp = self.session.post(cdr_url, data=data, timeout=self.timeout.value)
             resp.raise_for_status()
         except Exception as err:
             # Server is unreachable, try again later

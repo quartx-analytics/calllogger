@@ -1,4 +1,5 @@
 # Standard Lib
+from datetime import datetime
 from typing import Union
 import logging
 import time
@@ -8,7 +9,6 @@ import json
 import requests
 
 logger = logging.getLogger(__name__)
-__all__ = ["OnlyMessages", "Timeout", "decode_response", "sleeper"]
 
 
 class OnlyMessages(logging.Filter):
@@ -70,3 +70,15 @@ def sleeper(thread, timeout):
     while timeout > 0 and thread.is_running:
         time.sleep(.5)
         timeout -= 1
+
+
+class ComplexEncoder(json.JSONEncoder):
+    """Custom Json Encoder to serialize other types of python objects."""
+
+    def default(self, obj):
+        # Decode datetime objects to iso format
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)

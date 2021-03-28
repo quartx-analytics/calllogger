@@ -23,14 +23,14 @@ class CallDataRecord:
     OUTGOING_TRANSFERRED_EXT = 38
 
     def __init__(self, call_type):
-        self.data: Dict[str, Union[int, bool, str]] = dict(
+        self.data: Dict[str, Union[int, str, datetime]] = dict(
             call_type=int(call_type),
-            date=datetime.now().astimezone(timezone.utc).isoformat()
+            date=datetime.now(timezone.utc),
         )
 
-    def date(self, date: str, fmt: str = "%d.%m.%y%X", tz: timezone = timezone.utc):
+    def date_str(self, date: str, fmt: str = "%d.%m.%y%X", tz: timezone = timezone.utc):
         """
-        Convert date to a datetime object before saving.
+        Convert a date string to a datetime object before saving.
 
         .. note::
             https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
@@ -41,7 +41,15 @@ class CallDataRecord:
         :param timezone tz: The timezone the date is from. Default = 'UTC'
         """
         if date := date.strip():
-            self.data["date"] = datetime.strptime(date, fmt).astimezone(tz).isoformat()
+            self.data["date"] = datetime.strptime(date, fmt).replace(tzinfo=tz)
+
+    @property
+    def date(self) -> datetime:
+        return self.data["date"]
+
+    @date.setter
+    def date(self, value):
+        self.data["date"] = value
 
     @property
     def call_type(self) -> int:

@@ -19,7 +19,7 @@ jobs:
     - name: Install test dependencies
       run: |
         pip install --no-cache-dir --upgrade pip
-        pip install --no-cache-dir tox poetry-core
+        pip install --no-cache-dir tox-poetry-installer[poetry]
 
     - name: Test using tox
       run: |

@@ -23,7 +23,7 @@ jobs:
 
     - name: Test using tox
       run: |
-        tox
+        tox --require-poetry
 
 #    - name: Coveralls
 #      continue-on-error: true

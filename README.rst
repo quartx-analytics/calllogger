@@ -2,8 +2,8 @@
     :target: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml
     :alt: Build and Tests
 
-.. image:: https://coveralls.io/repos/github/quartx-analytics/calllogger/badge.svg?branch=rework
-    :target: https://coveralls.io/github/quartx-analytics/calllogger?branch=rework
+.. image:: https://codecov.io/gh/quartx-analytics/calllogger/branch/rework/graph/badge.svg?token=AH0TIQ7F8V
+    :target: https://codecov.io/gh/quartx-analytics/calllogger
     :alt: Test Coverage
 
 .. image:: https://api.codeclimate.com/v1/badges/c0d513f139aa33e2d4b6/maintainability

@@ -25,9 +25,12 @@ jobs:
       run: |
         tox
 
-    - name: Coveralls
-      continue-on-error: true
-      uses: AndreMiras/coveralls-python-action@develop
+#    - name: Coveralls
+#      continue-on-error: true
+#      uses: AndreMiras/coveralls-python-action@develop
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
 
     - name: Set Environment Variables
       run: |

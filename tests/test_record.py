@@ -15,7 +15,8 @@ def record():
 
 @pytest.mark.parametrize("call_type", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 35, 36, 37, 38])
 def test_call_types(call_type):
-    record = CallDataRecord(call_type)
+    record = CallDataRecord(0)
+    record.call_type = call_type
     assert record.call_type == call_type
 
 

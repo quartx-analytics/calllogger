@@ -50,7 +50,7 @@ logging.config.dictConfig({
     "version": 1,
     "filters": {
         "only_messages": {
-            "()": f"{__name__}.utils.OnlyMessages"
+            "()": f"calllogger.utils.OnlyMessages"
         }
     },
     "formatters": {

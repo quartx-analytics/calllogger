@@ -23,11 +23,11 @@ jobs:
 
     - name: Test using tox
       run: |
-        tox --require-poetry
+        tox
 
-#    - name: Coveralls
-#      continue-on-error: true
-#      uses: AndreMiras/coveralls-python-action@develop
+    - name: Coveralls
+      continue-on-error: true
+      uses: AndreMiras/coveralls-python-action@develop
 
     - name: Set Environment Variables
       run: |

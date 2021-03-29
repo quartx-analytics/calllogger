@@ -222,5 +222,5 @@ class SerialPlugin(BasePlugin):
                     self.push(record)
 
 
-from .mockcalls import MockCalls
+from calllogger.plugins.mockcalls import MockCalls
 internal_plugins[MockCalls.__name__.lower()] = MockCalls

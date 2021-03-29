@@ -81,8 +81,8 @@ logging.config.dictConfig({
 })
 
 __all__ = ["CallDataRecord", "BasePlugin", "SerialPlugin"]
-from .record import CallDataRecord
-from .plugins import (
+from calllogger.record import CallDataRecord
+from calllogger.plugins import (
     BasePlugin,
     SerialPlugin,
 )

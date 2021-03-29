@@ -48,11 +48,11 @@ sentry_sdk.init(
 # Setup Logging
 logging.config.dictConfig({
     "version": 1,
-    "filters": {
-        "only_messages": {
-            "()": f"calllogger.utils.OnlyMessages"
-        }
-    },
+    # "filters": {
+    #     "only_messages": {
+    #         "()": f"calllogger.utils.OnlyMessages"
+    #     }
+    # },
     "formatters": {
         "levelname": {
             "format": "%(levelname)s: %(message)s",
@@ -62,7 +62,7 @@ logging.config.dictConfig({
         "console_messages": {
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
-            "filters": ["only_messages"],
+            # "filters": ["only_messages"],
             "formatter": "levelname",
         },
         "console_errors": {

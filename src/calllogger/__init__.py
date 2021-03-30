@@ -17,16 +17,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-__version__ = "0.4.0"
-
 # Standard lib
 import logging.config
 from pathlib import PosixPath
+from importlib.metadata import version
 
 # Third Party
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
 from decouple import config
+
+__version__ = version("quartx-calllogger")
 
 # Extract the sentry DSN from docker secret if exists
 secret_path = PosixPath("/run/secrets/sentry_dsn")

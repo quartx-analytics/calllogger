@@ -40,7 +40,7 @@ class CDRWorker(Thread):
 
         # Session
         self.session = requests.Session()
-        self.session.headers["content_type"] = "application/json"
+        self.session.headers["content-type"] = "application/json"
         self.session.auth = token
 
     @property

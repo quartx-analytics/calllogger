@@ -2,6 +2,7 @@
 from queue import Queue
 import pkg_resources
 import threading
+import argparse
 import sys
 
 # Third Party
@@ -11,12 +12,15 @@ from sentry_sdk import configure_scope
 from calllogger.conf import settings, TokenAuth
 from calllogger.api.cdr import CDRWorker
 from calllogger.plugins import internal_plugins
+from calllogger import __version__
 
 
 def get_plugins() -> dict:
     # Installed Plugin Entrypoints
-    installed_plugins = {plugin.get_class().__name__.lower(): plugin.get_class() for plugin in
-                         pkg_resources.iter_entry_points("calllogger.plugin")}
+    installed_plugins = {
+        plugin.get_class().__name__.lower(): plugin.get_class() for plugin in
+        pkg_resources.iter_entry_points("calllogger.plugin")
+    }
     installed_plugins.update(internal_plugins)
     return installed_plugins
 
@@ -73,4 +77,7 @@ def main_logger():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog="Quartx CallLogger")
+    parser.add_argument('--version', action='version', version=f"calllogger {__version__}")
+    parser.parse_args()
     sys.exit(main_logger())

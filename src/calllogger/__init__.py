@@ -80,7 +80,7 @@ logging.config.dictConfig({
     }
 })
 
-__all__ = ["CallDataRecord", "BasePlugin", "SerialPlugin"]
+__all__ = ["CallDataRecord", "BasePlugin", "SerialPlugin", "__version__"]
 from calllogger.record import CallDataRecord
 from calllogger.plugins import (
     BasePlugin,

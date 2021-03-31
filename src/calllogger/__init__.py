@@ -51,7 +51,7 @@ logging.config.dictConfig({
     "version": 1,
     "filters": {
         "only_messages": {
-            "()": f"calllogger.utils.OnlyMessages"
+            "()": "calllogger.utils.OnlyMessages"
         }
     },
     "formatters": {

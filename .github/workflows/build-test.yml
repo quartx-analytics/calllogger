@@ -16,10 +16,15 @@ jobs:
       with:
         python-version: 3.9
 
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}
+
     - name: Install test dependencies
       run: |
-        pip install --no-cache-dir --upgrade pip
-        pip install --no-cache-dir tox
+        pip install --upgrade pip
+        pip install --upgrade --upgrade-strategy eager tox
 
     - name: Test using tox
       run: |

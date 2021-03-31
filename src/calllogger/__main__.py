@@ -14,6 +14,11 @@ from calllogger.api.cdr import CDRWorker
 from calllogger.plugins import internal_plugins
 from calllogger import __version__
 
+# Parse command line args. Only used for version right now.
+parser = argparse.ArgumentParser(prog="Quartx CallLogger")
+parser.add_argument('--version', action='version', version=f"calllogger {__version__}")
+parser.parse_args()
+
 
 def get_plugins() -> dict:
     # Installed Plugin Entrypoints
@@ -25,11 +30,11 @@ def get_plugins() -> dict:
     return installed_plugins
 
 
-def get_plugin():
+def get_plugin(selected_plugin: str):
+    selected_plugin = selected_plugin.lower()
     installed_plugins = get_plugins()
 
     # Select plugin
-    selected_plugin = settings.plugin.lower()
     if selected_plugin in installed_plugins:
         return installed_plugins[selected_plugin]
     elif installed_plugins:
@@ -45,7 +50,7 @@ def get_plugin():
     sys.exit()
 
 
-def main_logger():
+def main_logger(plugin) -> int:
     queue = Queue(settings.queue_size)
     running = threading.Event()
     running.set()
@@ -56,7 +61,6 @@ def main_logger():
         scope.user = {"id": settings.token}
 
     # Start the plugin thread to monitor for call records
-    plugin = get_plugin()
     plugin_thread = plugin(_queue=queue, _running=running)
     plugin_thread.start()
 
@@ -74,10 +78,21 @@ def main_logger():
         # This will allow the threads
         # to gracefully shutdown
         running.clear()
+        return 130
+
+
+def main() -> int:
+    """Normal logger that selects the plugin from user sellection."""
+    plugin = get_plugin(settings.plugin)
+    return main_logger(plugin)
+
+
+def mocker() -> int:
+    """Force use of the mock logger."""
+    plugin = get_plugin("MockCalls")
+    return main_logger(plugin)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog="Quartx CallLogger")
-    parser.add_argument('--version', action='version', version=f"calllogger {__version__}")
-    parser.parse_args()
-    sys.exit(main_logger())
+    exit_code = main()
+    sys.exit(exit_code)

@@ -26,7 +26,8 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-calllogger = "calllogger.__main__:main_logger"
+calllogger = "calllogger.__main__:main"
+calllogger-mock = "calllogger.__main__:mocker"
 
 [tool.poetry.dependencies]
 python = "^3.9"

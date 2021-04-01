@@ -82,7 +82,7 @@ def main_logger(plugin) -> int:
 
 
 def main() -> int:
-    """Normal logger that selects the plugin from user sellection."""
+    """Normal logger that calls the users preferred plugin."""
     plugin = get_plugin(settings.plugin)
     return main_logger(plugin)
 
@@ -94,5 +94,7 @@ def mocker() -> int:
 
 
 if __name__ == "__main__":
-    exit_code = main()
+    # Normally this program will be called from a entrypoint.
+    # So we will use the mock plugin here when directly called.
+    exit_code = mocker()
     sys.exit(exit_code)

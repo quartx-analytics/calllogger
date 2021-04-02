@@ -29,6 +29,9 @@ from decouple import config
 
 __version__ = version("quartx-calllogger")
 
+# Flag to indecate if running inside BalenaOS
+BALENA = config("BALENA", default=False, cast=bool)
+
 # Extract the sentry DSN from docker secret if exists
 secret_path = PosixPath("/run/secrets/sentry_dsn")
 if secret_path.exists():

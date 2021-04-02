@@ -37,6 +37,8 @@ class MockCalls(BasePlugin):
 
     #: Time in seconds to delay, 0 will skip incoming and push at full speed.
     sleep: float = 1
+    #: Time in seconds to delay between incoming call hops.
+    incoming_delay: float = 2
     #: Determine preferred call direction, Outgoing is 0 and Received is 1.
     direction: float = 0.5
     #: Number of phone lines.
@@ -125,7 +127,7 @@ class MockCalls(BasePlugin):
                 self.push(record)
 
                 # TODO: Incoming hop needs not to use sleep, It needs to use hop for sleep time
-                sleeper(self, self.sleep)
+                sleeper(self, self.incoming_delay)
                 # Break from loop if program is no longer running
                 if not self.is_running:
                     break

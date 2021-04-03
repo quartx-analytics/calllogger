@@ -105,3 +105,13 @@ pipenv update
 pipenv lock -r > requirements.txt
 pipenv lock --dev-only -r > requirements-dev.txt
 ```
+
+
+Balena
+------
+
+Scan for BalenaOS devices on the network.
+May or may not work depending on the network setup.
+```
+sudo balena scan
+```

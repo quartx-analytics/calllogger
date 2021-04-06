@@ -1,6 +1,5 @@
 # Standard Lib
 from queue import Queue
-import pkg_resources
 import threading
 import argparse
 import sys
@@ -11,7 +10,7 @@ from sentry_sdk import configure_scope
 # Local
 from calllogger.conf import settings, TokenAuth
 from calllogger.api.cdr import CDRWorker
-from calllogger.plugins import internal_plugins
+from calllogger.plugins import installed
 from calllogger import __version__
 
 # Parse command line args. Only used for version right now.
@@ -20,27 +19,16 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_args()
 
 
-def get_plugins() -> dict:
-    # Installed Plugin Entrypoints
-    installed_plugins = {
-        plugin.get_class().__name__.lower(): plugin.get_class() for plugin in
-        pkg_resources.iter_entry_points("calllogger.plugin")
-    }
-    installed_plugins.update(internal_plugins)
-    return installed_plugins
-
-
 def get_plugin(selected_plugin: str):
     selected_plugin = selected_plugin.lower()
-    installed_plugins = get_plugins()
 
     # Select plugin
-    if selected_plugin in installed_plugins:
-        return installed_plugins[selected_plugin]
-    elif installed_plugins:
+    if selected_plugin in installed:
+        return installed[selected_plugin]
+    elif installed:
         print("Specified plugin not found:", settings.plugin)
         print("Available plugins are:")
-        for plugin in installed_plugins.values():
+        for plugin in installed.values():
             print(f"--> {plugin.__name__}: {plugin.__doc__}", )
     else:
         print("No plugins are installed")

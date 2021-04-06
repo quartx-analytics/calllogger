@@ -19,6 +19,8 @@ logger = logging.getLogger(f"{__name__}")
 cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")
 Record = Dict[str, Union[str, int]]
 
+# TODO: Log warnings might not be working.
+
 
 class CDRWorker(Thread):
     """

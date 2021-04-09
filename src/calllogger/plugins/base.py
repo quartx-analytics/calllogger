@@ -41,7 +41,7 @@ class BasePlugin(Thread, metaclass=PluginSettings):
         super(BasePlugin, self).__init__(name=f"Thread-{self.__class__.__name__}")
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
-        self.timeout = Timeout(settings, self)
+        self.timeout = Timeout(settings, self._running)
 
     def run(self):
         try:

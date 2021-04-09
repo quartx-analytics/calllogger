@@ -96,7 +96,7 @@ class MockCalls(BasePlugin):
 
             # Sleep between records if requested
             if self.sleep:
-                sleeper(self, self.sleep)
+                sleeper(self.sleep, lambda: self.is_running)
 
     def outgoing(self):
         record = self.record(call_type=Record.OUTGOING)
@@ -126,8 +126,7 @@ class MockCalls(BasePlugin):
                 self.add_ext_name(record)
                 self.push(record)
 
-                # TODO: Incoming hop needs not to use sleep, It needs to use hop for sleep time
-                sleeper(self, self.incoming_delay)
+                sleeper(self.incoming_delay, lambda: self.is_running)
                 # Break from loop if program is no longer running
                 if not self.is_running:
                     break

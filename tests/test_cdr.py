@@ -106,7 +106,7 @@ def test_status_quit(api, record, requests_mock, mocker, bad_code):
     api.queue.put(record)
     requests_mock.post(cdr.cdr_url, status_code=bad_code, json={"success": True})
     push_spy = mocker.spy(api, "push_record")
-    running_spy = mocker.spy(api._running, "clear")
+    running_spy = mocker.spy(api.running, "clear")
     api.entrypoint()
 
     assert api.queue.empty()
@@ -130,7 +130,7 @@ def test_unhandled_exception(api, mocker):
     api.queue.put(record)
     mocked = mocker.patch.object(api, "push_record")
     mocked.side_effect = RuntimeError
-    running_spy = mocker.spy(api._running, "clear")
+    running_spy = mocker.spy(api.running, "clear")
     with pytest.raises(RuntimeError):
         api.run()
 

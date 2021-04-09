@@ -1,4 +1,5 @@
 # Standard Lib
+from threading import Event
 import logging
 
 # Third Party
@@ -31,12 +32,12 @@ def test_timeout_decay(mocker: MockerFixture):
         max_timeout = 300
         timeout_decay = 1.5
 
-    class Thread:
-        is_running = True
+    running = Event()
+    running.set()
 
     # Test that timeout decay is working
     mocked = mocker.patch("time.sleep")
-    timeout = utils.Timeout(Settings, Thread)
+    timeout = utils.Timeout(Settings, running)
     assert timeout.value == 3
     for i in [4, 6, 9, 13, 19, 28, 42, 63, 94, 141, 211, 300, 300, 300]:
         timeout.sleep()

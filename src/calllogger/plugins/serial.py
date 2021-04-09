@@ -5,7 +5,7 @@ import abc
 
 # Third party
 import serial
-from sentry_sdk import push_scope, capture_exception
+from sentry_sdk import push_scope, capture_exception, Scope
 
 # Local
 from calllogger.record import CallDataRecord
@@ -49,21 +49,21 @@ class SerialPlugin(BasePlugin):
             self.logger.debug(f"Conection made to serial interface: {self.sserver.port},{self.sserver.baudrate}")
             return True
 
-    def __read(self) -> Union[bytes, None]:
+    def __read(self, scope: Scope) -> Union[bytes, None]:
         """Read in a line from the serial interface."""
         try:
             return self.sserver.readline()
         except serial.SerialException as err:
             # Refresh the serial interface by closing the serial connection
-            capture_exception(err)
+            capture_exception(err, scope=scope)
             self.sserver.close()
             return None
 
-    def __decode(self, raw: bytes) -> str:
+    def __decode(self, scope: Scope, raw: bytes) -> str:
         try:
             return self.decode(raw)
         except Exception as err:
-            capture_exception(err)
+            capture_exception(err, scope=scope)
 
     def decode(self, raw: bytes) -> str:  # pragma: no cover
         """
@@ -75,11 +75,11 @@ class SerialPlugin(BasePlugin):
         """
         return raw.decode("ASCII")
 
-    def __validate(self, decoded_line: str) -> Union[str, bool]:
+    def __validate(self, scope: Scope, decoded_line: str) -> Union[str, bool]:
         try:
             validated = self.validate(decoded_line)
         except Exception as err:
-            capture_exception(err)
+            capture_exception(err, scope=scope)
             return False
         else:
             if validated is False:
@@ -98,12 +98,12 @@ class SerialPlugin(BasePlugin):
         """
         return decoded_line
 
-    def __parse(self, validated_line: str) -> CallDataRecord:
+    def __parse(self, scope: Scope, validated_line: str) -> CallDataRecord:
         try:
             # Parse the line wtih the selected parser
             return self.parse(validated_line)
         except Exception as err:
-            capture_exception(err)
+            capture_exception(err, scope=scope)
 
     @abc.abstractmethod
     def parse(self, validated_line: str) -> CallDataRecord:  # pragma: no cover
@@ -122,6 +122,7 @@ class SerialPlugin(BasePlugin):
         """
         while self.is_running:
             with push_scope() as scope:
+                # TODO: Replace scope.set_extra for serial with plugin settings context
                 scope.set_extra("baudrate", self.baudrate)
                 scope.set_extra("port", self.port)
 
@@ -134,23 +135,23 @@ class SerialPlugin(BasePlugin):
                     self.timeout.reset()
 
                 # Read the raw serial line
-                raw_line = self.__read()
+                raw_line = self.__read(scope)
                 if raw_line is None:
                     continue
 
                 # Decode the serial line
                 scope.set_extra("raw_line", raw_line)
-                decoded_line = self.__decode(raw_line)
+                decoded_line = self.__decode(scope, raw_line)
                 if decoded_line is None:
                     continue
 
                 # Validate the decoded serial line
                 scope.set_extra("decoded_line", decoded_line)
-                validated_line = self.__validate(decoded_line)
+                validated_line = self.__validate(scope, decoded_line)
                 if validated_line is False:
                     continue
 
                 # Parse the serial line and push to the cloud
                 scope.set_extra("validated_line", validated_line)
-                if record := self.__parse(validated_line):
+                if record := self.__parse(scope, validated_line):
                     self.push(record)

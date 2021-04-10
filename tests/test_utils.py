@@ -1,10 +1,10 @@
 # Standard Lib
-from threading import Event
+from datetime import datetime, timezone
 import logging
+import json
 
 # Third Party
 import pytest
-import requests
 from pytest_mock import MockerFixture
 
 # Local
@@ -26,18 +26,22 @@ def test_only_messages(level, expected):
     assert value is expected
 
 
+def test_complex_json():
+    """Test that utils.ComplexEncoder decodes datetime objects."""
+    date = datetime.now().astimezone(timezone.utc)
+    encoded = json.dumps({"date": date}, cls=utils.ComplexEncoder)
+    assert encoded == '{"date": "%s"}' % date.isoformat()
+
+
 def test_timeout_decay(mocker: MockerFixture):
     class Settings:
         timeout = 3
         max_timeout = 300
         timeout_decay = 1.5
 
-    running = Event()
-    running.set()
-
     # Test that timeout decay is working
     mocked = mocker.patch("time.sleep")
-    timeout = utils.Timeout(Settings, running)
+    timeout = utils.Timeout(Settings, lambda: True)
     assert timeout.value == 3
     for i in [4, 6, 9, 13, 19, 28, 42, 63, 94, 141, 211, 300, 300, 300]:
         timeout.sleep()
@@ -50,24 +54,8 @@ def test_timeout_decay(mocker: MockerFixture):
     assert timeout.value == 3
 
 
-def test_decode_response_json():
-    """Test that decode_response returns a full json object."""
-    resp = requests.Response()
-    resp.encoding = "utf8"
-    resp._content = b'{"test": true}'
-
-    # We set limit to 2 here to make sure it has no effect
-    data = utils.decode_response(resp, limit=2)
-    assert data == {"test": True}
-
-
-def test_decode_response_text():
-    """Test that decode_response returns a text with a length limit of 13."""
-    resp = requests.Response()
-    resp.encoding = "utf8"
-    resp._content = b'testdata-testdata-testdata'
-
-    # We use 13 only for testing, normally it's 1,000
-    data = utils.decode_response(resp, limit=13)
-    assert data == "testdata-test"
-    assert len(data) == 13
+def test_sleeper(mocker: MockerFixture):
+    """Test that time.sleep gets called twice as much as the timeout."""
+    mocked = mocker.patch("time.sleep")
+    utils.sleeper(5, lambda: True)
+    assert mocked.call_count == 10

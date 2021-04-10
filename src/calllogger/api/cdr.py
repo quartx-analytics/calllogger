@@ -11,6 +11,9 @@ from sentry_sdk import capture_exception
 from calllogger.api import QuartxAPIHandler
 from calllogger.conf import settings, TokenAuth
 
+# We keep the url here for easier testing
+cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")
+
 
 class CDRWorker(QuartxAPIHandler, Thread):
     """
@@ -29,7 +32,7 @@ class CDRWorker(QuartxAPIHandler, Thread):
         # Request
         self.request = requests.Request(
             method="POST",
-            url=urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/"),
+            url=cdr_url,
             headers={"content-type": "application/json"},
             auth=token,
         )

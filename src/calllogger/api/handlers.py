@@ -56,7 +56,7 @@ class QuartxAPIHandler:
 
     def __init__(self, running: Event, *args, suppress_errors=False, **kwargs):
         super(QuartxAPIHandler, self).__init__(*args, **kwargs)
-        self.timeout = Timeout(settings, running)
+        self.timeout = Timeout(settings, lambda: running.is_set())
         self.suppress_errors = suppress_errors
         self.session = requests.Session()
         self.running = running
@@ -70,18 +70,18 @@ class QuartxAPIHandler:
     def send_request(self, request: requests.Request, json: dict, **kwargs) -> requests.Response:
         """Send request using a request object."""
         prepared_request = request.prepare()
-        with push_scope() as scope:
-            try:
-                # Keep retrying to make the record if request fails
-                while self.running.is_set():
+        try:
+            # Keep retrying to make the record if request fails
+            while self.running.is_set():
+                with push_scope() as scope:
                     resp = self._send_request(scope, prepared_request, json, kwargs)
                     if resp is True:
                         self.timeout.sleep()
                         continue
                     else:
                         return resp
-            finally:
-                self.timeout.reset()
+        finally:
+            self.timeout.reset()
 
     def _send_request(self, scope, request: requests.PreparedRequest, json: dict, kwargs) -> RetryResponse:
         """
@@ -104,6 +104,7 @@ class QuartxAPIHandler:
             request_scope(scope, request)
             scope.set_extra("retry", retry)
             capture_exception(err, scope=scope)
+            err.sentry = True
 
             # Return True if we need to retry, else re-raise the exception
             if retry is True:
@@ -134,7 +135,6 @@ class QuartxAPIHandler:
             logger.warning(str(err))
             return False
 
-    # noinspection PyMethodMayBeStatic
     def status_check(self, status_code) -> bool:
         """
         Check the status of the response,

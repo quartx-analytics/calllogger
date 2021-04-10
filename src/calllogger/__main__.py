@@ -10,10 +10,8 @@ import sentry_sdk
 
 # Local
 from calllogger.conf import settings, TokenAuth
-from calllogger.api.cdr import CDRWorker
-from calllogger.api.info import get_owner_info
 from calllogger.plugins import installed
-from calllogger import __version__
+from calllogger import __version__, api
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +39,15 @@ def get_plugin(selected_plugin: str):
 
 
 def main_loop(plugin) -> int:
+    token_auth = TokenAuth(settings.token)
     queue = Queue(settings.queue_size)
     running = threading.Event()
     running.set()
 
     # Configure sentry
+    user_info = api.get_owner_info(running, token_auth)
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    sentry_sdk.set_user(get_owner_info())
+    sentry_sdk.set_user(user_info)
 
     # Start the plugin thread to monitor for call records
     logger.info("Selected Plugin: %s - %s", plugin.__name__, plugin.__doc__)
@@ -55,8 +55,7 @@ def main_loop(plugin) -> int:
     plugin_thread.start()
 
     # Start the CDR worker to monitor the record queue
-    token_auth = TokenAuth(settings.token)
-    cdr_thread = CDRWorker(queue, running, token_auth)
+    cdr_thread = api.CDRWorker(queue, running, token_auth)
     cdr_thread.start()
 
     # Sinse both threads have the same running event

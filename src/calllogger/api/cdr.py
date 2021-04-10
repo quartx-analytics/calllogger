@@ -1,7 +1,6 @@
 # Standard lib
 from urllib import parse as urlparse
-from threading import Event, Thread
-import logging
+from threading import Thread, Event
 import queue
 
 # Third party
@@ -10,11 +9,7 @@ from sentry_sdk import capture_exception
 
 # Local
 from calllogger.api import QuartxAPIHandler
-from calllogger.exceptions import Quit
 from calllogger.conf import settings, TokenAuth
-
-logger = logging.getLogger(f"{__name__}")
-cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")
 
 
 class CDRWorker(QuartxAPIHandler, Thread):
@@ -29,28 +24,23 @@ class CDRWorker(QuartxAPIHandler, Thread):
 
     def __init__(self, call_queue: queue.Queue, running: Event, token: TokenAuth):
         super().__init__(running, suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
-
-        # Attributes
         self.queue = call_queue
-        self.running = running
 
         # Request
         self.request = requests.Request(
-            method="GET",
-            url=cdr_url,
-            auth=token,
+            method="POST",
+            url=urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/"),
             headers={"content-type": "application/json"},
+            auth=token,
         )
 
     def run(self):
         try:
             self.entrypoint()
-        except Quit:
-            self.running.clear()
         except Exception as err:
             capture_exception(err)
+        finally:
             self.running.clear()
-            raise
 
     def entrypoint(self):
         """Process the call record queue."""

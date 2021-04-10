@@ -1,6 +1,5 @@
 # Standard Lib
 from datetime import datetime
-from threading import Event
 import logging
 import time
 import json
@@ -42,7 +41,7 @@ class Timeout:
     :param running: A Event flag to state if program is still running.
     """
 
-    def __init__(self, settings, running: Event):
+    def __init__(self, settings, running: callable):
         self._settings = settings
         self._timeout = settings.timeout
         self._running = running
@@ -50,7 +49,7 @@ class Timeout:
     def sleep(self):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.info("Retrying in '%d' seconds", self._timeout)
-        sleeper(self._timeout, lambda: self._running.is_set())
+        sleeper(self._timeout, lambda: self._running())
         self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
 
     def reset(self):

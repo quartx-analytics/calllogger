@@ -42,6 +42,9 @@ class CDRWorker(QuartxAPIHandler, Thread):
             self.entrypoint()
         except Exception as err:
             capture_exception(err)
+            return False
+        else:
+            return True
         finally:
             self.running.clear()
 

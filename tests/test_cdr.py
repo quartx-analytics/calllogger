@@ -10,7 +10,7 @@ from requests_mock import Mocker
 # Local
 from calllogger.api import cdr
 from calllogger.record import CallDataRecord
-from calllogger.conf import settings, TokenAuth
+from calllogger.conf import TokenAuth
 
 
 @pytest.fixture
@@ -27,10 +27,9 @@ def record():
 
 @pytest.fixture
 def api(mocker):
-    # Args
     queue = Queue(10)
     running = threading.Event()
-    tokenauth = TokenAuth(settings.token)
+    tokenauth = TokenAuth("token")
     running.set()
 
     # Setup worker and mock running flag so loop will only run once
@@ -44,95 +43,36 @@ def api(mocker):
 def test_empty_queue(api, requests_mock: Mocker):
     """Test that entrypoint don't fail if queue is empty."""
     requests_mock.post(cdr.cdr_url, text="", status_code=201)
-    api.entrypoint()
+    api.run()
 
     assert api.queue.empty()
     assert not requests_mock.called
 
 
-@pytest.mark.parametrize("status_code", [200, 201, 202, 203, 204, 205, 206, 207, 208, 226])
-def test_2xx(api, record, requests_mock, status_code, mocker):
+@pytest.mark.parametrize("status_code", [200, 400])
+def test_ok_with_errors_suppressed(api, record, requests_mock, mocker, status_code):
     """Test that all 2xx status codes work as expected."""
     api.queue.put(record)
     requests_mock.post(cdr.cdr_url, json={"success": True}, status_code=status_code)
-    request_spy = mocker.spy(api, "send_request")
-    api.entrypoint()
+    request_spy = mocker.spy(api, "_send_request")
+    success = api.run()
 
+    assert success
     assert api.queue.empty()
     assert requests_mock.called
     assert request_spy.call_count == 1
 
 
-@pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
-def test_retry_requests(api, record, requests_mock, mocker, bad_code):
-    """Test that the request gets retried on error."""
-    # This is required to allow the loop to run twice
-    mocked = mocker.patch.object(api, "running")
-    mocked.is_set.side_effect = [True, True, True, False]
-
+def test_errors_not_suppressed(api, record, requests_mock, mocker):
+    """Test that all 2xx status codes work as expected."""
+    api.suppress_errors = False
     api.queue.put(record)
-    requests_mock.post(cdr.cdr_url, response_list=[
-        {"status_code": bad_code} if isinstance(bad_code, int) else {"exc": bad_code},
-        {"status_code": 201, "json": {"success": True}},
-    ])
+
+    requests_mock.post(cdr.cdr_url, json={"success": True}, status_code=400)
     request_spy = mocker.spy(api, "_send_request")
-    api.entrypoint()
+    success = api.run()
 
+    assert not success
     assert api.queue.empty()
     assert requests_mock.called
-    assert request_spy.call_count == 2
-
-
-@pytest.mark.parametrize("bad_code", [400, 401])
-def test_no_retry_requests(api, record, requests_mock, mocker, bad_code):
-    """Test that the request"""
-    # This is required to allow the loop to run twice
-    mocked = mocker.patch.object(api, "running")
-    mocked.is_set.side_effect = [True, True, False]
-
-    api.queue.put(record)
-    requests_mock.post(cdr.cdr_url, status_code=bad_code, json={"success": False})
-    push_spy = mocker.spy(api, "send_request")
-    api.entrypoint()
-
-    assert api.queue.empty()
-    assert requests_mock.called
-    assert push_spy.call_count == 1
-
-
-@pytest.mark.parametrize("bad_code", [401, 402, 403])
-def test_status_quit(api, record, requests_mock, mocker, bad_code):
-    """Test that the api quits for authorization failers."""
-    api.queue.put(record)
-    requests_mock.post(cdr.cdr_url, status_code=bad_code, json={"success": True})
-    push_spy = mocker.spy(api, "send_request")
-    running_spy = mocker.spy(api.running, "clear")
-    api.entrypoint()
-
-    assert api.queue.empty()
-    assert requests_mock.called
-    assert push_spy.call_count == 1
-    assert running_spy.called
-
-
-def test_handled_exception(api, requests_mock, mocker):
-    """Test that a python exception is caught and record is ignored."""
-    api.queue.put(record)
-    requests_mock.post(cdr.cdr_url, exc=RuntimeError)
-    push_spy = mocker.spy(api, "send_request")
-    api.entrypoint()
-
-    assert api.queue.empty()
-    assert push_spy.call_count == 1
-
-
-def test_unhandled_exception(api, mocker):
-    api.queue.put(record)
-    mocked = mocker.patch.object(api, "send_request")
-    mocked.side_effect = RuntimeError
-    running_spy = mocker.spy(api.running, "clear")
-    with pytest.raises(RuntimeError):
-        api.entrypoint()
-
-    assert api.queue.empty()
-    assert mocked.call_count == 1
+    assert request_spy.call_count == 1

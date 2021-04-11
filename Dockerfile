@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.2.1
+# syntax = docker/dockerfile:1.2
 FROM python:3.9-alpine
 
 # Add Labels for OCI Image Format Specification

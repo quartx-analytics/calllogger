@@ -90,7 +90,7 @@ def test_retry_with_break(api, requests_mock, mocker):
     api.suppress_errors = True
 
     requests_mock.get(test_url, response_list=[
-        {"status_code": 401},
+        {"status_code": 500},
         {"status_code": 201, "json": {"success": True}},
     ])
     resp = api.make_request(method="GET", url=test_url)

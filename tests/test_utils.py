@@ -29,8 +29,8 @@ def test_only_messages(level, expected):
 def test_complex_json():
     """Test that utils.ComplexEncoder decodes datetime objects."""
     date = datetime.now().astimezone(timezone.utc)
-    encoded = json.dumps({"date": date}, cls=utils.ComplexEncoder)
-    assert encoded == '{"date": "%s"}' % date.isoformat()
+    encoded = json.dumps({"date": date, "data": "data"}, cls=utils.ComplexEncoder)
+    assert encoded == '{"date": "%s", "data": "data"}' % date.isoformat()
 
 
 def test_timeout_decay(mocker: MockerFixture):

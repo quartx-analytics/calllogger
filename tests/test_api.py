@@ -7,7 +7,8 @@ import requests
 import pytest
 
 # Local
-from calllogger.api import handlers
+from calllogger.api import handlers, info
+from calllogger.conf import TokenAuth
 
 test_url = "https://testing.test/test"
 client_error_status = [
@@ -117,3 +118,16 @@ def test_unexpected_errors(api, mocker, error):
     with pytest.raises(RuntimeError):
         api.make_request(method="GET", url=test_url)
     assert mocked.call_count == 1
+
+
+def test_get_owner_info(requests_mock):
+    tokenauth = TokenAuth("token")
+    running = threading.Event()
+    running.set()
+
+    expected_resp = {'id': 1, 'username': 'Test', 'email': 'test@test.com'}
+    mocked_request = requests_mock.get(info.info_url, status_code=200, json=expected_resp)
+    resp = info.get_owner_info(running, tokenauth)
+
+    assert mocked_request.called
+    assert resp == expected_resp

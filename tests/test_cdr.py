@@ -4,7 +4,6 @@ import threading
 
 # Third Party
 import pytest
-import requests
 from requests_mock import Mocker
 
 # Local

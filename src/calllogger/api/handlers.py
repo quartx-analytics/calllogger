@@ -56,7 +56,7 @@ class QuartxAPIHandler:
 
     def __init__(self, running: Event, *args, suppress_errors=False, **kwargs):
         super(QuartxAPIHandler, self).__init__(*args, **kwargs)
-        self.timeout = Timeout(settings, lambda: running.is_set())
+        self.timeout = Timeout(settings, lambda: running.is_set())  # pragma: no branch
         self.suppress_errors = suppress_errors
         self.session = requests.Session()
         self.running = running

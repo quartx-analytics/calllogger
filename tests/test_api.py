@@ -82,6 +82,24 @@ def test_server_network_errors(api, requests_mock, mocker, bad_code):
     assert request_spy.call_count == 2
 
 
+def test_retry_with_break(api, requests_mock, mocker):
+    """Test for server/network errors that can be retried."""
+    mocked = mocker.patch.object(api, "running")
+    mocked.is_set.side_effect = [True, False]
+    request_spy = mocker.spy(api, "_send_request")
+    api.suppress_errors = True
+
+    requests_mock.get(test_url, response_list=[
+        {"status_code": 401},
+        {"status_code": 201, "json": {"success": True}},
+    ])
+    resp = api.make_request(method="GET", url=test_url)
+
+    assert not resp
+    assert requests_mock.called
+    assert request_spy.call_count == 1
+
+
 def client_errors(api, requests_mock, mocker, bad_code, cleard):
     mocked = mocker.patch.object(api, "running")
     mocked.is_set.side_effect = [True, False]

@@ -63,8 +63,9 @@ class BasePlugin(Thread, metaclass=PluginSettings):
 
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""
-        logger.debug(record.data)
-        self._queue.put(record.data)
+        raw_data = record.__dict__
+        self._queue.put(raw_data)
+        logger.debug(raw_data)
 
     @property
     def is_running(self) -> bool:

@@ -21,7 +21,7 @@ def record():
     record.ext = 102
     record.ring = 10
     record.duration = 0
-    return record.data
+    return record.__dict__
 
 
 @pytest.fixture

@@ -32,18 +32,15 @@ class SerialPlugin(BasePlugin):
         super(SerialPlugin, self).__init__()
         self.sserver = serial.Serial()
 
-    def __open(self) -> bool:
+    def __open(self, scope: Scope) -> bool:
         """Open a connection to the serial interface, returning True if successful else False."""
         try:
             # We set the port & rate here to allow them to be changed on the fly
             self.sserver.baudrate = self.baudrate
             self.sserver.port = self.port
             self.sserver.open()
-        except serial.SerialException:
-            self.logger.error("Failed to open serial connection", extra={
-                "baudrate": self.sserver.baudrate,
-                "port": self.sserver.port,
-            })
+        except serial.SerialException as err:
+            capture_exception(err, scope=scope)
             return False
         else:
             self.logger.debug(f"Conection made to serial interface: {self.sserver.port},{self.sserver.baudrate}")
@@ -54,8 +51,8 @@ class SerialPlugin(BasePlugin):
         try:
             return self.sserver.readline()
         except serial.SerialException as err:
-            # Refresh the serial interface by closing the serial connection
             capture_exception(err, scope=scope)
+            # Refresh the serial interface by closing the serial connection
             self.sserver.close()
             return None
 
@@ -122,12 +119,13 @@ class SerialPlugin(BasePlugin):
         """
         while self.is_running:
             with push_scope() as scope:
-                # TODO: Replace scope.set_extra for serial with plugin settings context
-                scope.set_extra("baudrate", self.baudrate)
-                scope.set_extra("port", self.port)
+                scope.set_context("Serial Interface", {
+                    "baudrate": self.baudrate,
+                    "port": self.port,
+                })
 
                 # Open serial port connection
-                if not (self.sserver.is_open or self.__open()):
+                if not (self.sserver.is_open or self.__open(scope)):
                     # Sleep for a while before reattempting connection
                     self.timeout.sleep()
                     continue

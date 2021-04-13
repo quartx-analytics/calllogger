@@ -41,7 +41,7 @@ class BasePlugin(Thread, metaclass=PluginSettings):
         super(BasePlugin, self).__init__(name=f"Thread-{self.__class__.__name__}")
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
-        self.timeout = Timeout(settings, lambda: self._running.is_set())
+        self.timeout = Timeout(settings, lambda: self._running.is_set())  # pragma: no branch
 
     def run(self):
         try:
@@ -49,10 +49,11 @@ class BasePlugin(Thread, metaclass=PluginSettings):
         except Exception as err:
             capture_exception(err)
             self._running.clear()
-            # TODO: See whats the better option to do here, quit or try again
-            raise
+            return False
+        else:
+            return True
 
-    def log(self, msg: str, *args, lvl: int = logging.INFO, **kwargs) -> NoReturn:
+    def log(self, msg, *args, lvl: int = logging.INFO, **kwargs) -> NoReturn:
         """
         Send log message to console/server.
 
@@ -65,7 +66,7 @@ class BasePlugin(Thread, metaclass=PluginSettings):
         """Send a call log record to the call monitoring API."""
         raw_data = record.__dict__
         self._queue.put(raw_data)
-        logger.debug(raw_data)
+        self.log(raw_data, lvl=logging.DEBUG)
 
     @property
     def is_running(self) -> bool:

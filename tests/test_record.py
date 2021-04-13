@@ -36,6 +36,13 @@ def test_date_str(record):
     assert record.date == date
 
 
+@pytest.mark.parametrize("date", ["", " "])
+def test_invalid_date(record, date):
+    before = record.date
+    record.date_str(date)
+    assert record.date == before
+
+
 @pytest.mark.parametrize("number", ["0876159281", "066715325", "", None])
 def test_number(record, number):
     record.number = number

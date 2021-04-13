@@ -54,7 +54,6 @@ class SerialPlugin(BasePlugin):
             capture_exception(err, scope=scope)
             # Refresh the serial interface by closing the serial connection
             self.sserver.close()
-            return None
 
     def __decode(self, scope: Scope, raw: bytes) -> str:
         try:
@@ -125,6 +124,7 @@ class SerialPlugin(BasePlugin):
                 })
 
                 # Open serial port connection
+                print("is open", self.sserver.is_open)
                 if not (self.sserver.is_open or self.__open(scope)):
                     # Sleep for a while before reattempting connection
                     self.timeout.sleep()

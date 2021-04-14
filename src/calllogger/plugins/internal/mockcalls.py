@@ -72,6 +72,24 @@ class MockCalls(BasePlugin):
     def rand_duration(self) -> int:
         return 0 if random.randrange(self.answered_chance) == 0 else random.randrange(0, self.max_duration)
 
+    # noinspection PyMethodMayBeStatic
+    def add_ext_name(self, record):
+        """Add extension name if exists."""
+        if name := ext_names.get(record.ext):
+            record.ext_name = name
+
+    # noinspection PyMethodMayBeStatic
+    def add_contact_name(self, record):
+        """Add contact name if exists."""
+        if name := callset[record.number]:
+            record.contact_name = name
+
+    def push(self, record: Record) -> NoReturn:
+        """Add ext/contact names if available before pushing."""
+        self.add_contact_name(record)
+        self.add_ext_name(record)
+        super().push(record)
+
     def record(self, call_type: int) -> Record:
         record = Record(call_type=call_type)
         record.number = self.rand_number()
@@ -79,11 +97,6 @@ class MockCalls(BasePlugin):
         record.ext = self.rand_ext()
         record.ring = self.rand_ring()
         record.duration = self.rand_duration()
-
-        # Add name if one exists
-        if name := callset[record.number]:
-            record.contact_name = name
-
         return record
 
     def entrypoint(self) -> NoReturn:
@@ -99,66 +112,56 @@ class MockCalls(BasePlugin):
                 sleeper(self.sleep, lambda: self.is_running)
 
     def outgoing(self):
+        # Push the normal outgoing record
         record = self.record(call_type=Record.OUTGOING)
         self.push(record)
 
+        # Randomly add a transfered call
         if random.randrange(self.transferred_chance) == 0:
-            # Randomly choose internal or external transfer
-            record.ext = self.rand_ext()
-            if random.randrange(2):
-                record.call_type = Record.OUTGOING_TRANSFERRED_INT
-            else:
-                record.call_type = Record.OUTGOING_TRANSFERRED_EXT
-            self.push(record)
+            self.transfered_call(record)
 
     def received(self):
         record = self.record(call_type=Record.RECEIVED)
-        self.add_ext_name(record)
 
         # If we are sleeping before the next record
         # We want to add the Incoming records
         if self.sleep:
-            # Use the ring time to select the delay
-            # and number of hops before call ends
-            for hop in range(int(record.ring / 4)):
-                record.call_type = Record.INCOMING
-                record.ext = self.rand_ext()
-                self.add_ext_name(record)
-                self.push(record)
-
-                sleeper(self.incoming_delay, lambda: self.is_running)
-                # Break from loop if program is no longer running
-                if not self.is_running:
-                    break
-
-        # Mock an extension with auto fowarding enabled
-        if record.ext == self.ext_forward:
-            record.call_type = Record.RECEIVED_FORWARDED
-            self.push(record)
+            self.incoming(record)
 
         # Mock a transferred call
-        elif random.randrange(self.transferred_chance) == 0:
+        if random.randrange(self.transferred_chance) == 0:
             record.call_type = Record.RECEIVED
             self.push(record)
-
-            # Randomly choose internal or external transfer
-            record.ext = self.rand_ext()
-            if random.randrange(2):
-                record.call_type = Record.RECEIVED_TRANSFERRED_INT
-            else:
-                record.call_type = Record.RECEIVED_TRANSFERRED_EXT
-            self.push(record)
+            self.transfered_call(record)
         else:
-            record.call_type = Record.RECEIVED
+            # Mock a forwarded call if ext is setup for auto forwarding, else normal received call
+            record.call_type = Record.RECEIVED_FORWARDED if record.ext == self.ext_forward else Record.RECEIVED
             self.push(record)
 
-    # noinspection PyMethodMayBeStatic
-    def add_ext_name(self, record):
-        """Add extension name if exists."""
-        if name := ext_names.get(record.ext):
-            record.ext_name = name
+    def incoming(self, record):
+        # Use the ring time to select the delay
+        # and number of hops before call ends
+        for hop in range(int(record.ring / 4)):
+            record.call_type = Record.INCOMING
+            record.ext = self.rand_ext()
+            self.push(record)
+
+            sleeper(self.incoming_delay, lambda: self.is_running)
+            # Break from loop if program is no longer running
+            if not self.is_running:
+                break
+
+    def transfered_call(self, record: Record):
+        """Randomly choose between internal or external."""
+        if random.randrange(2):
+            record.call_type = Record.OUTGOING_TRANSFERRED_INT
+        else:
+            record.call_type = Record.OUTGOING_TRANSFERRED_EXT
+
+        record.ext = self.rand_ext()
+        self.push(record)
 
 
 # TODO: Add support for OUTGOING_FORWARDED and OUTGOING_VIA_FORWARDED
 # TODO: Add support for simulating auto attendant
-# TODO: Add support for answering machines.
+# TODO: Add support for answering machines

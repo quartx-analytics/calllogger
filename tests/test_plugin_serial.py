@@ -63,7 +63,7 @@ def test_open_serial_exception(mock_serial, mock_plugin, mocker):
     assert not mock_serial.is_open
 
 
-def test_read_serial_line(mock_serial, mock_plugin):
+def test_read_serial_line_exception(mock_serial, mock_plugin):
     mock_serial.readline.side_effect = serial.SerialException
     mock_plugin.run()
 
@@ -88,7 +88,6 @@ def test_failed_validate(mock_serial, mock_plugin, mocker):
 
     assert mock_serial.readline.called
     assert mock_serial.is_open
-    assert not mock_serial.close.called
 
 
 def test_invalid_parse_object(mock_serial, mock_plugin, mocker):
@@ -98,4 +97,3 @@ def test_invalid_parse_object(mock_serial, mock_plugin, mocker):
 
     assert mock_serial.readline.called
     assert mock_serial.is_open
-    assert not mock_serial.close.called

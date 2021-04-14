@@ -88,6 +88,10 @@ class SerialPlugin(BasePlugin):
         while self.is_running:
             with push_scope() as scope:
                 try:
+                    # Ensure that the serial connection is open
+                    if not self.sserver.is_open:
+                        self.__open()
+
                     self.monitor_interface(scope)
                 except Exception as err:
                     scope.set_context("Serial Interface", {
@@ -99,10 +103,6 @@ class SerialPlugin(BasePlugin):
                     self.timeout.reset()
 
     def monitor_interface(self, scope: Scope):
-        # Ensure that the serial connection is open
-        if not self.sserver.is_open:
-            self.__open()
-
         # Read the raw serial line
         raw_line = self.__read()
         scope.set_extra("raw_line", repr(raw_line))

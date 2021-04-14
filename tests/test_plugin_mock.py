@@ -33,7 +33,7 @@ def mock_plugin(mocker):
 def test_basic_useage(mock_plugin: MockCalls, mocker, transfer, direction, sleep, transfer_direction):
     """Test that all sorts of mocked call types work and DO not raise an exception."""
     # Change direction param to force select outgoing
-    mocker.patch.object(random, "randrange", side_effect=[lambda: transfer, lambda: transfer_direction])
+    mocker.patch.object(random, "randrange", return_value=transfer)  #, transfer_direction])
     mock_plugin.direction = direction  # Force direction
     mock_plugin.sleep = sleep  # Force direction
     mock_plugin.run()

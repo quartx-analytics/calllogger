@@ -24,10 +24,13 @@ def mock_plugin(mocker):
     yield plugin
 
 
+@pytest.mark.parametrize("sleep", [False, True])
 @pytest.mark.parametrize("direction", [OUTGOING, RECEIVED])
 @pytest.mark.parametrize("transfer", [TRANSFER_YES, TRANSFER_NO])
-def test_basic_useage(mock_plugin: MockCalls, mocker, transfer, direction):
+def test_basic_useage(mock_plugin: MockCalls, mocker, transfer, direction, sleep):
+    """Test that all sorts of mocked call types work and so not raise an exception."""
     # Change direction param to force select outgoing
     mocker.patch.object(random, "randrange", return_value=transfer)
     mock_plugin.direction = direction  # Force direction
+    mock_plugin.sleep = sleep  # Force direction
     mock_plugin.run()

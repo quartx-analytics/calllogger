@@ -1,5 +1,6 @@
 # Standard Lib
 import threading
+import queue
 import time
 
 # Third Party
@@ -15,6 +16,7 @@ from calllogger.record import CallDataRecord
 class TestPlugin(SerialPlugin):
     def __init__(self):
         super().__init__()
+        self._queue = queue.Queue()
         self._running = running = threading.Event()
         running.set()
 

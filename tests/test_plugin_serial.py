@@ -8,6 +8,7 @@ import serial
 
 # Local
 from calllogger.plugins import SerialPlugin
+from calllogger.record import CallDataRecord
 
 
 # noinspection PyAbstractClass
@@ -18,7 +19,9 @@ class TestPlugin(SerialPlugin):
         running.set()
 
     def parse(self, validated_line):
-        pass
+        record = CallDataRecord(2)
+        record.number = "+353876185584"
+        return record
 
 
 @pytest.fixture
@@ -35,7 +38,7 @@ def mock_serial(mocker):
     # By default the serial interface will be closed until open is called
     mocked.return_value.open.side_effect = open_on_request
     mocked.return_value.close.side_effect = close_request
-    mocked.return_value.configure_mock(is_open=False)
+    mocked.return_value.configure_mock(is_open=True)
     yield mocked.return_value
 
 
@@ -51,6 +54,7 @@ def mock_plugin(mocker):
 def test_open_serial_exception(mock_serial, mock_plugin, mocker):
     mock_serial.open.side_effect = serial.SerialException
     timeout = mocker.spy(mock_plugin.timeout, "sleep")
+    mock_serial.configure_mock(is_open=False)
     mock_plugin.run()
 
     assert timeout.called
@@ -64,3 +68,32 @@ def test_read_serial_line(mock_serial, mock_plugin):
     assert mock_serial.readline.called
     assert not mock_serial.is_open
     assert mock_serial.close.called
+
+
+def test_dateline(mock_serial, mock_plugin):
+    mock_serial.readline.return_value = b"raw data line"
+    mock_plugin.run()
+
+    assert mock_serial.readline.called
+    assert mock_serial.is_open
+    assert not mock_serial.close.called
+
+
+def test_failed_validate(mock_serial, mock_plugin, mocker):
+    mock_serial.readline.return_value = b"raw data line"
+    mocker.patch.object(mock_plugin, "validate", return_value=False)
+    mock_plugin.run()
+
+    assert mock_serial.readline.called
+    assert mock_serial.is_open
+    assert not mock_serial.close.called
+
+
+def test_invalid_parse_object(mock_serial, mock_plugin, mocker):
+    mock_serial.readline.return_value = b"raw data line"
+    mocker.patch.object(mock_plugin, "parse", return_value=False)
+    mock_plugin.run()
+
+    assert mock_serial.readline.called
+    assert mock_serial.is_open
+    assert not mock_serial.close.called

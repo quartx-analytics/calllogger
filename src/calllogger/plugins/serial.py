@@ -1,6 +1,5 @@
 # Standard library
 from typing import NoReturn, Union
-import logging
 import abc
 
 # Third party
@@ -10,9 +9,6 @@ from sentry_sdk import push_scope, capture_exception, Scope
 # Local
 from calllogger.record import CallDataRecord
 from calllogger.plugins.base import BasePlugin
-
-logger = logging.getLogger(__name__)
-installed_plugins = {}
 
 
 # noinspection PyMethodMayBeStatic
@@ -32,36 +28,27 @@ class SerialPlugin(BasePlugin):
         super(SerialPlugin, self).__init__()
         self.sserver = serial.Serial()
 
-    def __open(self, scope: Scope) -> bool:
+    def __open(self):
         """Open a connection to the serial interface, returning True if successful else False."""
         try:
-            # We set the port & rate here to allow them to be changed on the fly
             self.sserver.baudrate = self.baudrate
             self.sserver.port = self.port
             self.sserver.open()
-        except serial.SerialException as err:
-            capture_exception(err, scope=scope)
-            return False
-        else:
-            self.logger.debug(f"Conection made to serial interface: {self.sserver.port},{self.sserver.baudrate}")
-            return True
+        except Exception:
+            self.timeout.sleep()
+            self.sserver.close()
+            raise
 
-    def __read(self, scope: Scope) -> Union[bytes, None]:
+    def __read(self) -> bytes:
         """Read in a line from the serial interface."""
         try:
             return self.sserver.readline()
-        except serial.SerialException as err:
-            capture_exception(err, scope=scope)
-            # Refresh the serial interface by closing the serial connection
+        except Exception:
+            self.timeout.sleep()
             self.sserver.close()
+            raise
 
-    def __decode(self, scope: Scope, raw: bytes) -> str:
-        try:
-            return self.decode(raw)
-        except Exception as err:
-            capture_exception(err, scope=scope)
-
-    def decode(self, raw: bytes) -> str:  # pragma: no cover
+    def decode(self, raw: bytes) -> str:
         """
         Decode the serial line into unicode using the ASCII encoding.
         Overide this method to handel the decoding of the serial data with a different encoding.
@@ -71,35 +58,17 @@ class SerialPlugin(BasePlugin):
         """
         return raw.decode("ASCII")
 
-    def __validate(self, scope: Scope, decoded_line: str) -> Union[str, bool]:
-        try:
-            validated = self.validate(decoded_line)
-        except Exception as err:
-            capture_exception(err, scope=scope)
-            return False
-        else:
-            if validated is False:
-                self.logger.error("Serial line is invalid")
-            return validated
-
-    def validate(self, decoded_line: str) -> Union[str, bool]:  # pragma: no cover
+    def validate(self, decoded_line: str) -> Union[str, bool]:
         """
         Overide this method if you wish to validate the serial line.
 
         You can use this method to check if serial line is the
         correct length or that it's not empty after running strip().
 
-        :param str decoded_line: The raw data line from the serial interface.
+        :param str decoded_line: The decoded data line from the serial interface.
         :returns: The validated serial line, or False if validation failed.
         """
         return decoded_line
-
-    def __parse(self, scope: Scope, validated_line: str) -> CallDataRecord:
-        try:
-            # Parse the line wtih the selected parser
-            return self.parse(validated_line)
-        except Exception as err:
-            capture_exception(err, scope=scope)
 
     @abc.abstractmethod
     def parse(self, validated_line: str) -> CallDataRecord:  # pragma: no cover
@@ -118,38 +87,38 @@ class SerialPlugin(BasePlugin):
         """
         while self.is_running:
             with push_scope() as scope:
-                scope.set_context("Serial Interface", {
-                    "baudrate": self.baudrate,
-                    "port": self.port,
-                })
-
-                # Open serial port connection
-                print("is open", self.sserver.is_open)
-                if not (self.sserver.is_open or self.__open(scope)):
-                    # Sleep for a while before reattempting connection
-                    self.timeout.sleep()
-                    continue
+                try:
+                    self.monitor_interface(scope)
+                except Exception as err:
+                    scope.set_context("Serial Interface", {
+                        "baudrate": self.baudrate,
+                        "port": self.port,
+                    })
+                    capture_exception(err, scope=scope)
                 else:
                     self.timeout.reset()
 
-                # Read the raw serial line
-                raw_line = self.__read(scope)
-                if raw_line is None:
-                    continue
+    def monitor_interface(self, scope: Scope):
+        # Ensure that the serial connection is open
+        if not self.sserver.is_open:
+            self.__open()
 
-                # Decode the serial line
-                scope.set_extra("raw_line", raw_line)
-                decoded_line = self.__decode(scope, raw_line)
-                if decoded_line is None:
-                    continue
+        # Read the raw serial line
+        raw_line = self.__read()
+        scope.set_extra("raw_line", repr(raw_line))
 
-                # Validate the decoded serial line
-                scope.set_extra("decoded_line", decoded_line)
-                validated_line = self.__validate(scope, decoded_line)
-                if validated_line is False:
-                    continue
+        # Decode the serial line
+        decoded_line = self.decode(raw_line)
+        scope.set_extra("decoded_line", decoded_line)
 
-                # Parse the serial line and push to the cloud
-                scope.set_extra("validated_line", validated_line)
-                if record := self.__parse(scope, validated_line):
-                    self.push(record)
+        # Validate the decoded serial line
+        if validated_line := self.validate(decoded_line):
+            scope.set_extra("validated_line", validated_line)
+
+            # Parse the serial line and push to the cloud
+            if record := self.parse(validated_line):
+                self.push(record)
+            else:
+                self.logger.error("Non valid data returned from parser")
+        else:
+            self.logger.error("Serial line is invalid")

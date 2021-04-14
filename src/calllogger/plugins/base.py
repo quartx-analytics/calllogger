@@ -53,20 +53,11 @@ class BasePlugin(Thread, metaclass=PluginSettings):
         else:
             return True
 
-    def log(self, msg, *args, lvl: int = logging.INFO, **kwargs) -> NoReturn:
-        """
-        Send log message to console/server.
-
-        :param msg: The log message.
-        :param lvl: The logging level, default to INFO.
-        """
-        self.logger.log(lvl, msg, *args, **kwargs)
-
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""
         raw_data = record.__dict__
         self._queue.put(raw_data)
-        self.log(raw_data, lvl=logging.DEBUG)
+        self.logger.debug(raw_data)
 
     @property
     def is_running(self) -> bool:

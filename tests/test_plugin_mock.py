@@ -6,7 +6,6 @@ import pytest
 
 # Local
 from calllogger.plugins import MockCalls
-from calllogger.record import CallDataRecord
 from .utils import call_plugin
 
 
@@ -21,5 +20,12 @@ def mock_plugin(mocker):
 
 def test_outgoing(mock_plugin: MockCalls):
     # Change direction param to force select outgoing
+    mock_plugin.direction = 0
+    mock_plugin.run()
+
+
+def test_outgoing_transferred(mock_plugin: MockCalls):
+    # Change direction param to force select outgoing
+    mock_plugin.transferred_chance = 0
     mock_plugin.direction = 0
     mock_plugin.run()

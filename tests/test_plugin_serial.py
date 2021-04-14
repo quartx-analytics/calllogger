@@ -1,6 +1,4 @@
 # Standard Lib
-import threading
-import queue
 import time
 
 # Third Party
@@ -10,16 +8,11 @@ import serial
 # Local
 from calllogger.plugins import SerialPlugin
 from calllogger.record import CallDataRecord
+from .utils import call_plugin
 
 
 # noinspection PyAbstractClass
 class TestPlugin(SerialPlugin):
-    def __init__(self):
-        super().__init__()
-        self._queue = queue.Queue()
-        self._running = running = threading.Event()
-        running.set()
-
     def parse(self, validated_line):
         record = CallDataRecord(2)
         record.number = "+353876185584"
@@ -46,7 +39,7 @@ def mock_serial(mocker):
 
 @pytest.fixture
 def mock_plugin(mocker):
-    plugin = TestPlugin()
+    plugin = call_plugin(TestPlugin)
     mocked_runner = mocker.patch.object(plugin, "_running")
     mocked_runner.is_set.side_effect = [True, False]
     mocker.patch.object(time, "sleep")

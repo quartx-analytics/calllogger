@@ -1,4 +1,5 @@
 # Standard Lib
+import random
 import time
 
 # Third Party
@@ -18,14 +19,15 @@ def mock_plugin(mocker):
     yield plugin
 
 
-def test_outgoing(mock_plugin: MockCalls):
+def test_outgoing(mock_plugin: MockCalls, mocker):
     # Change direction param to force select outgoing
-    mock_plugin.direction = 0
+    mocker.patch.object(random, "randrange", return_value=1)
+    mock_plugin.direction = 0  # Force outgoing
     mock_plugin.run()
 
 
-def test_outgoing_transferred(mock_plugin: MockCalls):
+def test_outgoing_transferred(mock_plugin: MockCalls, mocker):
     # Change direction param to force select outgoing
-    mock_plugin.transferred_chance = 0
-    mock_plugin.direction = 0
+    mocker.patch.object(random, "randrange", return_value=0)
+    mock_plugin.direction = 0  # Force outgoing
     mock_plugin.run()

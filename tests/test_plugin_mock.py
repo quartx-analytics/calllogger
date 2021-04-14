@@ -9,6 +9,11 @@ import pytest
 from calllogger.plugins import MockCalls
 from .utils import call_plugin
 
+TRANSFER_YES = 0
+TRANSFER_NO = 1
+OUTGOING = 0
+RECEIVED = 1
+
 
 @pytest.fixture
 def mock_plugin(mocker):
@@ -19,15 +24,10 @@ def mock_plugin(mocker):
     yield plugin
 
 
-def test_outgoing(mock_plugin: MockCalls, mocker):
+@pytest.mark.parametrize("direction", [OUTGOING, RECEIVED])
+@pytest.mark.parametrize("transfer", [TRANSFER_YES, TRANSFER_NO])
+def test_basic_useage(mock_plugin: MockCalls, mocker, transfer, direction):
     # Change direction param to force select outgoing
-    mocker.patch.object(random, "randrange", return_value=1)
-    mock_plugin.direction = 0  # Force outgoing
-    mock_plugin.run()
-
-
-def test_outgoing_transferred(mock_plugin: MockCalls, mocker):
-    # Change direction param to force select outgoing
-    mocker.patch.object(random, "randrange", return_value=0)
-    mock_plugin.direction = 0  # Force outgoing
+    mocker.patch.object(random, "randrange", return_value=transfer)
+    mock_plugin.direction = direction  # Force direction
     mock_plugin.run()

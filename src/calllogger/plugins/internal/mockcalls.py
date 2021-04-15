@@ -130,7 +130,6 @@ class MockCalls(BasePlugin):
 
         # Mock a transferred call
         if random.randrange(self.transferred_chance) == 0:
-            print("fuck")
             record.call_type = Record.RECEIVED
             self.push(record)
             self.transfered_call(record)

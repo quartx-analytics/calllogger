@@ -28,8 +28,10 @@ def mock_plugin(mocker):
 
 @pytest.mark.parametrize("sleep", [False, True])
 @pytest.mark.parametrize("direction", [OUTGOING, RECEIVED])
-def test_basic_useage(mock_plugin: MockCalls, direction, sleep):
+@pytest.mark.parametrize("transfer", [TRANSFER_YES, TRANSFER_NO])
+def test_basic_useage(mock_plugin: MockCalls, transfer, direction, sleep):
     """Test that all sorts of mocked call types work and DO not raise an exception."""
+    mock_plugin.transferred_chance = transfer
     mock_plugin.direction = direction
     mock_plugin.sleep = sleep
     mock_plugin.run()

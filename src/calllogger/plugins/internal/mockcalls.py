@@ -117,7 +117,7 @@ class MockCalls(BasePlugin):
         self.push(record)
 
         # Randomly add a transfered call
-        if random.randrange(self.transferred_chance) == 0:
+        if self.transferred_chance and random.randrange(self.transferred_chance) == 0:
             self.transfered_call(record)
 
     def received(self):
@@ -129,7 +129,7 @@ class MockCalls(BasePlugin):
             self.incoming(record)
 
         # Mock a transferred call
-        if random.randrange(self.transferred_chance) == 0:
+        if self.transferred_chance and random.randrange(self.transferred_chance) == 0:
             record.call_type = Record.RECEIVED
             self.push(record)
             self.transfered_call(record)

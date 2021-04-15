@@ -9,8 +9,8 @@ import pytest
 from calllogger.plugins import MockCalls
 from .utils import call_plugin
 
-TRANSFER_YES = 0
-TRANSFER_NO = 1
+TRANSFER_YES = 1
+TRANSFER_NO = 0
 TRANSFER_EXT = 0
 TRANSFER_INT = 1
 OUTGOING = 0

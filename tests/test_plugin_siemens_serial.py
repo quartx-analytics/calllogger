@@ -94,12 +94,12 @@ def mock_serial(mocker):
 
 
 @pytest.mark.parametrize("raw_line", test_data.strip().split(b"\n"))
-def test_serial_parser(mock_plugin: siemens_serial.SiemensHipathSerial, mock_serial, mocker, raw_line):
+def test_serial_parser(mock_serial, mock_plugin: siemens_serial.SiemensHipathSerial, mocker, raw_line):
     """Test that all sorts of mocked call types work and DO not raise an exception."""
     mock_serial.readline.return_value = raw_line
     spy_push = mocker.patch.object(mock_plugin, "push")
     successful = mock_plugin.run()
 
     assert successful
-    # assert spy_push.called
-    # assert mock_serial.readline.called
+    assert spy_push.called
+    assert mock_serial.readline.called

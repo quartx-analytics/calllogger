@@ -70,13 +70,15 @@ def main_loop(plugin) -> int:
         return 130
 
 
+# Entrypoint: calllogger
 def monitor() -> int:
     """Normal logger that calls the users preferred plugin."""
     plugin = get_plugin(settings.plugin)
     return main_loop(plugin)
 
 
-def mocker() -> int:
+# Entrypoint: calllogger-mock
+def mockcalls() -> int:
     """Force use of the mock logger."""
     plugin = get_plugin("MockCalls")
     return main_loop(plugin)
@@ -84,6 +86,6 @@ def mocker() -> int:
 
 if __name__ == "__main__":
     # Normally this program will be called from an entrypoint
-    # So we will force use of the mock plugin when directly called
-    exit_code = mocker()
+    # So we will force use of the mock plugin when called directly
+    exit_code = mockcalls()
     sys.exit(exit_code)

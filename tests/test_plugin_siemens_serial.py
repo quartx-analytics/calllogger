@@ -4,10 +4,11 @@ import serial
 
 # Local
 from calllogger.plugins.internal import siemens_serial
+from calllogger.record import CallDataRecord
 from .utils import call_plugin
 
 
-test_data = b"""
+good_lines = b"""
 10.04.1923:19:06  2   104     00:00:0500441619251900                       2
 10.04.1923:28:01  2      00:0100:00:000061393038625                        2
 10.04.1923:28:01  2      00:0100:00:000061393038625                        2
@@ -62,7 +63,86 @@ test_data = b"""
 15.12.0013:46:18  4    1600:50        0230298007252                        1
 15.12.0013:49:28  4    16     00:00:0002317324856                          2
 01.01.0000:00:00  8                                                     23 2
-"""
+31.01.2115:23:44  9   500             353877629926                         0
+31.01.2115:23:49  9   250             353877629926                         0
+31.01.2115:23:58  9   25000:0500:00:07353877629926                         1
+31.01.2115:24:25  9   110     00:00:26353877629926                        35
+31.01.2115:24:35  9   223     00:00:10353877629926                        35
+31.01.2115:24:51  9   500             353877629926                         0
+31.01.2115:24:57  9   251             353877629926                         0
+31.01.2115:25:04  9   25100:0500:00:07353877629926                         1
+31.01.2115:25:43  5   110     00:00:130857739075                           2
+31.01.2115:26:22  5   110     00:00:080857739075                           2
+31.01.2115:26:22  9   110     00:01:17353877629926                        35
+31.01.2115:26:38  5   110     00:00:150857739075                          38
+31.01.2115:26:39  9   110     00:00:16353877629926                        37
+31.01.2115:28:21  9   500             353877629926                         0
+31.01.2115:28:27  9   250             353877629926                         0
+31.01.2115:28:34  9   25000:0500:00:06353877629926                         1
+31.01.2115:29:29  5   110     00:00:300857739075                           2
+31.01.2115:29:29  9   110     00:00:55353877629926                        35
+31.01.2115:29:42  5   110     00:00:120857739075                          38
+31.01.2115:29:42  9   110     00:00:12353877629926                        37
+31.01.2115:34:58  5   110     00:00:140857739075                           2
+31.01.2115:35:09  5   223     00:00:110857739075                          36
+31.01.2115:37:45  9   500             353877629926                         0
+31.01.2115:37:50  9   251             353877629926                         0
+31.01.2115:37:58  9   25100:0500:00:07353877629926                         1
+31.01.2115:38:17  9   110     00:00:18353877629926                        35
+31.01.2115:38:20  9   117     00:00:03353877629926                        35
+31.01.2115:39:41 16   11000:0800:00:0002976570                             2
+31.01.2115:40:53  5   110     00:00:320877629926                           2
+31.01.2115:41:52  5   110     00:00:190877629926                           2
+31.01.2115:41:57  5   117     00:00:050877629926                          36
+31.01.2115:50:41  5   500                                                  0
+31.01.2115:50:47  5   250                                                  0
+31.01.2115:50:58  5   25000:0500:00:10                                     1
+31.01.2115:51:04  5   110     00:00:06                                    35
+31.01.2116:04:14  9   500             353877629926                         0
+31.01.2116:04:15  9   50000:0100:00:00353877629926                         1
+31.01.2116:04:30  9   500             353877629926                         0
+31.01.2116:04:35  9   250             353877629926                         0
+31.01.2116:04:52  9   25000:0500:00:16353877629926                         1
+31.01.2116:04:56  9   117     00:00:04353877629926                        35
+31.01.2116:06:20  9   500             353877629926                         0
+31.01.2116:06:25  9   251             353877629926                         0
+31.01.2116:06:43  5   110     00:00:010857739075                           9
+31.01.2116:06:43  9   25100:0500:00:16353877629926                         1
+31.01.2116:06:59  5   110     00:00:160857739075                          39
+31.01.2116:06:59  9   251     00:00:16353877629926                        37
+31.01.2116:08:16  9   500             353877629926                         0
+31.01.2116:08:21  9   250             353877629926                         0
+31.01.2116:08:39  6   110     00:00:010857739085                           9
+31.01.2116:08:39  9   25000:0500:00:16353877629926                         1
+31.01.2116:08:41  6   110     00:00:020857739085                          39
+31.01.2116:08:41  9   250     00:00:02353877629926                        37
+31.01.2116:09:07  9   500             353877629926                         0
+31.01.2116:09:13  9   251             353877629926                         0
+31.01.2116:09:30  6   110     00:00:010857739075                           9
+31.01.2116:09:30  9   25100:0500:00:16353877629926                         1
+31.01.2116:09:47  6   110     00:00:170857739075                          39
+31.01.2116:09:48  9   251     00:00:17353877629926                        37
+31.01.2116:22:13  9   500             353877629926                         0
+31.01.2116:22:14  9   50000:0100:00:00353877629926                         1
+31.01.2116:22:34  9   500             353877629926                         0
+31.01.2116:22:39  9   250             353877629926                         0
+31.01.2116:22:56  5   110     00:00:010857739075                           9
+31.01.2116:22:56  9   25000:0500:00:16353877629926                         1
+31.01.2116:23:12  5   110     00:00:150857739075                          39
+31.01.2116:23:12  9   250     00:00:15353877629926                        37
+31.01.2116:25:18  9   500             353877629926                         0
+31.01.2116:25:23  9   251             353877629926                         0
+31.01.2116:25:30  9   25100:0500:00:05353877629926                         1
+31.01.2116:25:56  5   110     00:00:090857739075                           2
+31.01.2116:26:37  5   110     00:00:080857739075                           2
+31.01.2116:26:37  9   110     00:01:07353877629926                        35
+31.01.2116:26:39  5   110     00:00:020857739075                          38
+31.01.2116:26:39  9   110     00:00:02353877629926                        37
+31.01.2115:23:44  9   500             353877629926                         0
+31.01.2115:23:49  9   250             353877629926                         0
+31.01.2115:23:58  9   25000:0500:00:07353877629926                         1
+31.01.2115:24:25  9   110     00:00:00353877629926                        35
+""".strip().split(b"\n")
 
 
 @pytest.fixture
@@ -93,13 +173,44 @@ def mock_serial(mocker):
     yield mocked.return_value
 
 
-@pytest.mark.parametrize("raw_line", test_data.strip().split(b"\n"))
-def test_serial_parser(mock_serial, mock_plugin: siemens_serial.SiemensHipathSerial, mocker, raw_line):
+@pytest.mark.parametrize("raw_line", good_lines)
+def test_parser_good_lines(mock_plugin: siemens_serial.SiemensHipathSerial, raw_line):
+    """Test that the serial parser parses all known line formats."""
+    decoded_line = mock_plugin.decode(raw_line)
+    assert isinstance(decoded_line, str)
+
+    validated_line = mock_plugin.validate(decoded_line)
+    assert isinstance(decoded_line, str)
+
+    record = mock_plugin.parse(validated_line)
+    assert isinstance(record, CallDataRecord)
+    assert isinstance(record.call_type, int)
+
+
+@pytest.mark.parametrize("raw_line", [
+    b"dfdfdfsdfxcvnbdfsdfasdfa",  # Totally invalid line
+    b"31.01.2116:23:12  9   250     00:00:1535387",  # Line is missing data, too short
+])
+def test_validate_bad_lines(mock_plugin: siemens_serial.SiemensHipathSerial, raw_line):
+    """Test that the serial parser parses all known line formats."""
+    decoded_line = mock_plugin.decode(raw_line)
+    assert isinstance(decoded_line, str)
+
+    validated_line = mock_plugin.validate(decoded_line)
+    assert validated_line is False
+
+
+@pytest.mark.parametrize("raw_line", good_lines)
+def test_full_serial_parser_good_lines(mock_serial, mock_plugin: siemens_serial.SiemensHipathSerial, mocker, raw_line):
     """Test that all sorts of mocked call types work and DO not raise an exception."""
     mock_serial.readline.return_value = raw_line
     spy_push = mocker.patch.object(mock_plugin, "push")
+    spy_parse = mocker.patch.object(mock_plugin, "parse")
+    spy_validate = mocker.patch.object(mock_plugin, "validate")
     successful = mock_plugin.run()
 
     assert successful
-    assert spy_push.called
-    assert mock_serial.readline.called
+    assert spy_push.call_count == 1
+    assert spy_parse.call_count == 1
+    assert spy_validate.call_count == 1
+    assert mock_serial.readline.call_count == 1

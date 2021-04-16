@@ -111,7 +111,7 @@ class MockCalls(BasePlugin):
 
             # Sleep between records if requested
             if self.sleep:
-                sleeper(self.sleep, lambda: self.is_running)
+                sleeper(self.sleep, lambda: self.is_running)  # pragma: no branch
 
     def outgoing(self):
         # Push the normal outgoing record
@@ -147,7 +147,7 @@ class MockCalls(BasePlugin):
             record.call_type = Record.INCOMING
             record.ext = self.rand_ext()
             self.push(record)
-            sleeper(self.incoming_delay, lambda: self.is_running)
+            sleeper(self.incoming_delay, lambda: self.is_running)  # pragma: no branch
 
     def transfered_call(self, record: Record):
         """Randomly choose between internal or external."""

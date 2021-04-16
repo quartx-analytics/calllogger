@@ -1,3 +1,5 @@
+__all__ = ["MockCalls"]
+
 # Standard library
 from typing import NoReturn
 import random

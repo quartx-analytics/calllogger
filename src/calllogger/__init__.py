@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+__all__ = ["__version__"]
+
 # Standard lib
 import logging.config
 from pathlib import PosixPath
@@ -83,10 +85,3 @@ logging.config.dictConfig({
         }
     }
 })
-
-__all__ = ["CallDataRecord", "BasePlugin", "SerialPlugin", "__version__"]
-from calllogger.record import CallDataRecord
-from calllogger.plugins import (
-    BasePlugin,
-    SerialPlugin,
-)

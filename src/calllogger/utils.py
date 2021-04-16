@@ -49,7 +49,7 @@ class Timeout:
     def sleep(self):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.info("Retrying in '%d' seconds", self._timeout)
-        sleeper(self._timeout, lambda: self._running())
+        sleeper(self._timeout, self._running)
         self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
 
     def reset(self):

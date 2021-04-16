@@ -120,7 +120,7 @@ class MockCalls(BasePlugin):
 
         # Randomly add a transfered call
         if self.transferred_chance and random.randrange(self.transferred_chance) == 0:
-            self.transfered_call(record)
+            self.transfered_call(record, "outgoing")
 
     def received(self):
         record = self.record(call_type=Record.RECEIVED)
@@ -134,7 +134,7 @@ class MockCalls(BasePlugin):
         if self.transferred_chance and random.randrange(self.transferred_chance) == 0:
             record.call_type = Record.RECEIVED
             self.push(record)
-            self.transfered_call(record)
+            self.transfered_call(record, "received")
         else:
             # Mock a forwarded call if ext is setup for auto forwarding, else normal received call
             record.call_type = Record.RECEIVED_FORWARDED if record.ext == self.ext_forward else Record.RECEIVED
@@ -149,12 +149,12 @@ class MockCalls(BasePlugin):
             self.push(record)
             sleeper(self.incoming_delay, lambda: self.is_running)  # pragma: no branch
 
-    def transfered_call(self, record: Record):
+    def transfered_call(self, record: Record, call_type: str):
         """Randomly choose between internal or external."""
         if random.random() > self.transferred_direction:
-            record.call_type = Record.OUTGOING_TRANSFERRED_INT
+            record.call_type = getattr(Record, f"{call_type.upper()}_TRANSFERRED_INT")
         else:
-            record.call_type = Record.OUTGOING_TRANSFERRED_EXT
+            record.call_type = getattr(Record, f"{call_type.upper()}_TRANSFERRED_EXT")
 
         record.ext = self.rand_ext()
         self.push(record)

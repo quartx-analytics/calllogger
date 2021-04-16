@@ -1,6 +1,3 @@
-# Standard Lib
-import random
-
 # Third Party
 import pytest
 
@@ -37,7 +34,10 @@ def test_basic_useage(mock_plugin: mockcalls.MockCalls, mocker, direction, trans
     mock_plugin.sleep = sleep
 
     spy_transfered = mocker.spy(mock_plugin, "transfered_call")
+    spy_outgoing = mocker.spy(mock_plugin, "outgoing")
+    spy_received = mocker.spy(mock_plugin, "received")
     successful = mock_plugin.run()
 
     assert successful
     assert spy_transfered.called == transfer
+    assert (spy_received.called if direction else spy_outgoing.called) is True

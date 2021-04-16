@@ -43,7 +43,7 @@ class BasePlugin(Thread, metaclass=PluginSettings):
         #: Timeout control, Used to control the timeout decay when repeatedly called.
         self.timeout = Timeout(settings, lambda: self._running.is_set())  # pragma: no branch
 
-    def run(self):
+    def run(self) -> bool:
         try:
             self.entrypoint()
         except Exception as err:

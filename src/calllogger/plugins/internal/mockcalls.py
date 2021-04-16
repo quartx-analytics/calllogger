@@ -147,11 +147,7 @@ class MockCalls(BasePlugin):
             record.call_type = Record.INCOMING
             record.ext = self.rand_ext()
             self.push(record)
-
             sleeper(self.incoming_delay, lambda: self.is_running)
-            # Break from loop if program is no longer running
-            if not self.is_running:
-                break
 
     def transfered_call(self, record: Record):
         """Randomly choose between internal or external."""

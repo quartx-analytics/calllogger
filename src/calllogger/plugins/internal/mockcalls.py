@@ -143,7 +143,7 @@ class MockCalls(BasePlugin):
     def incoming(self, record):
         # Use the ring time to select the delay
         # and number of hops before call ends
-        for hop in range(int(record.ring / 4)):
+        for hop in range(int(record.ring / 4)):  # pragma: no branch
             record.call_type = Record.INCOMING
             record.ext = self.rand_ext()
             self.push(record)

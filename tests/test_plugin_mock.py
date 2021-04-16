@@ -26,14 +26,18 @@ def mock_plugin(mocker):
     yield plugin
 
 
-@pytest.mark.parametrize("sleep", [False, True])
-@pytest.mark.parametrize("transferred_direction", [TRANSFER_INT, TRANSFER_EXT])
-@pytest.mark.parametrize("transfer", [TRANSFER_YES, TRANSFER_NO])
-@pytest.mark.parametrize("direction", [OUTGOING, RECEIVED])
-def test_basic_useage(mock_plugin: MockCalls, direction, transfer, transferred_direction, sleep):
+# @pytest.mark.parametrize("sleep", [False, True])
+# @pytest.mark.parametrize("transferred_direction", [TRANSFER_INT, TRANSFER_EXT])
+# @pytest.mark.parametrize("transfer", [TRANSFER_NO, TRANSFER_YES])
+# @pytest.mark.parametrize("direction", [OUTGOING, RECEIVED])
+def test_basic_useage(mock_plugin: MockCalls, mocker):#, direction, transfer, transferred_direction, sleep):
     """Test that all sorts of mocked call types work and DO not raise an exception."""
-    mock_plugin.transferred_direction = transferred_direction
-    mock_plugin.transferred_chance = transfer
-    mock_plugin.direction = direction
-    mock_plugin.sleep = sleep
+    mock_plugin.transferred_direction = 1
+    mock_plugin.transferred_chance = 1
+    mock_plugin.direction = 1
+    mock_plugin.sleep = 1
+
+    spy_transfered = mocker.spy(mock_plugin, "transfered_call")
     mock_plugin.run()
+
+    assert spy_transfered.called == 1

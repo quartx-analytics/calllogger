@@ -51,8 +51,10 @@ class MockCalls(BasePlugin):
     max_duration: int = 7200
     #: The chance that a duration will be 0(unanswered), 1 in {value} chance.
     answered_chance: int = 5
-    #: The chance that a call will be transferred, 1 in {value} chance.
+    #: The chance that a call will be transferred, 1 in {value} chance. 0 to disable.
     transferred_chance: int = 5
+    #: Determine preferred transferred direction, Internal is 0 and External is 1.
+    transferred_direction: float = 0.5
     #: Extension that will auto forward calls
     ext_forward: int = 105
 
@@ -153,7 +155,7 @@ class MockCalls(BasePlugin):
 
     def transfered_call(self, record: Record):
         """Randomly choose between internal or external."""
-        if random.randrange(2):
+        if random.random() > self.transferred_direction:
             record.call_type = Record.OUTGOING_TRANSFERRED_INT
         else:
             record.call_type = Record.OUTGOING_TRANSFERRED_EXT

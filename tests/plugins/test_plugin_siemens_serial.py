@@ -5,7 +5,7 @@ import serial
 # Local
 from calllogger.plugins.internal import siemens_serial
 from calllogger.record import CallDataRecord
-from .utils import call_plugin
+from ..common import call_plugin
 
 
 good_lines = b"""

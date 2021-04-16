@@ -8,7 +8,7 @@ import serial
 # Local
 from calllogger.plugins import SerialPlugin
 from calllogger.record import CallDataRecord
-from .utils import call_plugin
+from ..common import call_plugin
 
 
 # noinspection PyAbstractClass

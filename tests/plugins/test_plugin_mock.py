@@ -3,7 +3,7 @@ import pytest
 
 # Local
 from calllogger.plugins.internal import mockcalls
-from .utils import call_plugin
+from ..common import call_plugin
 
 TRANSFER_NO = 0
 TRANSFER_YES = 1

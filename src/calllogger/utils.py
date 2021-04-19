@@ -54,7 +54,9 @@ class Timeout:
 
     def reset(self):
         """Reset the timeout value by undoing the timeout decay."""
-        self._timeout = self._settings.timeout
+        if self._timeout != self._settings.timeout:
+            logger.info("Everything is working again. Resetting timeout.")
+            self._timeout = self._settings.timeout
 
     @property
     def value(self) -> int:

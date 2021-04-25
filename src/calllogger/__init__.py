@@ -21,7 +21,6 @@ __all__ = ["__version__"]
 
 # Standard lib
 import logging.config
-from pathlib import PosixPath
 from importlib.metadata import version
 
 # Third Party
@@ -31,19 +30,9 @@ from decouple import config
 
 __version__ = version("quartx-calllogger")
 
-# Extract the sentry DSN from docker secret if exists
-secret_path = PosixPath("/run/secrets/sentry_dsn")
-if secret_path.exists():
-    with secret_path.open() as f:
-        sentry_dsn = f.read()
-    print("We have secret sentry_dsn", sentry_dsn)
-else:
-    print("there is no secret SENTRY_DSN available")
-    sentry_dsn = config("SENTRY_DSN", "")
-
 # Setup Sentry
 sentry_sdk.init(
-    sentry_dsn,
+    config("SENTRY_DSN", ""),
     release=__version__,
     environment=config("ENVIRONMENT", "Testing"),
     integrations=[ThreadingIntegration(propagate_hub=True)],

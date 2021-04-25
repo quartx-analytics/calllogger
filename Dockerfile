@@ -8,14 +8,10 @@ LABEL org.opencontainers.image.url="https://quartx.ie"
 LABEL org.opencontainers.image.licenses="GPL-2.0-only"
 LABEL org.opencontainers.image.title="Quartx Call Logger"
 
-# Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE 1
-# Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
-
-# Add secrets & Environment Variables
-RUN --mount=type=secret,id=sentry_dsn
 ENV ENVIRONMENT Deployed
+ENV SENTRY_DSN https://31a1124e3ac34d2eb30d764211cacfe8@o321896.ingest.sentry.io/1839719
 
 # Install as Package
 COPY . /src

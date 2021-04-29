@@ -267,11 +267,11 @@
         },
         "requests-mock": {
             "hashes": [
-                "sha256:87607be91d6b4c8c9ec86e0bac6d29fd027dfbf99e710e00b406da60c98aa0d4",
-                "sha256:fc9b992daa522031deb3d72ed10e39e8dc0ffd7131cc278d39517273c088a745"
+                "sha256:154903e7646b8215fbdccc6898c32a77b87d2fbafad2f43e99d6d7987dc86953",
+                "sha256:705c03efff5c4e38a00eb203e71e9b4381fbce9679870bda3ac533b61a0b8b9d"
             ],
             "index": "pypi",
-            "version": "==1.9.0"
+            "version": "==1.9.1"
         },
         "six": {
             "hashes": [

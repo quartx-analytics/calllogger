@@ -214,11 +214,11 @@
         },
         "phonenumbers": {
             "hashes": [
-                "sha256:271f26271338616460eef8b878e5879401299adfc0cd0891c48b4744afbb45b2",
-                "sha256:7d66d6f09541568941e51fe2275de0f2d519b3234c80c8c166c56d01d098d3fc"
+                "sha256:b20765cb9d1392308071a3462c06edcaa953cb383e3565f5fc0a6fb93f240150",
+                "sha256:f9cb4882e5c7daeaa183af7b0390c44a02604731c7aab561d9456e1df4582207"
             ],
             "index": "pypi",
-            "version": "==8.12.21"
+            "version": "==8.12.22"
         },
         "pluggy": {
             "hashes": [

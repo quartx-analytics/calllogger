@@ -23,7 +23,7 @@ jobs:
 
       - name: Test using tox
         run: |
-          tox
+          tox --parallelize-locked-install
 
       - name: Upload test coverage to Codecov
         continue-on-error: true

@@ -28,6 +28,7 @@ Deployment
 ----------
 
 This package is designed to be run within a containerized environment, for this we can use docker.
+The containerized image is built to work on linux/amd64, linux/arm64, linux/arm/v7.
 Configuration is done through environment variables, currently only two are required.
 
     * **TOKEN**: Authentication key used to authenticate and identify who owns the call logs.

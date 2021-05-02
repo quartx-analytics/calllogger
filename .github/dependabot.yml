@@ -6,7 +6,7 @@
 version: 1
 updates:
   # Maintain dependencies for Poetry package system
-  - package-ecosystem: "poetry"
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"

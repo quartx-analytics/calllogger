@@ -1,148 +1,151 @@
-import pytest
-from unittest import mock
-from quartx_call_logger.api import API
-from quartx_call_logger.record import Record
-from quartx_call_logger import settings
-from urllib import parse as urlparse
+# Standard lib
 import threading
+import json
+
+# Third Party
 import requests
-import queue
+import pytest
+
+# Local
+from calllogger.api import handlers, info
+from calllogger.conf import TokenAuth
+
+test_url = "https://testing.test/test"
+client_error_status = [
+    (400, False),
+    (401, True),
+    (402, True),
+    (403, True)
+]
 
 
 @pytest.fixture
-def url():
-    return urlparse.urlunsplit((
-        "https" if settings.SSL else "http",  # scheme
-        settings.DOMAIN,  # netloc
-        "/monitor/cdr/record/",  # path,
-        "",  # query
-        "",  # fragment
-    ))
-
-
-@pytest.fixture
-def api():
+def api(mocker):
     running = threading.Event()
-    obj = API(queue.Queue(10), running)
-    obj.timeout = 0.01
-    with mock.patch.object(obj, "running") as mocker:
-        mocker.is_set.side_effect = [True, False]
-        yield obj
+    obj = handlers.QuartxAPIHandler(running)
+    mocked = mocker.patch.object(obj, "running")
+    mocked.is_set.side_effect = [True, False]
+    mocker.patch.object(obj.timeout, "sleep")
+    yield obj
 
 
-@pytest.fixture
-def record():
-    return Record(call_type=1, number="0876521354", line=1, ext=102, ring=10, duration=0)
+def test_decode_response_json():
+    """Test that decode_response returns a full json object."""
+    resp = requests.Response()
+    resp.encoding = "utf8"
+    resp._content = b'{"test": true}'
+
+    # We set limit to 2 here to make sure it has no effect
+    data = handlers.decode_response(resp, limit=2)
+    assert data == {"test": True}
 
 
-@pytest.fixture
-def req_callback():
-    class Called:
-        def __init__(self):
-            self.called = False
+def test_decode_response_text():
+    """Test that decode_response returns a text with a length limit of 13."""
+    resp = requests.Response()
+    resp.encoding = "utf8"
+    resp._content = b'testdata-testdata-testdata'
 
-        def resp(self, resp):
-            def callback(request, context):
-                req_data = request.json()
-                for field in ["call_type", "number", "line", "ext", "ring", "duration"]:
-                    assert field in req_data
-                self.called = True
-                return resp
-            return callback
-    return Called()
+    # We use 13 only for testing, normally it's 1,000
+    data = handlers.decode_response(resp, limit=13)
+    assert data == "testdata-test"
+    assert len(data) == 13
 
 
-def test_push(api, record):
-    assert api.queue.empty()
-    api.queue.put(record)
-    assert not api.queue.empty()
+@pytest.mark.parametrize("status_code", [200, 201, 202, 203, 204, 205, 206, 207, 208, 226])
+def test_ok_requests(api, requests_mock, status_code, mocker):
+    """Test that all 2xx status codes work as expected."""
+    requests_mock.get(test_url, json={"success": True}, status_code=status_code)
+    request_spy = mocker.spy(api, "_send_request")
+    resp = api.make_request(method="GET", url=test_url)
+
+    assert resp.json() == {"success": True}
+    assert requests_mock.called
+    assert request_spy.call_count == 1
 
 
-def test_empty_queue(url, api, requests_mock, req_callback):
-    assert api.queue.empty()
-    requests_mock.post(url, text=req_callback.resp(""), status_code=201)
-    api.run()
+@pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
+def test_server_network_errors(api, requests_mock, mocker, bad_code):
+    """Test for server/network errors that can be retried."""
+    mocked = mocker.patch.object(api, "running")
+    mocked.is_set.side_effect = [True, True, False]
+    request_spy = mocker.spy(api, "_send_request")
 
-    assert api.queue.empty()
-    assert req_callback.called is False
+    requests_mock.get(test_url, response_list=[
+        {"status_code": bad_code} if isinstance(bad_code, int) else {"exc": bad_code},
+        {"status_code": 201, "json": {"success": True}},
+    ])
+    resp = api.make_request(method="GET", url=test_url)
 
-
-def test_run_201(url, api, record, requests_mock, req_callback):
-    api.queue.put(record)
-    requests_mock.post(url, json=req_callback.resp({"success": True}), status_code=201)
-    api.run()
-
-    assert api.queue.empty()
-    assert req_callback.called is True
-
-
-def test_run_400(url, api, record, requests_mock, req_callback):
-    api.queue.put(record)
-    requests_mock.post(url, json=req_callback.resp({"error": "field is missing"}), status_code=400)
-    api.run()
-
-    assert api.queue.empty()
-    assert req_callback.called is True
+    assert resp.json() == {"success": True}
+    assert requests_mock.called
+    assert request_spy.call_count == 2
 
 
-def test_run_401(url, api, record, requests_mock, req_callback):
-    api.queue.put(record)
-    requests_mock.post(url, json=req_callback.resp({"error": "permission required"}), status_code=401)
-    api.run()
+def test_retry_with_break(api, requests_mock, mocker):
+    """Test for server/network errors that can be retried."""
+    mocked = mocker.patch.object(api, "running")
+    mocked.is_set.side_effect = [True, False]
+    request_spy = mocker.spy(api, "_send_request")
+    api.suppress_errors = True
 
-    assert api.queue.empty()
-    assert req_callback.called is True
+    requests_mock.get(test_url, response_list=[
+        {"status_code": 500},
+        {"status_code": 201, "json": {"success": True}},
+    ])
+    resp = api.make_request(method="GET", url=test_url)
 
-
-def test_run_403(url, api, record, requests_mock, req_callback):
-    api.queue.put(record)
-    requests_mock.post(url, json=req_callback.resp({"error": "access forbidden"}), status_code=403)
-    api.run()
-
-    assert api.queue.empty()
-    assert req_callback.called is True
-
-
-def test_run_500(url, api, record, requests_mock, req_callback):
-    api.queue.put(record)
-    requests_mock.post(url, text=req_callback.resp(""), status_code=500)
-    api.run()
-
-    assert not api.queue.empty()
-    assert req_callback.called is True
+    assert not resp
+    assert requests_mock.called
+    assert request_spy.call_count == 1
 
 
-def test_exception_timeout(api, record):
-    api.queue.put(record)
-    with mock.patch.object(api, "session") as mocker:
-        mocker.post.side_effect = requests.Timeout
-        api.run()
-        mocker.post.assert_called()
+def client_errors(api, requests_mock, mocker, bad_code, cleard):
+    mocked = mocker.patch.object(api, "running")
+    mocked.is_set.side_effect = [True, False]
+    request_spy = mocker.spy(api, "_send_request")
+    requests_mock.get(test_url, status_code=bad_code, json={"success": False})
+    resp = api.make_request(method="GET", url=test_url)
+
+    assert requests_mock.called
+    assert request_spy.call_count == 1
+    assert mocked.clear.called is cleard
+    return resp
 
 
-def test_exception_connection_error(api, record):
-    api.queue.put(record)
-    with mock.patch.object(api, "session") as mocker:
-        mocker.post.side_effect = requests.ConnectionError
-        api.run()
-        mocker.post.assert_called()
+@pytest.mark.parametrize("bad_code,cleard", client_error_status)
+def test_client_errors(api, requests_mock, mocker, bad_code, cleard):
+    """Test for client errors. Errors that can not be retried."""
+    with pytest.raises(requests.HTTPError):
+        client_errors(api, requests_mock, mocker, bad_code, cleard)
 
 
-def test_exception_connection_error_incoming(api):
-    record = Record(call_type=0, number="0876521354", line=1, ext=102)
-    api.queue.put(record)
-    with mock.patch.object(api, "session") as mocker:
-        mocker.post.side_effect = requests.ConnectionError
-        api.run()
-        mocker.post.assert_called()
+@pytest.mark.parametrize("bad_code,cleard", client_error_status)
+def test_client_errors_suppressed(api, requests_mock, mocker, bad_code, cleard):
+    """Test for client errors. Errors that can not be retried."""
+    api.suppress_errors = True
+    resp = client_errors(api, requests_mock, mocker, bad_code, cleard)
+    assert resp is False
 
 
-def test_exception_queue_full(api, record):
-    with mock.patch.object(api, "queue", spec=True) as queue_mock:
-        queue_mock.put_nowait.side_effect = queue.Full
-        api.queue.put(record)
+@pytest.mark.parametrize("error", [RuntimeError, json.JSONDecodeError, TypeError])
+def test_unexpected_errors(api, mocker, error):
+    mocked = mocker.patch.object(api.session, "send")
+    mocked.side_effect = RuntimeError
 
-        with mock.patch.object(api, "session") as req_mock:
-            req_mock.post.side_effect = requests.Timeout
-            api.run()
-            req_mock.post.assert_called()
+    with pytest.raises(RuntimeError):
+        api.make_request(method="GET", url=test_url)
+    assert mocked.call_count == 1
+
+
+def test_get_owner_info(requests_mock):
+    tokenauth = TokenAuth("token")
+    running = threading.Event()
+    running.set()
+
+    expected_resp = {'id': 1, 'username': 'Test', 'email': 'test@test.com'}
+    mocked_request = requests_mock.get(info.info_url, status_code=200, json=expected_resp)
+    resp = info.get_owner_info(running, tokenauth)
+
+    assert mocked_request.called
+    assert resp == expected_resp

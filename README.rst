@@ -1,102 +1,45 @@
-.. image:: https://api.codacy.com/project/badge/Grade/af3dc404e10e4a8f9f8e79823ff654e9
-    :target: https://www.codacy.com/app/Quartx/quartx-call-logger?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quartx-software/quartx-call-logger&amp;utm_campaign=Badge_Grade
+.. image:: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml/badge.svg
+    :target: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml
+    :alt: Build and Tests
 
-.. image:: https://travis-ci.org/quartx-software/quartx-call-logger.svg?branch=master
-    :target: https://travis-ci.org/quartx-software/quartx-call-logger
+.. image:: https://codecov.io/gh/quartx-analytics/calllogger/branch/master/graph/badge.svg?token=AH0TIQ7F8V
+    :target: https://codecov.io/gh/quartx-analytics/calllogger
+    :alt: Test Coverage
 
-.. image:: https://coveralls.io/repos/github/quartx-software/quartx-call-logger/badge.svg?branch=master
-    :target: https://coveralls.io/github/quartx-software/quartx-call-logger?branch=master
-
-.. image:: https://readthedocs.org/projects/quartx-call-logger/badge/?version=latest
-    :target: https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+.. image:: https://api.codeclimate.com/v1/badges/c0d513f139aa33e2d4b6/maintainability
+   :target: https://codeclimate.com/github/quartx-analytics/calllogger/maintainability
+   :alt: Maintainability
 
 
 Quartx Call Logger
 ------------------
 
-Call logger component for the Quartx phone system monitoring frontend. https://quartx.ie/
+Call logger component for the Quartx phone system monitoring service. https://quartx.ie/
 
-This logger can monitor phone systems for CDR(Call Data Records) and send the records to the monitoring frontend.
+This logger can monitor phone systems for CDR(Call Data Records) and send the records to the monitoring service.
 The monitoring frontend will then analyze the records and display them in a easy to view web interface.
 
 The currently supported phone systems are:
 
     * Siemens Hipath
 
-Support for new phone systems can be easily added through plugins.
-With the plugin system any system can be supported as long as the system has some sort of API or Serial Interface.
-The documentation on how to create a plugin can be found here.
-https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest.
 
+Deployment
+----------
 
-Install
--------
+This package is designed to be run within a containerized environment, for this we can use docker.
+The containerized image is built to work on linux/amd64, linux/arm64, linux/arm/v7.
+Configuration is done through environment variables, currently only two are required.
 
-Currently only install from git repo is supported, but PyPI support will be added later.
+    * **TOKEN**: Authentication key used to authenticate and identify who owns the call logs.
+    * **PLUGIN**: The plugin to use. For now this will be ``SiemensHipathSerial``.
 
-Dependencies ::
-    
-    sudo apt-get install python3-pip git
+The Siemens Hipath plugin accesses the phone system using the serial interface.
+The serial interface needs to be passed to the docker container using the ``--device`` option in docker.
 
-Production ::
+There is only one command required to install, configure and run the call logger.
+Don't forget to change the ``token`` to the required value. Also make sure that the device path is correct.
 
-    sudo pip3 install git+https://github.com/quartx-software/quartx-call-logger.git
+.. code-block:: bash
 
-Development ::
-
-    git clone https://github.com/quartx-software/quartx-call-logger.git
-    cd quartx-call-logger
-    pip install pipenv
-    pipenv install --dev
-
-
-Configuration
--------------
-
-The Configuration for this package is located in ``/Library/Application Support/quartx`` on MacOS,
-``/etc/xdg/quartx`` on Unix/Linux or ``C:\ProgramData\quartx\quartx`` on Windows.
-
-First we download the base configuration file from github so we can modifiy it. The following commands are for Linux/Unix.
-::
-
-    sudo mkdir -p /etc/xdg/quartx
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/call-logger.yml > call-logger.yml
-    sudo cp call-logger.yml /etc/xdg/quartx/call-logger.yml
-    
-
-Currently the only required settings is the ``token``. The token is the authentication key used to authenticate
-the user and identify who the call logs belong to. Contact Quartx Call Monitoring for the token key.
-::
-
-    sudo nano /etc/xdg/quartx/call-logger.yml
-    ...
-    token: bd6a567386f79329b156a042a1aac9f44726e736
-    ...
-
-The plugin settings may also need to be changed depending on the phone system.
-You can read the configuration comments to see what changes may be required.
-
-
-Usage
------
-
-The call logger can be run with just one single command when on Linux.
-::
-
-    call-logger
-
-To run the call-logger as a service you can install the systemd service file
-::
-
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/quartx-call-logger.service > call-logger.service
-    sudo cp call-logger.service /etc/systemd/system/call-logger.service
-    sudo systemctl enable --now call-logger.service
-
-
-Contribution
-------------
-
-Support for other phone systems can be added through plugins.
-Documentation for creating plugins can be found at readthedocs.
-https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest.
+    docker run --detach -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --restart=unless-stopped ghcr.io/quartx-analytics/calllogger

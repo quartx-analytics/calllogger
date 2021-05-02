@@ -1,0 +1,47 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "quartx-calllogger"
+version = "0.4.0"
+description = "CDR(Call Data Record) logger that sends call logs to the Quartx Call Monitoring service for processing."
+license = "GPL-2.0-only"
+authors = ["William Forde <willforde@quartx.ie>"]
+readme = "README.rst"
+homepage = "https://quartx.ie"
+repository = "https://github.com/quartx-analytics/calllogger"
+documentation = ""
+keywords = ["phone", "telephone", "cdr", "telecommunications"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Natural Language :: English",
+    "Environment :: No Input/Output (Daemon)",
+    "Operating System :: OS Independent",
+    "Topic :: Communications :: Telephony",
+    "Topic :: Communications :: Internet Phone",
+]
+packages = [
+    { include = "calllogger", from = "src" },
+]
+
+[tool.poetry.scripts]
+calllogger = "calllogger.__main__:monitor"
+calllogger-mock = "calllogger.__main__:mocker"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+python-decouple = "^3.4"
+sentry-sdk = "^1.0.0"
+pyserial = "^3.5"
+requests = "^2.25.1"
+attrs = "^20.3.0"
+
+[tool.poetry.dev-dependencies]
+tox = "^3.23.0"
+pytest = "^6.2.2"
+flake8 = "^3.9.0"
+pytest-cov = "^2.11.1"
+pytest-mock = "^3.5.1"
+requests-mock = "^1.8.0"
+tox-poetry-installer = "^0.6.4"

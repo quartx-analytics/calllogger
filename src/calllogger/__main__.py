@@ -1,0 +1,91 @@
+# Standard Lib
+from queue import Queue
+import threading
+import argparse
+import logging
+import sys
+
+# Third Party
+import sentry_sdk
+
+# Local
+from calllogger.conf import settings, TokenAuth
+from calllogger.plugins import installed
+from calllogger import __version__, api
+
+logger = logging.getLogger(__name__)
+
+# Parse command line args. Only used for version right now.
+parser = argparse.ArgumentParser(prog="Quartx CallLogger")
+parser.add_argument('--version', action='version', version=f"calllogger {__version__}")
+parser.parse_args()
+
+
+def get_plugin(selected_plugin: str):
+    """Return the selected plugin."""
+    if plugin := installed.get(selected_plugin.lower()):
+        return plugin
+    elif installed:
+        print("Specified plugin not found:", selected_plugin)
+        print("Available plugins are:")
+        for plugin in installed.values():
+            print(f"--> {plugin.__name__} - {plugin.__doc__}")
+    else:
+        print("No plugins are installed")
+
+    # We only get here if the selected
+    # plugin was not found
+    sys.exit()
+
+
+def main_loop(plugin) -> int:
+    token_auth = TokenAuth(settings.token)
+    queue = Queue(settings.queue_size)
+    running = threading.Event()
+    running.set()
+
+    # Configure sentry
+    user_info = api.get_owner_info(running, token_auth)
+    sentry_sdk.set_tag("plugin", plugin.__name__)
+    sentry_sdk.set_user(user_info)
+
+    # Start the plugin thread to monitor for call records
+    logger.info("Selected Plugin: %s - %s", plugin.__name__, plugin.__doc__)
+    plugin_thread = plugin(_queue=queue, _running=running)
+    plugin_thread.start()
+
+    # Start the CDR worker to monitor the record queue
+    cdr_thread = api.CDRWorker(queue, running, token_auth)
+    cdr_thread.start()
+
+    # Sinse both threads have the same running event
+    # If one dies, so should the other.
+    try:
+        plugin_thread.join()
+        cdr_thread.join()
+    except KeyboardInterrupt:
+        # This will allow the threads
+        # to gracefully shutdown
+        running.clear()
+        return 130
+
+
+# Entrypoint: calllogger
+def monitor() -> int:
+    """Normal logger that calls the users preferred plugin."""
+    plugin = get_plugin(settings.plugin)
+    return main_loop(plugin)
+
+
+# Entrypoint: calllogger-mock
+def mockcalls() -> int:
+    """Force use of the mock logger."""
+    plugin = get_plugin("MockCalls")
+    return main_loop(plugin)
+
+
+if __name__ == "__main__":
+    # Normally this program will be called from an entrypoint
+    # So we will force use of the mock plugin when called directly
+    exit_code = mockcalls()
+    sys.exit(exit_code)

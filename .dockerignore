@@ -1,0 +1,6 @@
+LICENSE
+tox.ini
+.gitignore
+/.github
+/tests
+/docs

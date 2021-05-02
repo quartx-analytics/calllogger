@@ -1,45 +1,14 @@
-"""
-Call logger Mocker
-
-positional arguments:
-  token                 The required token used to authenticate with the
-                        monitoring server.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -d DOMAIN, --domain DOMAIN
-                        The domain of the server e.g. '127.0.0.1:8080' or
-                        'quartx.ie', defaults to 'stage.quartx.ie'.
-  -l, --no-ssl          Disable SSL mode (https).
-  -n, --no-verify       Disable SSL verification.
-  -s [1], --slow-mode [1]
-                        Slow down the rate of mocked calls. This also enables
-                        incoming call logs.
-
-# To send mock calls as fast as posible
-python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/
-
-# To send mock calls at a more normal rate, including incoming calls
-python mockcalls.py 2165432165432df654d854e3241efsfsd32485 -f http://127.0.0.1:8000/ -s 3
-"""
-
-# Standard library
-from unittest import mock
-import argparse
+# Third Party
+import pytest
 import serial
-import time
-import os
 
-# Disable sentry logging for tests
-os.environ["DISABLE_SENTRY"] = "1"
-
-# Package
-from quartx_call_logger import settings
-from quartx_call_logger.record import Record
-from quartx_call_logger.plugins.siemens_hipath_serial import SiemensHipathSerial
+# Local
+from calllogger.plugins.internal import siemens_serial
+from calllogger.record import CallDataRecord
+from ..common import call_plugin
 
 
-mock_data = b"""
+good_lines = b"""
 10.04.1923:19:06  2   104     00:00:0500441619251900                       2
 10.04.1923:28:01  2      00:0100:00:000061393038625                        2
 10.04.1923:28:01  2      00:0100:00:000061393038625                        2
@@ -173,71 +142,75 @@ mock_data = b"""
 31.01.2115:23:49  9   250             353877629926                         0
 31.01.2115:23:58  9   25000:0500:00:07353877629926                         1
 31.01.2115:24:25  9   110     00:00:00353877629926                        35
-
 """.strip().split(b"\n")
 
-# Create Parser to parse the required arguments
-parser = argparse.ArgumentParser(description="Call logger")
-parser.add_argument(
-    "token",
-    help="The required token used to authenticate with the monitoring server."
-)
-parser.add_argument(
-    "-d",
-    "--domain",
-    help="The domain of the server e.g. '127.0.0.1:8080' or 'quartx.ie', defaults to 'stage.quartx.ie'.",
-    default="stage.quartx.ie"
-)
-parser.add_argument(
-    "-l",
-    "--no-ssl",
-    action="store_false",
-    help="Disable SSL mode (https)."
-)
-parser.add_argument(
-    "-n",
-    "--no-verify",
-    action="store_false",
-    help="Disable SSL verification."
-)
-parser.add_argument(
-    "-s",
-    "--slow-mode",
-    nargs="?",
-    type=int,
-    const=1,
-    default=0,
-    metavar="1",
-    help="Slow down the rate of mocked calls. This also enables incoming call logs."
-)
+
+@pytest.fixture
+def mock_plugin(mocker):
+    plugin = call_plugin(siemens_serial.SiemensHipathSerial)
+    mocked_runner = mocker.patch.object(plugin, "_running")
+    mocked_runner.is_set.side_effect = [True, False]
+    # This will protect from slow failing tests
+    mocker.patch.object(plugin.timeout, "sleep")
+    yield plugin
 
 
-class TestCallmonitor(SiemensHipathSerial):
-    def __init__(self, delay: int, **kwargs):
-        patcher = mock.patch.object(serial, "Serial", spec=True)
-        mock_class = patcher.start()
-        mock_class.return_value.is_open = True
-        mock_class.return_value.readline.side_effect = [*mock_data, KeyboardInterrupt]
-        super(TestCallmonitor, self).__init__(**kwargs)
-        self.delay = delay
+@pytest.fixture
+def mock_serial(mocker):
+    """Mock the serial lib Serial object to control return values."""
+    mocked = mocker.patch.object(serial, "Serial", spec=True)
 
-    def push(self, record: Record):
-        """Send a call log record to the call monitoring API."""
-        record.pop("date", "")
-        print(record)
-        super(TestCallmonitor, self).push(record)
-        time.sleep(self.delay)
+    def open_on_request():
+        mocked.return_value.configure_mock(is_open=True)
+
+    def close_request():
+        mocked.return_value.configure_mock(is_open=False)
+
+    # By default the serial interface will be closed until open is called
+    mocked.return_value.open.side_effect = open_on_request
+    mocked.return_value.close.side_effect = close_request
+    mocked.return_value.configure_mock(is_open=True)
+    yield mocked.return_value
 
 
-if __name__ == '__main__':
-    # Fetch authentication token from command line
-    args = parser.parse_args()
-    settings.set_token(args.token)
-    settings.set_plugin("TestCallmonitor", {"port": "/dev/ttyUSB0", "rate": 9600})
-    settings.DOMAIN = args.domain
-    settings.SSL = args.no_ssl
-    settings.SSL_VERIFY = args.no_verify
+@pytest.mark.parametrize("raw_line", good_lines)
+def test_parser_good_lines(mock_plugin: siemens_serial.SiemensHipathSerial, raw_line):
+    """Test that the serial parser parses all known line formats."""
+    decoded_line = mock_plugin.decode(raw_line)
+    assert isinstance(decoded_line, str)
 
-    # Start the plugin
-    plugin = TestCallmonitor(args.slow_mode, port="/dev/ttyUSB0", rate=9600)
-    plugin.start()
+    validated_line = mock_plugin.validate(decoded_line)
+    assert isinstance(decoded_line, str)
+
+    record = mock_plugin.parse(validated_line)
+    assert isinstance(record, CallDataRecord)
+    assert isinstance(record.call_type, int)
+
+
+@pytest.mark.parametrize("raw_line", [
+    b"dfdfdfsdfxcvnbdfsdfasdfa",  # Totally invalid line
+    b"31.01.2116:23:12  9   250     00:00:1535387",  # Line is missing data, too short
+])
+def test_validate_bad_lines(mock_plugin: siemens_serial.SiemensHipathSerial, raw_line):
+    """Test that the serial parser parses all known line formats."""
+    decoded_line = mock_plugin.decode(raw_line)
+    assert isinstance(decoded_line, str)
+
+    validated_line = mock_plugin.validate(decoded_line)
+    assert validated_line is False
+
+
+@pytest.mark.parametrize("raw_line", good_lines)
+def test_full_serial_parser_good_lines(mock_serial, mock_plugin: siemens_serial.SiemensHipathSerial, mocker, raw_line):
+    """Test that all sorts of mocked call types work and DO not raise an exception."""
+    mock_serial.readline.return_value = raw_line
+    spy_push = mocker.patch.object(mock_plugin, "push")
+    spy_parse = mocker.patch.object(mock_plugin, "parse")
+    spy_validate = mocker.patch.object(mock_plugin, "validate")
+    successful = mock_plugin.run()
+
+    assert successful
+    assert spy_push.call_count == 1
+    assert spy_parse.call_count == 1
+    assert spy_validate.call_count == 1
+    assert mock_serial.readline.call_count == 1

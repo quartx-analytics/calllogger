@@ -40,4 +40,5 @@ There is only one command required to install, configure and run the call logger
 Don't forget to change the <token> to the required value. Also make sure that the device path is correct.
 
 .. code-block:: bash
+    
     docker run --detach -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --restart=unless-stopped ghcr.io/quartx-analytics/calllogger:latest

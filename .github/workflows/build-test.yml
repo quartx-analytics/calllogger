@@ -1,8 +1,6 @@
 name: tests
 
-on:
-  push:
-    branches: [ master ]
+on: push
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/calllogger
@@ -48,6 +46,7 @@ jobs:
           flake8 src
 
   docker:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: [tests, flake8]
     steps:
@@ -90,6 +89,7 @@ jobs:
           cache-to: type=inline
 
   anchore:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: [docker]
     steps:

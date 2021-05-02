@@ -93,7 +93,9 @@ jobs:
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.created=${{ env.BUILD_DATE }}
             org.opencontainers.image.revision=${{ github.sha }}
-          #
+          # Switch to using new GitHub cache backend when buildx releases it
+          # https://github.com/moby/buildkit/pull/1974
+          # https://github.com/docker/buildx/pull/535
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 

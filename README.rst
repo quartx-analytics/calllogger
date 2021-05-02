@@ -14,104 +14,27 @@
 Quartx Call Logger
 ------------------
 
-Call logger component for the Quartx phone system monitoring frontend. https://quartx.ie/
+Call logger component for the Quartx phone system monitoring service. https://quartx.ie/
 
-This logger can monitor phone systems for CDR(Call Data Records) and send the records to the monitoring frontend.
+This logger can monitor phone systems for CDR(Call Data Records) and send the records to the monitoring service.
 The monitoring frontend will then analyze the records and display them in a easy to view web interface.
 
 The currently supported phone systems are:
 
     * Siemens Hipath
 
-Support for new phone systems can be easily added through plugins.
-With the plugin system any system can be supported as long as the system has some sort of API or Serial Interface.
-The documentation on how to create a plugin can be found here.
-https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest.
+
+Deployment
+----------
+
+This package is designed to be run within a containerized environment, for this we can use docker.
+Configuration is done through environment variables, currently only two are required.
+
+    * **TOKEN**: Authentication key used to authenticate and identify who owns the call logs.
+    * **PLUGIN**: The plugin to use. For now this will be `SiemensHipathSerial`.
 
 
-Install
--------
-
-Currently only install from git repo is supported, but PyPI support will be added later.
-
-Dependencies ::
-
-    sudo apt-get install python3-pip git
-
-Production ::
-
-    sudo pip3 install git+https://github.com/quartx-software/quartx-call-logger.git
-
-Development ::
-
-    git clone https://github.com/quartx-software/quartx-call-logger.git
-    cd quartx-call-logger
-    pip install pipenv
-    pipenv install --dev
-
-
-Configuration
--------------
-
-The Configuration for this package is located in ``/Library/Application Support/quartx`` on MacOS,
-``/etc/xdg/quartx`` on Unix/Linux or ``C:\ProgramData\quartx\quartx`` on Windows.
-
-First we download the base configuration file from github so we can modifiy it. The following commands are for Linux/Unix.
+There is only one command required to install, configure and run the call logger.
 ::
 
-    sudo mkdir -p /etc/xdg/quartx
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/call-logger.yml > call-logger.yml
-    sudo cp call-logger.yml /etc/xdg/quartx/call-logger.yml
-
-
-Currently the only required settings is the ``token``. The token is the authentication key used to authenticate
-the user and identify who the call logs belong to. Contact Quartx Call Monitoring for the token key.
-::
-
-    sudo nano /etc/xdg/quartx/call-logger.yml
-    ...
-    token: bd6a567386f79329b156a042a1aac9f44726e736
-    ...
-
-The plugin settings may also need to be changed depending on the phone system.
-You can read the configuration comments to see what changes may be required.
-
-
-Usage
------
-
-The call logger can be run with just one single command when on Linux.
-::
-
-    call-logger
-
-To run the call-logger as a service you can install the systemd service file
-::
-
-    sudo curl https://raw.githubusercontent.com/quartx-software/quartx-call-logger/master/data/quartx-call-logger.service > call-logger.service
-    sudo cp call-logger.service /etc/systemd/system/call-logger.service
-    sudo systemctl enable --now call-logger.service
-
-
-Contribution
-------------
-
-Support for other phone systems can be added through plugins.
-Documentation for creating plugins can be found at readthedocs.
-https://quartx-call-logger.readthedocs.io/en/latest/?badge=latest.
-
-```
-pipenv update
-pipenv lock -r > requirements.txt
-pipenv lock --dev-only -r > requirements-dev.txt
-```
-
-
-Balena
-------
-
-Scan for BalenaOS devices on the network.
-May or may not work depending on the network setup.
-```
-sudo balena scan
-```
+    docker run --detach -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --restart=unless-stopped ghcr.io/quartx-analytics/calllogger:latest

@@ -33,8 +33,11 @@ Configuration is done through environment variables, currently only two are requ
     * **TOKEN**: Authentication key used to authenticate and identify who owns the call logs.
     * **PLUGIN**: The plugin to use. For now this will be `SiemensHipathSerial`.
 
+The Siemens Hipath plugin accesses the phone system using the serial interface.
+The serial interface needs to be passed to the docker container using the `--device` option in docker.
 
 There is only one command required to install, configure and run the call logger.
-::
+Don't forget to change the <token> to the required value. Also make sure that the device path is correct.
 
+.. code-block:: bash
     docker run --detach -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --restart=unless-stopped ghcr.io/quartx-analytics/calllogger:latest

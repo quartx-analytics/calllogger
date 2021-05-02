@@ -1,8 +1,8 @@
-.. image:: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml/badge.svg?branch=rework
+.. image:: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml/badge.svg
     :target: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml
     :alt: Build and Tests
 
-.. image:: https://codecov.io/gh/quartx-analytics/calllogger/branch/rework/graph/badge.svg?token=AH0TIQ7F8V
+.. image:: https://codecov.io/gh/quartx-analytics/calllogger/branch/master/graph/badge.svg?token=AH0TIQ7F8V
     :target: https://codecov.io/gh/quartx-analytics/calllogger
     :alt: Test Coverage
 

@@ -2,7 +2,7 @@ name: tests
 
 on:
   push:
-    branches: [ rework ]
+    branches: [ master ]
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/calllogger

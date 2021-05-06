@@ -38,6 +38,13 @@ def get_plugin(selected_plugin: str):
     sys.exit()
 
 
+def set_sentry_user(running: threading.Event, token_auth: TokenAuth):
+    """Request CDR user info and remap name to username for sentry support."""
+    user_info = api.get_owner_info(running, token_auth)
+    user_info["username"] = user_info.pop("name")
+    sentry_sdk.set_user(user_info)
+
+
 def main_loop(plugin) -> int:
     token_auth = TokenAuth(settings.token)
     queue = Queue(settings.queue_size)
@@ -45,9 +52,8 @@ def main_loop(plugin) -> int:
     running.set()
 
     # Configure sentry
-    user_info = api.get_owner_info(running, token_auth)
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    sentry_sdk.set_user(user_info)
+    set_sentry_user(running, token_auth)
 
     # Start the plugin thread to monitor for call records
     logger.info("Selected Plugin: %s - %s", plugin.__name__, plugin.__doc__)

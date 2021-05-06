@@ -143,7 +143,7 @@ def test_get_owner_info(requests_mock):
     running = threading.Event()
     running.set()
 
-    expected_resp = {'id': 1, 'username': 'Test', 'email': 'test@test.com'}
+    expected_resp = {'id': 1, 'name': 'Test', 'email': 'test@test.com'}
     mocked_request = requests_mock.get(info.info_url, status_code=200, json=expected_resp)
     resp = info.get_owner_info(running, tokenauth)
 

@@ -39,7 +39,7 @@ attrs = "^20.3.0"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.23.0"
-pytest = "^6.2.2"
+pytest = "^6.2.4"
 flake8 = "^3.9.0"
 pytest-cov = "^2.11.1"
 pytest-mock = "^3.6.0"

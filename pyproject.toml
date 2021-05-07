@@ -32,7 +32,7 @@ calllogger-mock = "calllogger.__main__:mocker"
 [tool.poetry.dependencies]
 python = "^3.9"
 python-decouple = "^3.4"
-sentry-sdk = "^1.0.0"
+sentry-sdk = "^1.1.0"
 pyserial = "^3.5"
 requests = "^2.25.1"
 attrs = "^20.3.0"

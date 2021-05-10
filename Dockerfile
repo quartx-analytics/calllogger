@@ -15,5 +15,6 @@ ENV SENTRY_DSN https://31a1124e3ac34d2eb30d764211cacfe8@o321896.ingest.sentry.io
 
 # Install as Package
 COPY . /src
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir /src && rm -rf /src
+RUN mkdir /data && pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir /src && rm -rf /src
 CMD ["calllogger"]
+VOLUME ["/data"]

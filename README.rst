@@ -31,7 +31,7 @@ This package is designed to be run within a containerized environment, for this 
 The containerized image is built to work on linux/amd64, linux/arm64, linux/arm/v7.
 Configuration is done through environment variables, currently only two are required.
 
-    * **TOKEN**: Authentication key used to authenticate and identify who owns the call logs.
+    * **TOKEN**: Authentication key used to identify who owns the call logs.
     * **PLUGIN**: The plugin to use. For now this will be ``SiemensHipathSerial``.
 
 The Siemens Hipath plugin accesses the phone system using the serial interface.
@@ -42,4 +42,4 @@ Don't forget to change the ``token`` to the required value. Also make sure that 
 
 .. code-block:: bash
 
-    docker run --detach -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --restart=unless-stopped ghcr.io/quartx-analytics/calllogger
+    docker run --detach --name "calllogger" -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --restart=unless-stopped ghcr.io/quartx-analytics/calllogger

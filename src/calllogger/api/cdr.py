@@ -1,6 +1,6 @@
 # Standard lib
 from urllib import parse as urlparse
-from threading import Thread, Event
+from threading import Thread
 import queue
 
 # Third party
@@ -21,12 +21,11 @@ class CDRWorker(QuartxAPIHandler, Thread):
     to the QuartX monitoring service.
 
     :param call_queue: The call record queue.
-    :param running: Threading flag to state if the thread should continue working.
     :param token: The authentication token for the monitoring service.
     """
 
-    def __init__(self, call_queue: queue.Queue, running: Event, token: TokenAuth):
-        super().__init__(running, suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
+    def __init__(self, call_queue: queue.Queue, token: TokenAuth):
+        super().__init__(suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         self.queue = call_queue
 
         # Request

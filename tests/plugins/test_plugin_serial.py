@@ -9,6 +9,7 @@ import serial
 from calllogger.plugins import SerialPlugin
 from calllogger.record import CallDataRecord
 from ..common import call_plugin
+from calllogger import running
 
 
 # noinspection PyAbstractClass
@@ -40,8 +41,8 @@ def mock_serial(mocker):
 @pytest.fixture
 def mock_plugin(mocker):
     plugin = call_plugin(TestPlugin)
-    mocked_runner = mocker.patch.object(plugin, "_running")
-    mocked_runner.is_set.side_effect = [True, False]
+    mocked_runner = mocker.patch.object(running, "is_set")
+    mocked_runner.side_effect = [True, False]
     mocker.patch.object(time, "sleep")
     yield plugin
 

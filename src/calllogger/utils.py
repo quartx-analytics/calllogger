@@ -38,18 +38,18 @@ class Timeout:
         method neeeds to be called to undo the timeout decay.
 
     :param settings: Programs settings object.
-    :param running: A Event flag to state if program is still running.
+    :param callback: A callable that should return True/False to state if program is still running.
     """
 
-    def __init__(self, settings, running: callable):
+    def __init__(self, settings, callback: callable):
         self._settings = settings
         self._timeout = settings.timeout
-        self._running = running
+        self._callback = callback
 
     def sleep(self):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.info("Retrying in '%d' seconds", self._timeout)
-        sleeper(self._timeout, self._running)
+        sleeper(self._timeout, self._callback)
         self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
 
     def reset(self):
@@ -67,7 +67,6 @@ def sleeper(timeout: float, callback: callable):
     """
     Sleep for a given amount of time while checking callback
     every half a second to see if sleeping is still required.
-
     This allows for the program to gracefully shutdown.
     """
     timeout = timeout * 2

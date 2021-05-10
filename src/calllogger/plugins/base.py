@@ -1,5 +1,5 @@
 # Standard library
-from threading import Event, Thread
+from threading import Thread
 from typing import NoReturn
 from queue import Queue
 import logging
@@ -9,9 +9,10 @@ import abc
 from sentry_sdk import capture_exception
 
 # Local
+from calllogger.conf import settings, merge_settings
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
-from calllogger.conf import settings, merge_settings
+from calllogger import running
 
 logger = logging.getLogger(__name__)
 installed_plugins = {}
@@ -34,21 +35,20 @@ class BasePlugin(Thread, metaclass=PluginSettings):
     """
 
     _queue: Queue
-    _running: Event
 
     def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         super(BasePlugin, self).__init__(name=f"Thread-{self.__class__.__name__}")
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
-        self.timeout = Timeout(settings, lambda: self._running.is_set())  # pragma: no branch
+        self.timeout = Timeout(settings, running.is_set)  # pragma: no branch
 
     def run(self) -> bool:
         try:
             self.entrypoint()
         except Exception as err:
             capture_exception(err)
-            self._running.clear()
+            running.clear()
             return False
         else:
             return True
@@ -62,7 +62,7 @@ class BasePlugin(Thread, metaclass=PluginSettings):
     @property
     def is_running(self) -> bool:
         """Flag to indicate that everything is working and ready to keep monitoring."""
-        return self._running.is_set()
+        return running.is_set()
 
     @abc.abstractmethod
     def entrypoint(self) -> NoReturn:  # pragma: no cover

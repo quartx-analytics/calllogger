@@ -4,6 +4,7 @@ import pytest
 # Local
 from calllogger.plugins.internal import mockcalls
 from ..common import call_plugin
+from calllogger import running
 
 TRANSFER_NO = 0
 TRANSFER_YES = 1
@@ -16,8 +17,8 @@ RECEIVED = 1
 @pytest.fixture
 def mock_plugin(mocker):
     plugin = call_plugin(mockcalls.MockCalls)
-    mocked_runner = mocker.patch.object(plugin, "_running")
-    mocked_runner.is_set.side_effect = [True, False]
+    mocked_runner = mocker.patch.object(running, "is_set")
+    mocked_runner.side_effect = [True, False]
     mocker.patch.object(mockcalls, "sleeper")
     yield plugin
 

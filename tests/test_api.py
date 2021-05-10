@@ -1,5 +1,4 @@
 # Standard lib
-import threading
 import json
 
 # Third Party
@@ -9,6 +8,7 @@ import pytest
 # Local
 from calllogger.api import handlers, info
 from calllogger.conf import TokenAuth
+from calllogger import running
 
 test_url = "https://testing.test/test"
 client_error_status = [
@@ -21,10 +21,9 @@ client_error_status = [
 
 @pytest.fixture
 def api(mocker):
-    running = threading.Event()
-    obj = handlers.QuartxAPIHandler(running)
-    mocked = mocker.patch.object(obj, "running")
-    mocked.is_set.side_effect = [True, False]
+    obj = handlers.QuartxAPIHandler()
+    mocked = mocker.patch.object(running, "is_set")
+    mocked.side_effect = [True, False]
     mocker.patch.object(obj.timeout, "sleep")
     yield obj
 
@@ -67,8 +66,8 @@ def test_ok_requests(api, requests_mock, status_code, mocker):
 @pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
 def test_server_network_errors(api, requests_mock, mocker, bad_code):
     """Test for server/network errors that can be retried."""
-    mocked = mocker.patch.object(api, "running")
-    mocked.is_set.side_effect = [True, True, False]
+    mocked = mocker.patch.object(running, "is_set")
+    mocked.side_effect = [True, True, False]
     request_spy = mocker.spy(api, "_send_request")
 
     requests_mock.get(test_url, response_list=[
@@ -84,8 +83,8 @@ def test_server_network_errors(api, requests_mock, mocker, bad_code):
 
 def test_retry_with_break(api, requests_mock, mocker):
     """Test for server/network errors that can be retried."""
-    mocked = mocker.patch.object(api, "running")
-    mocked.is_set.side_effect = [True, False]
+    mocked = mocker.patch.object(running, "is_set")
+    mocked.side_effect = [True, False]
     request_spy = mocker.spy(api, "_send_request")
     api.suppress_errors = True
 
@@ -101,15 +100,16 @@ def test_retry_with_break(api, requests_mock, mocker):
 
 
 def client_errors(api, requests_mock, mocker, bad_code, cleard):
-    mocked = mocker.patch.object(api, "running")
-    mocked.is_set.side_effect = [True, False]
+    mocked = mocker.patch.object(running, "is_set")
+    mocked.side_effect = [True, False]
+    clear_spy = mocker.spy(running, "clear")
     request_spy = mocker.spy(api, "_send_request")
     requests_mock.get(test_url, status_code=bad_code, json={"success": False})
     resp = api.make_request(method="GET", url=test_url)
 
     assert requests_mock.called
     assert request_spy.call_count == 1
-    assert mocked.clear.called is cleard
+    assert clear_spy.called is cleard
     return resp
 
 
@@ -138,14 +138,13 @@ def test_unexpected_errors(api, mocker, error):
     assert mocked.call_count == 1
 
 
-def test_get_owner_info(requests_mock):
+def test_get_owner_info(requests_mock, mocker):
     tokenauth = TokenAuth("token")
-    running = threading.Event()
-    running.set()
-
+    mocked = mocker.patch.object(running, "is_set")
+    mocked.return_value = True
     expected_resp = {'id': 1, 'name': 'Test', 'email': 'test@test.com'}
     mocked_request = requests_mock.get(info.info_url, status_code=200, json=expected_resp)
-    resp = info.get_owner_info(running, tokenauth)
+    resp = info.get_owner_info(tokenauth)
 
     assert mocked_request.called
     assert resp == expected_resp

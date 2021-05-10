@@ -1,6 +1,5 @@
 # Standard Lib
 from queue import Queue
-import threading
 import argparse
 import logging
 import sys
@@ -11,7 +10,7 @@ import sentry_sdk
 # Local
 from calllogger.conf import settings, TokenAuth
 from calllogger.plugins import installed
-from calllogger import __version__, api
+from calllogger import __version__, running, api
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +37,9 @@ def get_plugin(selected_plugin: str):
     sys.exit()
 
 
-def set_sentry_user(running: threading.Event, token_auth: TokenAuth):
+def set_sentry_user(token_auth: TokenAuth):
     """Request CDR user info and remap name to username for sentry support."""
-    user_info = api.get_owner_info(running, token_auth)
+    user_info = api.get_owner_info(token_auth)
     user_info["username"] = user_info.pop("name")
     sentry_sdk.set_user(user_info)
 
@@ -48,23 +47,22 @@ def set_sentry_user(running: threading.Event, token_auth: TokenAuth):
 def main_loop(plugin) -> int:
     token_auth = TokenAuth(settings.token)
     queue = Queue(settings.queue_size)
-    running = threading.Event()
     running.set()
 
     # Configure sentry
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    set_sentry_user(running, token_auth)
+    set_sentry_user(token_auth)
 
     # Start the plugin thread to monitor for call records
     logger.info("Selected Plugin: %s - %s", plugin.__name__, plugin.__doc__)
-    plugin_thread = plugin(_queue=queue, _running=running)
+    plugin_thread = plugin(_queue=queue)
     plugin_thread.start()
 
     # Start the CDR worker to monitor the record queue
-    cdr_thread = api.CDRWorker(queue, running, token_auth)
+    cdr_thread = api.CDRWorker(queue, token_auth)
     cdr_thread.start()
 
-    # Sinse both threads have the same running event
+    # Sinse both threads share the same running event
     # If one dies, so should the other.
     try:
         plugin_thread.join()

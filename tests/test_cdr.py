@@ -1,6 +1,5 @@
 # Standard Lib
 from queue import Queue
-import threading
 
 # Third Party
 import pytest
@@ -10,6 +9,7 @@ from requests_mock import Mocker
 from calllogger.api import cdr
 from calllogger.record import CallDataRecord
 from calllogger.conf import TokenAuth
+from calllogger import running
 
 
 @pytest.fixture
@@ -27,14 +27,12 @@ def record():
 @pytest.fixture
 def api(mocker):
     queue = Queue(10)
-    running = threading.Event()
     tokenauth = TokenAuth("token")
-    running.set()
 
     # Setup worker and mock running flag so loop will only run once
-    obj = cdr.CDRWorker(queue, running, tokenauth)
-    mocked = mocker.patch.object(obj, "running")
-    mocked.is_set.side_effect = [True, True, False]
+    obj = cdr.CDRWorker(queue, tokenauth)
+    mocked = mocker.patch.object(running, "is_set")
+    mocked.side_effect = [True, True, False]
     mocker.patch.object(obj.timeout, "sleep")
     yield obj
 

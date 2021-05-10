@@ -1,5 +1,4 @@
 # Standard lib
-from threading import Event
 from typing import Union
 import json as _json
 import logging
@@ -12,6 +11,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 # Local
 from calllogger.utils import ComplexEncoder, Timeout
 from calllogger.conf import settings
+from calllogger import running
 
 logger = logging.getLogger(__name__)
 RetryResponse = Union[bool, requests.Response]
@@ -54,9 +54,9 @@ def decode_response(response: requests.Response, limit=1000) -> Union[str, dict]
 class QuartxAPIHandler:
     """Custom Requests handler for api errors."""
 
-    def __init__(self, running: Event, *args, suppress_errors=False, **kwargs):
+    def __init__(self, *args, suppress_errors=False, **kwargs):
         super(QuartxAPIHandler, self).__init__(*args, **kwargs)
-        self.timeout = Timeout(settings, lambda: running.is_set())  # pragma: no branch
+        self.timeout = Timeout(settings, running.is_set)  # pragma: no branch
         self.suppress_errors = suppress_errors
         self.session = requests.Session()
         self.running = running

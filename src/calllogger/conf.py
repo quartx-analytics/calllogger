@@ -19,21 +19,11 @@ class TokenAuth(AuthBase):
         return req
 
 
-def cmd_args() -> dict:
-    args = {}
-    for arg in sys.argv[1:]:
-        if "=" in arg:
-            key, val = arg.split("=", 1)
-            args[key.replace("-", "_").lower()] = val
-    return args
-
-
 def merge_settings(cls, settings_store: dict, prefix="", **defaults):
     # Merge class, instance and defaults together
     defaults_store = dict(**cls.__dict__, **defaults)
     prefix = f"{prefix}_" if prefix else ""
     settings_store.update(defaults)
-    args = cmd_args()
     errors = []
 
     # Check if all settings with annotations have a environment variable set for them
@@ -41,11 +31,7 @@ def merge_settings(cls, settings_store: dict, prefix="", **defaults):
         default = defaults_store.get(key, undefined)
         env_key = f"{prefix}{key}"
         try:
-            if env_key in args:
-                setting = args[env_key.lower()]
-                setting = cast(setting)
-            else:
-                setting = config(env_key.upper(), default, cast)
+            setting = config(env_key.upper(), default, cast)
             settings_store[key] = setting
         except UndefinedValueError:
             errors.append(f"Missing required environment variable: {env_key}")

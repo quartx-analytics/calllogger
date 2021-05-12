@@ -62,7 +62,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.3.0
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 

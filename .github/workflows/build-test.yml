@@ -89,7 +89,7 @@ jobs:
     needs: [docker]
     steps:
       - name: Docker Security Scan with Anchore
-        uses: anchore/scan-action@v2
+        uses: anchore/scan-action@v2.0.4
         id: scan
         with:
           image: ${{ env.IMAGE }}

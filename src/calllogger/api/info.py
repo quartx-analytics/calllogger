@@ -2,13 +2,13 @@
 from urllib import parse as urlparse
 
 # Local
-from calllogger.conf import settings, TokenAuth
+from calllogger.conf import settings
 from calllogger.api import QuartxAPIHandler
 
-info_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/info")
+info_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/info/")
 
 
-def get_owner_info(token: TokenAuth) -> dict:
+def get_owner_info(token) -> dict:
     api = QuartxAPIHandler()
     resp = api.make_request(
         method="GET",

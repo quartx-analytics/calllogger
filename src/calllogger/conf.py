@@ -3,20 +3,9 @@ import sys
 
 # Third Party
 from decouple import config, undefined, UndefinedValueError
-from requests.auth import AuthBase
-
-__all__ = ["TokenAuth", "settings", "merge_settings"]
 
 
-class TokenAuth(AuthBase):
-    """Requests Token authentication class."""
-
-    def __init__(self, token: str):
-        self.__token = token
-
-    def __call__(self, req):
-        req.headers["Authorization"] = f"Token {self.__token}"
-        return req
+__all__ = ["settings", "merge_settings"]
 
 
 def merge_settings(cls, settings_store: dict, prefix="", **defaults):
@@ -65,8 +54,6 @@ class Settings:
     debug: bool = False
     #: Required -  The name of the plugin to use.
     plugin: str
-    #: Required -  The CDR authentication token.
-    token: str
 
     def __init__(self):
         merge_settings(self.__class__, self.__dict__)

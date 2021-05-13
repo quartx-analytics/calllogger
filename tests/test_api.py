@@ -7,7 +7,7 @@ import pytest
 
 # Local
 from calllogger.api import handlers, info
-from calllogger.conf import TokenAuth
+from calllogger.secrets import TokenAuth
 from calllogger import running
 
 test_url = "https://testing.test/test"

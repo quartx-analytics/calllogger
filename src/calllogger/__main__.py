@@ -8,7 +8,8 @@ import sys
 import sentry_sdk
 
 # Local
-from calllogger.conf import settings, TokenAuth
+from calllogger.secrets import TokenAuth
+from calllogger.conf import settings
 from calllogger.plugins import installed
 from calllogger import __version__, running, api
 
@@ -44,34 +45,39 @@ def set_sentry_user(token_auth: TokenAuth):
     sentry_sdk.set_user(user_info)
 
 
-def main_loop(plugin) -> int:
-    token_auth = TokenAuth(settings.token)
-    queue = Queue(settings.queue_size)
+def main_loop(*args, **kwargs):
+    try:
+        return _main_loop(*args, **kwargs)
+    except KeyboardInterrupt:
+        # This will allow the threads
+        # to gracefully shutdown
+        running.clear()
+        return 130
+
+
+def _main_loop(plugin) -> int:
     running.set()
+    token = TokenAuth()
+    queue = Queue(settings.queue_size)
 
     # Configure sentry
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    set_sentry_user(token_auth)
+    set_sentry_user(token)
+
+    # Start the CDR worker to monitor the record queue
+    cdr_thread = api.CDRWorker(queue, token)
+    cdr_thread.start()
 
     # Start the plugin thread to monitor for call records
     logger.info("Selected Plugin: %s - %s", plugin.__name__, plugin.__doc__)
     plugin_thread = plugin(_queue=queue)
     plugin_thread.start()
 
-    # Start the CDR worker to monitor the record queue
-    cdr_thread = api.CDRWorker(queue, token_auth)
-    cdr_thread.start()
-
     # Sinse both threads share the same running event
     # If one dies, so should the other.
-    try:
-        plugin_thread.join()
-        cdr_thread.join()
-    except KeyboardInterrupt:
-        # This will allow the threads
-        # to gracefully shutdown
-        running.clear()
-        return 130
+    cdr_thread.join()
+    plugin_thread.join()
+    return 0
 
 
 # Entrypoint: calllogger

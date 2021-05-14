@@ -32,13 +32,9 @@ from decouple import config
 __version__ = version("quartx-calllogger")
 running = threading.Event()
 
-
 print(config("SENTRY_DSN", ""))
 print(config("DATASTORE", ""))
 print(config("LINKKEY", ""))
-
-
-
 
 # Setup Sentry
 sentry_sdk.init(

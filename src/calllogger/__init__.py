@@ -27,20 +27,18 @@ import threading
 # Third Party
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
-from decouple import config
+
+# Local
+from calllogger.conf import settings
 
 __version__ = version("quartx-calllogger")
 running = threading.Event()
 
-print("SENTRY_DSN", repr(config("SENTRY_DSN", "")))
-print("DATASTORE", repr(config("DATASTORE", "")))
-print("LINKKEY", repr(config("LINKKEY", "")))
-
 # Setup Sentry
 sentry_sdk.init(
-    config("SENTRY_DSN", ""),
+    settings.sentry_dsn,
     release=__version__,
-    environment=config("ENVIRONMENT", "Testing"),
+    environment=settings.environment,
     integrations=[ThreadingIntegration(propagate_hub=True)],
     max_breadcrumbs=25,
 )
@@ -75,7 +73,7 @@ logging.config.dictConfig({
     "loggers": {
         __name__: {
             "handlers": ["console_messages", "console_errors"],
-            "level": "DEBUG" if config("DEBUG", False, cast=bool) else "INFO",
+            "level": "DEBUG" if settings.debug else "INFO",
         }
     }
 })

@@ -5,6 +5,9 @@ import sys
 from decouple import config, undefined, UndefinedValueError
 from requests.auth import AuthBase
 
+# Local
+from calllogger.utils import decode_env
+
 __all__ = ["TokenAuth", "settings", "merge_settings"]
 
 
@@ -65,6 +68,8 @@ class Settings:
     to be override by environment variables.
     """
 
+    #: Environment name, e.g. 'testing', 'production'
+    environment: str = "Testing"
     #: Timeout in seconds to sleep on errors.
     timeout: int = 3
     #: Multiplier that increases the timeout on continuous errors.
@@ -88,6 +93,18 @@ class Settings:
     def __repr__(self):
         clean = {key: val for key, val in self.__dict__.items() if not key.startswith("__")}
         return repr(clean)
+
+    @property
+    def sentry_dsn(self):
+        return decode_env("SENTRY_DSN")
+
+    @property
+    def datastore_key(self):
+        return decode_env("DATASTORE")
+
+    @property
+    def link_key(self):
+        return decode_env("LINKKEY")
 
 
 settings = Settings()

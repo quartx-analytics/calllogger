@@ -10,11 +10,10 @@ from cryptography.fernet import Fernet
 # Local
 from calllogger.api import link_device
 
+logger = logging.getLogger(__name__)
 stored_token = PosixPath("/data/token")
 encryption_key = b'haef_Qbi7Q8-qs7nQFWaySQWMe3YuA0ds8oJw5DObuY='
 device_id = "258A3H"
-
-logger = logging.getLogger(__name__)
 
 
 class TokenAuth(AuthBase):

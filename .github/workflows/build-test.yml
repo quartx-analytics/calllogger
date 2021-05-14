@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set Environment Variables
         run: |
-          echo "BUILD_DATE=$(date +\"%Y-%m-%d %H:%M:%S\")" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
           echo "SENTRY_DSN=$(echo -n \"${{ secrets.SENTRY_DSN }}\" | base64)" >> $GITHUB_ENV
           echo "DATASTORE=$(echo -n \"${{ secrets.DATASTORE }}\" | base64)" >> $GITHUB_ENV
           echo "LINKKEY=$(echo -n \"${{ secrets.LINKKEY }}\" | base64)" >> $GITHUB_ENV

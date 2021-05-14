@@ -28,7 +28,6 @@ import threading
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
 from decouple import config
-import base64
 
 __version__ = version("quartx-calllogger")
 running = threading.Event()

@@ -1,8 +1,19 @@
+"""
+Utility module
+--------------
+Some useful function this package needs.
+
+This module should never import anything from the calllogger package.
+It should be self contained, third party imports are fine.
+"""
+
 # Standard Lib
 from datetime import datetime
 import logging
+import base64
 import time
 import json
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -73,3 +84,11 @@ def sleeper(timeout: float, callback: callable):
     while timeout > 0 and callback():
         time.sleep(.5)
         timeout -= 1
+
+
+# TODO: Create tests for this function
+def decode_env(env, default="") -> str:
+    """Decode a Base64 encoded environment variable."""
+    if value := os.environ.get(env, default):
+        value = base64.b64decode(value)
+    return value

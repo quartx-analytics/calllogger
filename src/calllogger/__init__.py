@@ -33,9 +33,9 @@ import base64
 __version__ = version("quartx-calllogger")
 running = threading.Event()
 
-print("SENTRY_DSN", repr(base64.b64decode(config("SENTRY_DSN", ""))))
-print("DATASTORE", repr(base64.b64decode(config("DATASTORE", ""))))
-print("LINKKEY", repr(base64.b64decode(config("LINKKEY", ""))))
+print("SENTRY_DSN", repr(config("SENTRY_DSN", "")))
+print("DATASTORE", repr(config("DATASTORE", "")))
+print("LINKKEY", repr(config("LINKKEY", "")))
 
 # Setup Sentry
 sentry_sdk.init(

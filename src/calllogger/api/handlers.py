@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Union
 import json as _json
 import logging
+import sys
 
 # Third party
 import requests
@@ -13,6 +14,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 from calllogger.utils import Timeout
 from calllogger.conf import settings
 from calllogger import running
+from calllogger import datastore
 
 logger = logging.getLogger(__name__)
 RetryResponse = Union[bool, requests.Response]
@@ -159,8 +161,9 @@ class QuartxAPIHandler:
         # Quit if not authorized
         if status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
             logger.error("Quitting as the token does not have the required permissions or has been revoked.")
+            datastore.revoke_token()
             self.running.clear()
-            return False
+            sys.exit(1)
 
         # Server is expereancing problems, reattempting request later
         elif status_code in (codes.not_found, codes.request_timeout) or status_code >= codes.server_error:

@@ -1,8 +1,9 @@
 # Standard lib
-import os
+from functools import cached_property
 from pathlib import PosixPath
 import logging
 import sys
+import os
 
 # Third Party
 from decouple import config, undefined, UndefinedValueError
@@ -68,15 +69,15 @@ class Settings:
     def __init__(self):
         merge_settings(self.__class__, self.__dict__)
 
-    @property
+    @cached_property
     def sentry_dsn(self) -> str:
         return decode_env("SENTRY_DSN")
 
-    @property
+    @cached_property
     def reg_key(self) -> str:
         return decode_env("REG_KEY")
 
-    @property
+    @cached_property
     def datastore(self) -> PosixPath:
         """The location for the datastore."""
         if locale := os.environ.get("DATA_LOCATION"):
@@ -86,6 +87,7 @@ class Settings:
             locale = appdirs.user_data_dir("quartx-calllogger")
             locale = PosixPath(locale)
 
+        logger.debug("Datastore Location: %s", locale)
         os.makedirs(locale, exist_ok=True)
         return locale
 

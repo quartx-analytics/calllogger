@@ -46,3 +46,9 @@ def get_token() -> str:
         token = api.link_device()
         write_datastore(token_store, token)
         logger.debug("Device token received, writing to datastore.")
+
+
+def revoke_token():
+    """Remove token form datastore if exists."""
+    logger.info("Removing stored token if exists")
+    token_store.unlink(missing_ok=True)

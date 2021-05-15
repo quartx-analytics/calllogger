@@ -17,8 +17,6 @@ def link_device() -> str:
         json={
             "device_id": settings.identifier,
             "reg_key": settings.reg_key,
-        },
-        headers={"content-type": "application/json"},
+        }
     )
-    # TODO: Change QuartxAPIHandler to not require content-type to be set for json
     return resp.json()["token"]

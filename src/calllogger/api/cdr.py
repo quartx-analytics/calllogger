@@ -36,7 +36,6 @@ class CDRWorker(QuartxAPIHandler, Thread):
         self.request = requests.Request(
             method="POST",
             url=cdr_url,
-            headers={"content-type": "application/json"},
             auth=token,
         )
 

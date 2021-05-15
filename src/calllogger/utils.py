@@ -8,11 +8,10 @@ It should be self contained, third party imports are fine.
 """
 
 # Standard Lib
-from datetime import datetime
+
 import logging
 import base64
 import time
-import json
 import os
 
 # Third Party
@@ -25,18 +24,6 @@ class OnlyMessages(logging.Filter):
     """Filter out log records that are less than the WARNING level."""
     def filter(self, record):
         return record.levelno < logging.WARNING
-
-
-class ComplexEncoder(json.JSONEncoder):
-    """Custom Json Encoder to serialize other types of python objects."""
-
-    def default(self, obj):
-        # Decode datetime objects to iso format
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-
-        # Let the base class default method raise the TypeError
-        return json.JSONEncoder.default(self, obj)
 
 
 class Timeout:

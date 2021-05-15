@@ -1,4 +1,5 @@
 # Standard lib
+from datetime import datetime
 from typing import Union
 import json as _json
 import logging
@@ -9,7 +10,7 @@ from requests import codes
 from sentry_sdk import push_scope, capture_exception, Scope
 
 # Local
-from calllogger.utils import ComplexEncoder, Timeout
+from calllogger.utils import Timeout
 from calllogger.conf import settings
 from calllogger import running
 
@@ -51,6 +52,18 @@ def decode_response(response: requests.Response, limit=1000) -> Union[str, dict]
         return data[:limit] if isinstance(data, str) else data
 
 
+class ComplexEncoder(_json.JSONEncoder):
+    """Custom Json Encoder to serialize other types of python objects."""
+
+    def default(self, obj):
+        # Decode datetime objects to iso format
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+
+        # Let the base class default method raise the TypeError
+        return super().default(obj)
+
+
 class QuartxAPIHandler:
     """Custom Requests handler for api errors."""
 
@@ -63,18 +76,18 @@ class QuartxAPIHandler:
 
     def make_request(self, *args, **kwargs) -> requests.Response:
         """Contruct a request object and send the request."""
-        json = kwargs.pop("json", None)
+        custom_json = kwargs.pop("custom_json", None)
         request = requests.Request(*args, **kwargs)
-        return self.send_request(request, json)
+        return self.send_request(request, custom_json)
 
-    def send_request(self, request: requests.Request, json: dict, **kwargs) -> requests.Response:
+    def send_request(self, request: requests.Request, custom_json: dict = None, **kwargs) -> requests.Response:
         """Send request using a request object."""
         prepared_request = request.prepare()
         try:
             # Keep retrying to make the record if request fails
             while self.running.is_set():
                 with push_scope() as scope:
-                    resp = self._send_request(scope, prepared_request, json, kwargs)
+                    resp = self._send_request(scope, prepared_request, custom_json, kwargs)
                     if resp is True:
                         self.timeout.sleep()
                         continue
@@ -83,15 +96,17 @@ class QuartxAPIHandler:
         finally:
             self.timeout.reset()
 
-    def _send_request(self, scope, request: requests.PreparedRequest, json: dict, kwargs) -> RetryResponse:
+    def _send_request(self, scope, request: requests.PreparedRequest, custom_json: dict, kwargs) -> RetryResponse:
         """
         Send request and process the response for errors.
         Returning True if request needs to be retried.
         """
         try:
             # Add request body
-            data = _json.dumps(json, cls=ComplexEncoder)
-            request.prepare_body(data, None)
+            if custom_json:
+                data = _json.dumps(custom_json, cls=ComplexEncoder)
+                request.headers["content-type"] = "application/json"
+                request.prepare_body(data, None)
 
             # Send Request
             response = self.session.send(request, timeout=self.timeout.value, **kwargs)

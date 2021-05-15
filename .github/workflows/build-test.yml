@@ -81,8 +81,8 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:latest
           build-args: |
-            SENTRY_DSN=${{ env.SENTRY_DSN }}
-            REG_KEY=${{ env.REG_KEY }}
+            SENTRY_DSN=encoded:${{ env.SENTRY_DSN }}
+            REG_KEY=encoded:${{ env.REG_KEY }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.created=${{ env.BUILD_DATE }}

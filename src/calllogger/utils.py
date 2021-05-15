@@ -90,6 +90,7 @@ def sleeper(timeout: float, callback: callable):
 # TODO: Create tests for this function
 def decode_env(env, default="") -> str:
     """Decode a Base64 encoded environment variable."""
-    if value := os.environ.get(env, default):
-        value = base64.b64decode(value).decode("utf8")
+    value = os.environ.get(env, default)
+    if value and value.startswith("encoded:"):
+        value = base64.b64decode(value.lstrip("encoded:")).decode("utf8")
     return value

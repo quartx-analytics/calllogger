@@ -73,12 +73,8 @@ class Settings:
         return decode_env("SENTRY_DSN")
 
     @property
-    def datastore_key(self) -> str:
-        return decode_env("DATASTORE")
-
-    @property
     def reg_key(self) -> str:
-        return decode_env("REGISTRY")
+        return decode_env("REG_KEY")
 
     @property
     def datastore(self) -> PosixPath:

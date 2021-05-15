@@ -91,5 +91,5 @@ def sleeper(timeout: float, callback: callable):
 def decode_env(env, default="") -> str:
     """Decode a Base64 encoded environment variable."""
     if value := os.environ.get(env, default):
-        value = base64.b64decode(value)
+        value = base64.b64decode(value).decode("utf8")
     return value

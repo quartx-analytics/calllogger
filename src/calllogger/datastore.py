@@ -1,10 +1,8 @@
 # Standard Lib
 from pathlib import PosixPath
 import logging
+import base64
 import os
-
-# Third Party
-from cryptography.fernet import Fernet
 
 # Local
 from calllogger import api
@@ -16,21 +14,19 @@ token_store = settings.datastore.joinpath("token")
 
 
 def read_datastore(path: PosixPath, encoding="UTF8") -> str:
-    """Decrypt stored token and return."""
-    crypto = Fernet(settings.datastore_key.encode("ASCII"))
+    """Decode stored data and return."""
     with path.open("rb") as stream:
-        encrypted_data = stream.read()
-        decrypted_data = crypto.decrypt(encrypted_data)
-        return decrypted_data.decode(encoding)
+        encoded_data = stream.read()
+        decoded_data = base64.b64decode(encoded_data)
+        return decoded_data.decode(encoding)
 
 
 def write_datastore(path: PosixPath, data: str, encoding="UTF8"):
-    """Encrypt token and save to disk."""
-    crypto = Fernet(settings.datastore_key.encode("ASCII"))
+    """Encode data and save to disk."""
     with path.open("wb") as stream:
-        decrypted_data = data.encode(encoding)
-        encrypted_data = crypto.encrypt(decrypted_data)
-        stream.write(encrypted_data)
+        decoded_data = data.encode(encoding)
+        encoded_data = base64.b64encode(decoded_data)
+        stream.write(encoded_data)
 
 
 def get_token() -> str:

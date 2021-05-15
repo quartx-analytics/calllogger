@@ -24,4 +24,4 @@ ENV REG_KEY=$REG_KEY
 COPY . /src
 RUN mkdir -p $DATA_LOCATION && pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir /src && rm -rf /src
 CMD ["calllogger"]
-VOLUME [$DATA_LOCATION]
+VOLUME ["$DATA_LOCATION"]

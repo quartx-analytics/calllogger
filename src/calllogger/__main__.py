@@ -67,7 +67,7 @@ def _main_loop(plugin) -> int:
     set_sentry_user(tokenauth)
 
     # Start the CDR worker to monitor the record queue
-    cdr_thread = api.CDRWorker(queue, token)
+    cdr_thread = api.CDRWorker(queue, tokenauth)
     cdr_thread.start()
 
     # Start the plugin thread to monitor for call records

@@ -11,6 +11,7 @@ from sentry_sdk import capture_exception
 # Local
 from calllogger.api import QuartxAPIHandler
 from calllogger.conf import settings
+from calllogger.utils import TokenAuth
 
 # We keep the url here for easier testing
 cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")
@@ -26,7 +27,7 @@ class CDRWorker(QuartxAPIHandler, Thread):
     :param token: The authentication token for the monitoring service.
     """
 
-    def __init__(self, call_queue: queue.Queue, token):
+    def __init__(self, call_queue: queue.Queue, token: TokenAuth):
         super().__init__(suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.debug("Sending CDRs to: %s", settings.domain)
         self.queue = call_queue

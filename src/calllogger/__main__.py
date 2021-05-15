@@ -8,7 +8,8 @@ import sys
 import sentry_sdk
 
 # Local
-from calllogger.secrets import TokenAuth
+from calllogger.datastore import get_token
+from calllogger.utils import TokenAuth
 from calllogger.conf import settings
 from calllogger.plugins import installed
 from calllogger import __version__, running, api
@@ -57,12 +58,13 @@ def main_loop(*args, **kwargs):
 
 def _main_loop(plugin) -> int:
     running.set()
-    token = TokenAuth()
+    token = get_token()
+    tokenauth = TokenAuth(token)
     queue = Queue(settings.queue_size)
 
     # Configure sentry
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    set_sentry_user(token)
+    set_sentry_user(tokenauth)
 
     # Start the CDR worker to monitor the record queue
     cdr_thread = api.CDRWorker(queue, token)

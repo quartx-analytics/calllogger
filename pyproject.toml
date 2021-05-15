@@ -37,6 +37,7 @@ pyserial = "^3.5"
 requests = "^2.25.1"
 attrs = "^21.2.0"
 cryptography = "^3.4.7"
+appdirs = "^1.4.4"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.23.1"

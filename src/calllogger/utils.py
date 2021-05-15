@@ -15,6 +15,9 @@ import time
 import json
 import os
 
+# Third Party
+from requests.auth import AuthBase
+
 logger = logging.getLogger(__name__)
 
 
@@ -72,6 +75,17 @@ class Timeout:
     @property
     def value(self) -> int:
         return self._timeout
+
+
+class TokenAuth(AuthBase):
+    """Requests Token authentication class."""
+
+    def __init__(self, token: str):
+        self.__token = token
+
+    def __call__(self, req):
+        req.headers["Authorization"] = f"Token {self.__token}"
+        return req
 
 
 def sleeper(timeout: float, callback: callable):

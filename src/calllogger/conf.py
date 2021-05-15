@@ -1,34 +1,19 @@
 # Standard lib
+import os
+from pathlib import PosixPath
+import logging
 import sys
 
 # Third Party
 from decouple import config, undefined, UndefinedValueError
-from requests.auth import AuthBase
+import appdirs
 
 # Local
 from calllogger.utils import decode_env
 
-__all__ = ["TokenAuth", "settings", "merge_settings"]
-
-
-class TokenAuth(AuthBase):
-    """Requests Token authentication class."""
-
-    def __init__(self, token: str):
-        self.__token = token
-
-    def __call__(self, req):
-        req.headers["Authorization"] = f"Token {self.__token}"
-        return req
-
-
-def cmd_args() -> dict:
-    args = {}
-    for arg in sys.argv[1:]:
-        if "=" in arg:
-            key, val = arg.split("=", 1)
-            args[key.replace("-", "_").lower()] = val
-    return args
+__all__ = ["settings", "merge_settings"]
+logger = logging.getLogger(__name__)
+stored_token = PosixPath("/data/token")
 
 
 def merge_settings(cls, settings_store: dict, prefix="", **defaults):
@@ -83,21 +68,32 @@ class Settings:
     def __init__(self):
         merge_settings(self.__class__, self.__dict__)
 
-    def __repr__(self):
-        clean = {key: val for key, val in self.__dict__.items() if not key.startswith("__")}
-        return repr(clean)
-
     @property
-    def sentry_dsn(self):
+    def sentry_dsn(self) -> str:
         return decode_env("SENTRY_DSN")
 
     @property
-    def datastore_key(self):
+    def datastore_key(self) -> str:
         return decode_env("DATASTORE")
 
     @property
-    def link_key(self):
-        return decode_env("LINKKEY")
+    def reg_key(self) -> str:
+        return decode_env("REGISTRY")
+
+    @property
+    def datastore(self) -> PosixPath:
+        """The location for the datastore."""
+        if locale := os.environ.get("DATA_LOCATION"):
+            return PosixPath(locale).resolve()
+        else:
+            # Use appdirs to select datastore location if locale is not given
+            locale = appdirs.user_data_dir("quartx-calllogger")
+            return PosixPath(locale)
+
+    @property
+    def identifier(self):
+        """The unique identifier for this device."""
+        return "258A3H"
 
 
 settings = Settings()

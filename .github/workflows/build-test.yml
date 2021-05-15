@@ -55,7 +55,7 @@ jobs:
           echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
           echo "SENTRY_DSN=$(echo -n '${{ secrets.SENTRY_DSN }}' | base64 -w 0)" >> $GITHUB_ENV
           echo "DATASTORE=$(echo -n '${{ secrets.DATASTORE }}' | base64 -w 0)" >> $GITHUB_ENV
-          echo "LINKKEY=$(echo -n '${{ secrets.LINKKEY }}' | base64 -w 0)" >> $GITHUB_ENV
+          echo "REGISTRY=$(echo -n '${{ secrets.REGISTRY }}' | base64 -w 0)" >> $GITHUB_ENV
 
       - name: Login to Github Container Registry
         uses: docker/login-action@v1.9.0
@@ -84,7 +84,7 @@ jobs:
           build-args: |
             SENTRY_DSN=${{ env.SENTRY_DSN }}
             DATASTORE=${{ env.DATASTORE }}
-            LINKKEY=${{ env.LINKKEY }}
+            REGISTRY=${{ env.REGISTRY }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.created=${{ env.BUILD_DATE }}

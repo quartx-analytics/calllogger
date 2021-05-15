@@ -80,11 +80,14 @@ class Settings:
     def datastore(self) -> PosixPath:
         """The location for the datastore."""
         if locale := os.environ.get("DATA_LOCATION"):
-            return PosixPath(locale).resolve()
+            locale = PosixPath(locale).resolve()
         else:
             # Use appdirs to select datastore location if locale is not given
             locale = appdirs.user_data_dir("quartx-calllogger")
-            return PosixPath(locale)
+            locale = PosixPath(locale)
+
+        os.makedirs(locale, exist_ok=True)
+        return locale
 
     @property
     def identifier(self):

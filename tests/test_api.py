@@ -12,8 +12,7 @@ from calllogger.utils import TokenAuth
 from calllogger import running
 
 test_url = "https://testing.test/test"
-client_error_status = [
-    (400, False),
+client_exit_status = [
     (401, True),
     (402, True),
     (403, True)
@@ -114,18 +113,24 @@ def client_errors(api, requests_mock, mocker, bad_code, cleard):
     return resp
 
 
-@pytest.mark.parametrize("bad_code,cleard", client_error_status)
-def test_client_errors(api, requests_mock, mocker, bad_code, cleard):
+def test_client_errors(api, requests_mock, mocker):
     """Test for client errors. Errors that can not be retried."""
     with pytest.raises(requests.HTTPError):
+        client_errors(api, requests_mock, mocker, 400, False)
+
+
+@pytest.mark.parametrize("bad_code,cleard", client_exit_status)
+def test_client_exit(api, requests_mock, mocker, bad_code, cleard):
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
         client_errors(api, requests_mock, mocker, bad_code, cleard)
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 1
 
 
-@pytest.mark.parametrize("bad_code,cleard", client_error_status)
-def test_client_errors_suppressed(api, requests_mock, mocker, bad_code, cleard):
+def test_client_errors_suppressed(api, requests_mock, mocker):
     """Test for client errors. Errors that can not be retried."""
     api.suppress_errors = True
-    resp = client_errors(api, requests_mock, mocker, bad_code, cleard)
+    resp = client_errors(api, requests_mock, mocker, 400, False)
     assert resp is False
 
 

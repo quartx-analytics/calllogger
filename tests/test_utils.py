@@ -1,7 +1,5 @@
 # Standard Lib
-from datetime import datetime, timezone
 import logging
-import json
 
 # Third Party
 import pytest
@@ -24,19 +22,6 @@ def test_only_messages(level, expected):
     # noinspection PyTypeChecker
     value = logfilter.filter(logging.LogRecord("testlogger", level, "", 1, None, tuple(), {"test": None}))
     assert value is expected
-
-
-def test_complex_json_supported_type():
-    """Test that utils.ComplexEncoder decodes datetime objects."""
-    date = datetime.now().astimezone(timezone.utc)
-    encoded = json.dumps({"date": date, "data": "data"}, cls=utils.ComplexEncoder)
-    assert encoded == '{"date": "%s", "data": "data"}' % date.isoformat()
-
-
-def test_complex_json_unsupported_type():
-    """Test that utils.ComplexEncoder decodes datetime objects."""
-    with pytest.raises(TypeError):
-        json.dumps({"timezone": timezone.utc, "data": "data"}, cls=utils.ComplexEncoder)
 
 
 def test_timeout_decay(mocker: MockerFixture):

@@ -1,4 +1,5 @@
 # Standard lib
+from datetime import datetime, timezone
 import json
 
 # Third Party
@@ -7,7 +8,7 @@ import pytest
 
 # Local
 from calllogger.api import handlers, info
-from calllogger.secrets import TokenAuth
+from calllogger.utils import TokenAuth
 from calllogger import running
 
 test_url = "https://testing.test/test"
@@ -148,3 +149,16 @@ def test_get_owner_info(requests_mock, mocker):
 
     assert mocked_request.called
     assert resp == expected_resp
+
+
+def test_complex_json_supported_type():
+    """Test that utils.ComplexEncoder decodes datetime objects."""
+    date = datetime.now().astimezone(timezone.utc)
+    encoded = json.dumps({"date": date, "data": "data"}, cls=handlers.ComplexEncoder)
+    assert encoded == '{"date": "%s", "data": "data"}' % date.isoformat()
+
+
+def test_complex_json_unsupported_type():
+    """Test that utils.ComplexEncoder decodes datetime objects."""
+    with pytest.raises(TypeError):
+        json.dumps({"timezone": timezone.utc, "data": "data"}, cls=handlers.ComplexEncoder)

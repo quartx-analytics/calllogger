@@ -8,7 +8,7 @@ from requests_mock import Mocker
 # Local
 from calllogger.api import cdr
 from calllogger.record import CallDataRecord
-from calllogger.secrets import TokenAuth
+from calllogger.utils import TokenAuth
 from calllogger import running
 
 

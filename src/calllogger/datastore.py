@@ -2,6 +2,7 @@
 from pathlib import PosixPath
 import logging
 import base64
+import sys
 import os
 
 # Local
@@ -41,11 +42,20 @@ def get_token() -> str:
         return read_datastore(token_store)
 
     # Option 3: Register with server
-    else:
+    elif settings.identifier and settings.reg_key:
         logger.debug("Registering device with server.")
         token = api.link_device()
         write_datastore(token_store, token)
         logger.debug("Device token received, writing to datastore.")
+    else:
+        if not settings.identifier:
+            logger.debug("Device registration unavailable. Missing required device identifier")
+        if not settings.reg_key:
+            logger.debug("Device registration unavailable. Missing required registration key")
+
+        print("Unable to proceed, missing required TOKEN.")
+        print("Please set the TOKEN environment variable")
+        sys.exit(1)
 
 
 def revoke_token():

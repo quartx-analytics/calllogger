@@ -14,7 +14,6 @@ from calllogger.utils import decode_env
 
 __all__ = ["settings", "merge_settings"]
 logger = logging.getLogger(__name__)
-stored_token = PosixPath("/data/token")
 
 
 def merge_settings(cls, settings_store: dict, prefix="", **defaults):
@@ -65,6 +64,9 @@ class Settings:
     debug: bool = False
     #: Required -  The name of the plugin to use.
     plugin: str
+
+    # Flag to indicate if program is dockerized
+    dockerized: bool = False
 
     def __init__(self):
         merge_settings(self.__class__, self.__dict__)

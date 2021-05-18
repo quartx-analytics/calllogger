@@ -27,6 +27,7 @@ class SerialPlugin(BasePlugin):
     def __init__(self):
         super(SerialPlugin, self).__init__()
         self.sserver = serial.Serial()
+        # TODO: Create check if serial port is available, exit if not
 
     def __open(self):
         """Open a connection to the serial interface, returning True if successful else False."""

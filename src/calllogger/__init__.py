@@ -23,6 +23,8 @@ __all__ = ["__version__", "__package__", "running"]
 from importlib.metadata import version
 import logging.config
 import threading
+import sys
+import os
 
 # Third Party
 import sentry_sdk
@@ -78,3 +80,10 @@ logging.config.dictConfig({
         }
     }
 })
+
+# Make sure that the datastore directory is mounted if program is dockerized
+if settings.dockerized and not os.path.ismount(settings.datastore):
+    print(f"The {settings.datastore} directory is required to be a mounted docker volume")
+    print("Please add the following to your docker command")
+    print(f'--volume="calllogger-data:{settings.datastore}"')
+    sys.exit(1)

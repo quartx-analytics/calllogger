@@ -42,4 +42,4 @@ Don't forget to change the ``token`` to the required value. Also make sure that 
 
 .. code-block:: bash
 
-    docker run --detach --name "calllogger" -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --volume="calllogger:/data" --restart=unless-stopped ghcr.io/quartx-analytics/calllogger
+    docker run --detach --name "calllogger" -e "TOKEN=<token>" -e "PLUGIN=SiemensHipathSerial" --device=/dev/ttyUSB0:/dev/ttyUSB0 --volume="calllogger-data:/data" --restart=unless-stopped ghcr.io/quartx-analytics/calllogger

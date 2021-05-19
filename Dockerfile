@@ -23,6 +23,7 @@ ENV REG_KEY=
 # Entrypoint setup
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["calllogger"]
 
 # Install as Python Package
 COPY . /src

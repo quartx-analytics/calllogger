@@ -17,8 +17,8 @@ case $1 in
     exec calllogger-mock
   ;;
   *)
-    exec calllogger
+    exec "$@"
   ;;
 esac
 
-exit $?
+exit 0

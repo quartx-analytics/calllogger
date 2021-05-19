@@ -28,6 +28,7 @@ packages = [
 [tool.poetry.scripts]
 calllogger = "calllogger.__main__:monitor"
 calllogger-mock = "calllogger.__main__:mocker"
+calllogger-getid = "calllogger.__main__:getid"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -37,6 +38,7 @@ pyserial = "^3.5"
 requests = "^2.25.1"
 attrs = "^21.2.0"
 appdirs = "^1.4.4"
+getmac = "^0.8.2"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.23.1"

@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 isMounted    () { findmnt -rno SOURCE,TARGET "$1" >/dev/null;} # path or device
 isDevMounted () { findmnt -rno SOURCE        "$1" >/dev/null;} # device only
@@ -12,10 +12,21 @@ if ! isPathMounted "$DATA_LOCATION"; then
   exit 1
 fi
 
+# Ensure that the docker container is in network host mode
+if [[ ! -d "/sys/class/net/docker0" ]]; then
+  echo "Looks like the docker network mode was not set to host."
+  echo "Please add the following to your docker command."
+  echo "--network host"
+fi
+
 case $1 in
   mock)
     export PLUGIN=MockCalls
     exec calllogger-mock
+  ;;
+  getid)
+    export PLUGIN=MockCalls
+    exec calllogger-getid
   ;;
   *)
     exec "$@"

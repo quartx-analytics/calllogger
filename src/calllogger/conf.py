@@ -7,6 +7,7 @@ import os
 
 # Third Party
 from decouple import config, undefined, UndefinedValueError
+from getmac import get_mac_address
 import appdirs
 
 # Local
@@ -96,7 +97,7 @@ class Settings:
     @property
     def identifier(self):
         """The unique identifier for this device."""
-        return "258A3H"
+        return get_mac_address(hostname="localhost")
 
 
 settings = Settings()

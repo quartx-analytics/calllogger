@@ -96,6 +96,12 @@ def mockcalls() -> int:
     return main_loop(plugin)
 
 
+# Entrypoint: calllogger-getid
+def getid() -> int:
+    print(f"Device Identifier: {settings.identifier}")
+    return 0
+
+
 if __name__ == "__main__":
     # Normally this program will be called from an entrypoint
     # So we will force use of the mock plugin when called directly

@@ -14,6 +14,7 @@ fi
 
 case $1 in
   mock)
+    export PLUGIN=MockCalls
     exec calllogger-mock
   ;;
   *)

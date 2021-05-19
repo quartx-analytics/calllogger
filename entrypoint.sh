@@ -9,6 +9,7 @@ if ! isPathMounted "$DATA_LOCATION"; then
   echo "The $DATA_LOCATION directory is required to be a mounted docker volume."
   echo "Please add the following to your docker command."
   echo "--volume='calllogger-data:$DATA_LOCATION'"
+  exit 1
 fi
 
 case $1 in

@@ -63,8 +63,6 @@ class Settings:
     domain: str = "https://quartx.ie"
     #: Set to true to enable debug logging.
     debug: bool = False
-    #: Required -  The name of the plugin to use.
-    plugin: str
 
     # Flag to indicate if program is dockerized
     dockerized: bool = False
@@ -94,10 +92,19 @@ class Settings:
         os.makedirs(locale, exist_ok=True)
         return locale
 
-    @property
+    @cached_property
     def identifier(self):
         """The unique identifier for this device."""
         return get_mac_address(hostname="localhost")
+
+    @property
+    def plugin(self):
+        """The name of the plugin to use."""
+        if "PLUGIN" in os.environ["PLUGIN"]:
+            return os.environ["PLUGIN"]
+        else:
+            print("environment variable: PLUGIN")
+            sys.exit()
 
 
 settings = Settings()

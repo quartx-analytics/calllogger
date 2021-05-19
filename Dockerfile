@@ -27,4 +27,8 @@ CMD ["calllogger"]
 
 # Install as Python Package
 COPY . /src
-RUN mkdir -p $DATA_LOCATION && pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir /src && rm -rf /src
+RUN mkdir -p $DATA_LOCATION && \
+    apk add --no-cache findmnt && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir /src && \
+    rm -rf /src

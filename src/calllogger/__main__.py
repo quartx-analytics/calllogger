@@ -8,9 +8,8 @@ import sys
 import sentry_sdk
 
 # Local
-from calllogger.datastore import get_token
+from calllogger.conf import settings, get_token, get_identifier
 from calllogger.utils import TokenAuth
-from calllogger.conf import settings
 from calllogger.plugins import installed
 from calllogger import __version__, running, api
 
@@ -98,7 +97,7 @@ def mockcalls() -> int:
 
 # Entrypoint: calllogger-getid
 def getid() -> int:
-    print(f"Device Identifier: {settings.identifier}")
+    print(get_identifier())
     return 0
 
 

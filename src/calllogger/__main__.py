@@ -1,8 +1,8 @@
 # Standard Lib
 from queue import Queue
+import signal as _signal
 import argparse
 import logging
-import signal
 import sys
 
 # Third Party
@@ -23,7 +23,7 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_args()
 
 
-def terminate():
+def terminate(signal=None, frame=None):
     """This will allow the threads to gracefully shutdown."""
     logger.debug("initiating graceful shutdown")
     running.clear()

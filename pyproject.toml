@@ -27,7 +27,7 @@ packages = [
 
 [tool.poetry.scripts]
 calllogger = "calllogger.__main__:monitor"
-calllogger-mock = "calllogger.__main__:mocker"
+calllogger-mock = "calllogger.__main__:mockcalls"
 calllogger-getid = "calllogger.__main__:getid"
 
 [tool.poetry.dependencies]

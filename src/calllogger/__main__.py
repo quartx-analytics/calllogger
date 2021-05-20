@@ -1,6 +1,6 @@
 # Standard Lib
 from queue import Queue
-import signal as _signal
+import signal
 import argparse
 import logging
 import sys
@@ -23,7 +23,7 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_args()
 
 
-def terminate(_=None, __=None):
+def terminate(*_):
     """This will allow the threads to gracefully shutdown."""
     logger.debug("initiating graceful shutdown")
     running.clear()
@@ -54,11 +54,11 @@ def set_sentry_user(token_auth: TokenAuth):
     sentry_sdk.set_user(user_info)
 
 
-def main_loop(*args, **kwargs):
+def main_loop(*args, **kwargs) -> int:
     try:
         return _main_loop(*args, **kwargs)
     except KeyboardInterrupt:
-        terminate()
+        return terminate()
 
 
 def _main_loop(plugin) -> int:
@@ -107,7 +107,9 @@ def getid() -> int:
     return 0
 
 
-_signal.signal(_signal.SIGTERM, terminate)
+# Gracefully shutdown for 'kill <pid>' or docker stop <container>
+signal.signal(signal.SIGTERM, terminate)
+
 if __name__ == "__main__":
     # Normally this program will be called from an entrypoint
     # So we will force use of the mock plugin when called directly

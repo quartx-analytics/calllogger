@@ -48,15 +48,18 @@ def get_token() -> str:
     # Option 3: Register with server
     elif (identifier := get_identifier()) and settings.reg_key:
         logger.debug("Registering device with server.")
-        token = api.link_device(identifier)
-        utils.write_datastore(token_store, token)
-        logger.debug("Device token received, writing to datastore.")
-        return token
+        if token := api.link_device(identifier):
+            utils.write_datastore(token_store, token)
+            logger.debug("Device token received, writing to datastore.")
+            return token
+        else:
+            print("Unable to register device.")
+            sys.exit(1)
     else:
         if identifier is None:
-            logger.debug("Device registration unavailable. Missing required device identifier")
+            logger.info("Device registration unavailable. Missing required device identifier")
         if not settings.reg_key:
-            logger.debug("Device registration unavailable. Missing required registration key")
+            logger.info("Device registration unavailable. Missing required registration key")
 
         print("Unable to proceed, missing required TOKEN.")
         print("Please set the TOKEN environment variable")

@@ -65,6 +65,10 @@ class Settings:
 
     # Flag to indicate if program is dockerized
     dockerized: bool = False
+    # Device registration cutoff timeout in seconds
+    device_reg_timeout: int = 3*60*60
+    # Device registration check timeout in seconds
+    device_reg_check: int = 60
 
     def __init__(self):
         merge_settings(self.__class__, self.__dict__)

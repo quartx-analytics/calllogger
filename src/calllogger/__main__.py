@@ -52,6 +52,7 @@ def main_loop(*args, **kwargs):
     except KeyboardInterrupt:
         # This will allow the threads
         # to gracefully shutdown
+        logger.debug("initiating graceful shutdown")
         running.clear()
         return 130
 

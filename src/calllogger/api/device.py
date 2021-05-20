@@ -40,7 +40,7 @@ def link_device(identifier) -> Union[str, None]:
             if time.time() - start < settings.device_reg_timeout:
                 continue
             else:
-                logger.info(f"Device registration failed: Registration time elapsed, giving up.")
+                logger.info("Device registration failed: Registration time elapsed, giving up.")
                 return None
         else:
             # Have no idea what to do here only return None

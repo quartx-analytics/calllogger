@@ -23,7 +23,7 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_args()
 
 
-def terminate(signal=None, frame=None):
+def terminate(_=None, __=None):
     """This will allow the threads to gracefully shutdown."""
     logger.debug("initiating graceful shutdown")
     running.clear()
@@ -107,7 +107,7 @@ def getid() -> int:
     return 0
 
 
-signal.signal(signal.SIGTERM, terminate)
+_signal.signal(_signal.SIGTERM, terminate)
 if __name__ == "__main__":
     # Normally this program will be called from an entrypoint
     # So we will force use of the mock plugin when called directly

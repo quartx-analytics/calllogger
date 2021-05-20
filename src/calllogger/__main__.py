@@ -2,6 +2,7 @@
 from queue import Queue
 import argparse
 import logging
+import signal
 import sys
 
 # Third Party
@@ -20,6 +21,13 @@ logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser(prog="Quartx CallLogger")
 parser.add_argument('--version', action='version', version=f"calllogger {__version__}")
 parser.parse_args()
+
+
+def terminate():
+    """This will allow the threads to gracefully shutdown."""
+    logger.debug("initiating graceful shutdown")
+    running.clear()
+    return 130
 
 
 def get_plugin(selected_plugin: str):
@@ -50,11 +58,7 @@ def main_loop(*args, **kwargs):
     try:
         return _main_loop(*args, **kwargs)
     except KeyboardInterrupt:
-        # This will allow the threads
-        # to gracefully shutdown
-        logger.debug("initiating graceful shutdown")
-        running.clear()
-        return 130
+        terminate()
 
 
 def _main_loop(plugin) -> int:
@@ -103,6 +107,7 @@ def getid() -> int:
     return 0
 
 
+signal.signal(signal.SIGTERM, terminate)
 if __name__ == "__main__":
     # Normally this program will be called from an entrypoint
     # So we will force use of the mock plugin when called directly

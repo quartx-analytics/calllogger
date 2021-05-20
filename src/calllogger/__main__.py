@@ -8,10 +8,11 @@ import sys
 import sentry_sdk
 
 # Local
-from calllogger.conf import settings, get_token, get_identifier
+from calllogger.conf import settings
 from calllogger.utils import TokenAuth
 from calllogger.plugins import installed
 from calllogger import __version__, running, api
+from calllogger.datastore import get_token, get_identifier
 
 logger = logging.getLogger(__name__)
 

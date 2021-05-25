@@ -47,10 +47,9 @@ def get_token() -> str:
 
     # Option 3: Register with server
     elif (identifier := get_identifier()) and settings.reg_key:
-        logger.debug("Registering device with server.")
         if token := api.link_device(identifier):
             utils.write_datastore(token_store, token)
-            logger.debug("Device token received, writing to datastore.")
+            logger.debug("Writing token to datastore")
             return token
         else:
             print("Unable to register device.")

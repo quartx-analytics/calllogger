@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 def link_device(identifier) -> Union[str, None]:
     """Link device to a tenant on the server and return the provided token."""
+    logger.info("Registering device with server using identifier: %s", identifier)
     api = QuartxAPIHandler()
     start = time.time()
 
@@ -31,6 +32,7 @@ def link_device(identifier) -> Union[str, None]:
             }
         )
         if resp.status_code == codes["created"]:  # 201
+            logger.info("Device token received")
             data = resp.json()
             return data["token"]
         elif resp.status_code == codes["no_content"]:  # 204

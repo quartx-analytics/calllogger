@@ -53,6 +53,7 @@ def get_token() -> str:
             return token
         else:
             print("Unable to register device.")
+            # TODO: Look into better exit code for link device
             sys.exit(1)
     else:
         if identifier is None:
@@ -62,7 +63,7 @@ def get_token() -> str:
 
         print("Unable to proceed, missing required TOKEN.")
         print("Please set the TOKEN environment variable")
-        sys.exit(1)
+        sys.exit(0)
 
 
 def revoke_token():

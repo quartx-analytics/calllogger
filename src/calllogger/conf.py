@@ -39,7 +39,7 @@ def merge_settings(cls, settings_store: dict, prefix="", **defaults):
     if errors:
         for msg in errors:
             print(msg)
-        sys.exit()
+        sys.exit(0)
 
 
 class Settings:
@@ -101,8 +101,8 @@ class Settings:
         if "PLUGIN" in os.environ["PLUGIN"]:
             return os.environ["PLUGIN"]
         else:
-            print("environment variable: PLUGIN")
-            sys.exit()
+            print("Missing required environment variable: PLUGIN")
+            sys.exit(0)
 
 
 settings = Settings()

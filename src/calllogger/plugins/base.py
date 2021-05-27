@@ -1,14 +1,11 @@
 # Standard library
-from threading import Thread
 from typing import NoReturn
 from queue import Queue
 import logging
 import abc
 
-# Third party
-from sentry_sdk import capture_exception
-
 # Local
+from calllogger.managers import ThreadExceptionManager
 from calllogger.conf import settings, merge_settings
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
@@ -27,7 +24,7 @@ class PluginSettings(abc.ABCMeta):
         return inst
 
 
-class BasePlugin(Thread, metaclass=PluginSettings):
+class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     """
     This is the Base Plugin class for all phone system plugins.
 
@@ -42,16 +39,6 @@ class BasePlugin(Thread, metaclass=PluginSettings):
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
         self.timeout = Timeout(settings, running.is_set)  # pragma: no branch
-
-    def run(self) -> bool:
-        try:
-            self.entrypoint()
-        except Exception as err:
-            capture_exception(err)
-            running.clear()
-            return False
-        else:
-            return True
 
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""

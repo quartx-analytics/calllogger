@@ -9,6 +9,7 @@ It should be self contained, third party imports are fine.
 
 # Standard Lib
 from pathlib import PosixPath
+import threading
 import logging
 import base64
 import time
@@ -111,3 +112,34 @@ def write_datastore(path: PosixPath, data: str, encoding="UTF8"):
         decoded_data = data.encode(encoding)
         encoded_data = base64.b64encode(decoded_data)
         stream.write(encoded_data)
+
+
+class ExitCodeManager:
+    """
+    Manager to keep track of the exit code on running threads.
+
+    Will only allow for the exit code to be set once.
+    Any other attempt to set the exit code will be ignored.
+
+    This is needed so a thread can trigger the program to exit and
+    have the thread state the exit code. Docker will then restart the
+    program if the exit code is anything other than 0.
+    """
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        # Exit code of zero says that the program
+        # exited gracefully (Linux Default)
+        self.__exit_code = 0
+        self.__set = False
+
+    def set(self, exit_code: int):
+        """Set the exit code."""
+        if self.__set is False:
+            with self.lock:
+                self.__exit_code = exit_code
+                self.__set = True
+
+    def value(self) -> int:
+        """Return the exit code."""
+        return self.__exit_code

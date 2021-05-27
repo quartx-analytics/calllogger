@@ -1,8 +1,8 @@
 # Standard Lib
 from queue import Queue
-import signal
 import argparse
 import logging
+import signal
 import sys
 
 # Third Party
@@ -10,10 +10,11 @@ import sentry_sdk
 
 # Local
 from calllogger.conf import settings
-from calllogger.utils import TokenAuth
 from calllogger.plugins import installed
 from calllogger import __version__, running, api
 from calllogger.datastore import get_token, get_identifier
+from calllogger.managers import ThreadExceptionManager
+from calllogger.utils import TokenAuth
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def get_plugin(selected_plugin: str):
 
     # We only get here if the selected
     # plugin was not found
-    sys.exit()
+    sys.exit(0)
 
 
 def set_sentry_user(token_auth: TokenAuth):
@@ -84,7 +85,7 @@ def _main_loop(plugin) -> int:
     # If one dies, so should the other.
     cdr_thread.join()
     plugin_thread.join()
-    return 0
+    return ThreadExceptionManager.exit_code.value()
 
 
 # Entrypoint: calllogger

@@ -1,24 +1,23 @@
 # Standard lib
 from urllib import parse as urlparse
-from threading import Thread
 import logging
 import queue
 
 # Third party
 import requests
-from sentry_sdk import capture_exception
 
 # Local
+from calllogger.managers import ThreadExceptionManager
 from calllogger.api import QuartxAPIHandler
-from calllogger.conf import settings
 from calllogger.utils import TokenAuth
+from calllogger.conf import settings
 
 # We keep the url here for easier testing
 cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")
 logger = logging.getLogger(__name__)
 
 
-class CDRWorker(QuartxAPIHandler, Thread):
+class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
     """
     Threaded class to monitor the call record queue and send the records
     to the QuartX monitoring service.
@@ -38,17 +37,6 @@ class CDRWorker(QuartxAPIHandler, Thread):
             url=cdr_url,
             auth=token,
         )
-
-    def run(self):
-        try:
-            self.entrypoint()
-        except Exception as err:
-            capture_exception(err)
-            return False
-        else:
-            return True
-        finally:
-            self.running.clear()
 
     def entrypoint(self):
         """Process the call record queue."""

@@ -18,7 +18,7 @@ ENV DOCKERIZED=1
 ENV ENVIRONMENT="Deployed"
 ENV DATA_LOCATION="/data"
 ENV SENTRY_DSN=$SENTRY_DSN
-ENV REG_KEY=
+ENV REG_KEY=$REG_KEY
 
 # Entrypoint setup
 COPY entrypoint.sh /entrypoint.sh

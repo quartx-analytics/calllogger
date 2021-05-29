@@ -18,9 +18,12 @@ class ThreadExceptionManager(threading.Thread):
         except Exception as err:
             capture_exception(err)
             self.exit_code.set(1)
-            return err
+            return False
         except SystemExit as err:
             self.exit_code.set(err.code)
+            return True
+        else:
+            return True
         finally:
             running.clear()
 

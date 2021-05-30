@@ -8,15 +8,22 @@ from typing import Union
 from calllogger.plugins import SerialPlugin
 from calllogger.record import CallDataRecord
 
+# Set of Control Characters the we don't need nor want
+# https://donsnotes.com/tech/charsets/ascii.html
+control_char_map = dict.fromkeys(range(32))
+
 
 # noinspection PyMethodMayBeStatic
 class SiemensHipathSerial(SerialPlugin):
     """Data object for call logs."""
 
+    def decode(self, raw: bytes) -> str:
+        decoded_line = raw.decode("ASCII")
+        return decoded_line.translate(control_char_map)
+
     def validate(self, decoded_line: str) -> Union[str, bool]:
         """Validate that the line contains data and is at least the right length."""
-        # TODO: Some lines have garbled data but still contain the data we need. We need to filter out the crap.
-        line = decoded_line.strip()
+        line = decoded_line.rstrip()  # Gets rid of end of line crap
         return False if len(line) < 76 else line
 
     def parse(self, validated_line: str) -> CallDataRecord:

@@ -1,5 +1,6 @@
 # Standard library
 from typing import NoReturn, Union
+import logging
 import abc
 import sys
 import os
@@ -12,6 +13,8 @@ from sentry_sdk import push_scope, capture_exception, Scope
 from calllogger.record import CallDataRecord
 from calllogger.plugins.base import BasePlugin
 from calllogger.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 # noinspection PyMethodMayBeStatic
@@ -129,3 +132,5 @@ class SerialPlugin(BasePlugin):
             # Parse the serial line and push to the cloud
             if record := self.parse(validated_line):
                 self.push(record)
+        else:
+            logger.debug("Serial line failed validation: %s", decoded_line)

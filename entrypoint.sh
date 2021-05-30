@@ -26,6 +26,14 @@ case $1 in
   getid)
     exec calllogger-getid
   ;;
+  calllogger)
+    # Set the plugin to use if one
+    # is given using cli parameters
+    if [ -n "$2" ]; then
+      export PLUGIN="$2"
+    fi
+    exec calllogger
+  ;;
   *)
     exec "$@"
   ;;

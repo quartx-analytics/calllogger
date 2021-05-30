@@ -1,14 +1,6 @@
-.. image:: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml/badge.svg
-    :target: https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml
-    :alt: Build and Tests
-
-.. image:: https://codecov.io/gh/quartx-analytics/calllogger/branch/master/graph/badge.svg?token=AH0TIQ7F8V
-    :target: https://codecov.io/gh/quartx-analytics/calllogger
-    :alt: Test Coverage
-
-.. image:: https://api.codeclimate.com/v1/badges/c0d513f139aa33e2d4b6/maintainability
-   :target: https://codeclimate.com/github/quartx-analytics/calllogger/maintainability
-   :alt: Maintainability
+[![tests](https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml/badge.svg)](https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml)
+[![codecov](https://codecov.io/gh/quartx-analytics/calllogger/branch/master/graph/badge.svg?token=AH0TIQ7F8V)](https://codecov.io/gh/quartx-analytics/calllogger)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c0d513f139aa33e2d4b6/maintainability)](https://codeclimate.com/github/quartx-analytics/calllogger/maintainability)
 
 
 Quartx Call Logger
@@ -49,22 +41,22 @@ Here is a list of command options that we will use to configure the docker conta
 If using the SiemensHipathSerial plugin, the serial interface needs to be passed
 to the docker container using the ``--device`` option in docker.
 
-```
+```bash
 --device="/dev/ttyUSB0:/dev/ttyUSB0"
 ```
 
 Below is a list of environment variables that can be used to configure the calllogger.
 
 * ``TIMEOUT``: Timeout in seconds to sleep between errors.
-* ``timeout_decay``: Multiplier that increases the timeout on continuous errors.
-* ``max_timeout``: The max timeout can be after continuous decay.
-* ``queue_size``: Size of the call queue.
-* ``debug``: Set to ``true`` to enable debug logging.
+* ``TIMEOUT_DECAY``: Multiplier that increases the timeout on continuous errors.
+* ``MAX_TIMEOUT``: The max timeout can be after continuous decay.
+* ``QUEUE_SIZE``: Size of the call queue.
+* ``DEBUG``: Set to ``true`` to enable debug logging.
 
 The plugin that will be used can be specified by appending the name of the plugin to the end of the docker run command.
 Some plugins also have there own set of configurations the can be set using.
 
-```
+```bash
 -e "PLUGIN_<SETTING>=<VALUE>"
 ```
 

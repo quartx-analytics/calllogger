@@ -15,7 +15,7 @@ control_char_map = dict.fromkeys(range(32))
 
 # noinspection PyMethodMayBeStatic
 class SiemensHipathSerial(SerialPlugin):
-    """Data object for call logs."""
+    """Add's support for the Siemens Hipath phone system, using the serial interface."""
 
     def decode(self, raw: bytes) -> str:
         decoded_line = raw.decode("ASCII")

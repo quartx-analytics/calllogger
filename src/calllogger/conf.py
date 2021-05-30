@@ -45,12 +45,10 @@ def merge_settings(cls, settings_store: dict, prefix="", **defaults):
 class Settings:
     """
     Settings class that allows settings
-    to be override by environment variables.
+    to be overridden by environment variables.
     """
 
-    #: Environment name, e.g. 'testing', 'production'
-    environment: str = "Testing"
-    #: Timeout in seconds to sleep on errors.
+    #: Timeout in seconds to sleep between errors.
     timeout: int = 3
     #: Multiplier that increases the timeout on continuous errors.
     timeout_decay: float = 1.5
@@ -63,6 +61,8 @@ class Settings:
     #: Set to true to enable debug logging.
     debug: bool = False
 
+    # Environment name, e.g. 'testing', 'production'
+    environment: str = "Testing"
     # Flag to indicate if program is dockerized
     dockerized: bool = False
     # Device registration cutoff timeout in seconds

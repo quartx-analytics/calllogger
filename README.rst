@@ -21,8 +21,8 @@ The monitoring frontend will then analyze the records and display them in a easy
 
 Phone system support is done using plugins. The currently available plugins are:
 
-    * **SiemensHipathSerial**: Add's support for the Siemens Hipath phone system, using the serial interface.
-    * **Mock**: Generate random call records continuously.
+    * ``SiemensHipathSerial``: Add's support for the Siemens Hipath phone system, using the serial interface.
+    * ``Mock``: Generate random call records continuously.
 
 This package is designed to be run within a containerized environment, for this we use docker.
 The containerized image is built to work on linux/amd64, linux/arm64, linux/arm/v7.
@@ -36,26 +36,31 @@ the call logger is configured using environment variables.
 
 Here is a list of command options that we will use to configure the docker container.
 
-    * **--detach**: Tell docker to start in the background.
-    * **--name "calllogger"**: Sets the identifier name for the container.
-    * **--volume="calllogger-data:/data"**: Creates a docker data volume and mounts it into the container,
+    * ``--detach``: Tell docker to start in the background.
+    * ``--name "calllogger"``: Sets the identifier name for the container.
+    * ``--volume="calllogger-data:/data"``: Creates a docker data volume and mounts it into the container,
       this is required as containers are stateless.
-    * **--restart=on-failure**: Tell docker to restart the docker container if the program exits unexpectedly.
-    * **--network host**: Gives the container direct access to the network devices. This is required
+    * ``--restart=on-failure``: Tell docker to restart the docker container if the program exits unexpectedly.
+    * ``--network host``: Gives the container direct access to the network devices. This is required
       for device identification.
+    * ``--env "KEY=VALUE"``: Sets environment variables to be used by the calllogger.
 
 If using the SiemensHipathSerial plugin, the serial interface needs to be passed
 to the docker container using the ``--device`` option in docker.
+
 .. code-block:: bash
 
     --device=/dev/ttyUSB0:/dev/ttyUSB0
 
 Below is a list of environment variables that can be used to configure the calllogger.
 
-    * sdfsdfsdf
+    * ``TIMEOUT``: Timeout in seconds to sleep between errors.
+    * ``timeout_decay``: Multiplier that increases the timeout on continuous errors.
+    * ``max_timeout``: The max timeout can be after continuous decay.
+    * ``queue_size``: Size of the call queue.
+    * ``debug``: Set to ``true`` to enable debug logging.
 
-
-The plugin can be specified by appending the name of the plugin to the end of the docker run command.
+The plugin that will be used can be specified by appending the name of the plugin to the end of the docker run command.
 
 
 Deployment

@@ -1,6 +1,8 @@
 # Standard library
 from typing import NoReturn, Union
 import abc
+import sys
+import os
 
 # Third party
 import serial
@@ -9,6 +11,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 # Local
 from calllogger.record import CallDataRecord
 from calllogger.plugins.base import BasePlugin
+from calllogger.conf import settings
 
 
 # noinspection PyMethodMayBeStatic
@@ -27,7 +30,14 @@ class SerialPlugin(BasePlugin):
     def __init__(self):
         super(SerialPlugin, self).__init__()
         self.sserver = serial.Serial()
-        # TODO: Create check if serial port is available, exit if not
+
+        # Check if serial port exists
+        if not os.path.exists(self.port):
+            print(f"The target serial port '{self.port}' can't be found.")
+            if settings.dockerized:
+                print("Please add the following to your docker command.")
+                print(f"--device={self.port}:{self.port}")
+            sys.exit(0)
 
     def __open(self):
         """Open a connection to the serial interface, returning True if successful else False."""

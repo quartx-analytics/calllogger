@@ -1,9 +1,9 @@
 # Standard library
 from typing import NoReturn, Union
+from pathlib import PosixPath
 import logging
 import abc
 import sys
-import os
 
 # Third party
 import serial
@@ -28,14 +28,14 @@ class SerialPlugin(BasePlugin):
     #: The serial baudrate to use.
     baudrate: int = 9600
     #: The serial port to comunicate with.
-    port: str = "/dev/ttyUSB0"
+    port: PosixPath = PosixPath("/dev/ttyUSB0")
 
     def __init__(self):
         super(SerialPlugin, self).__init__()
         self.sserver = serial.Serial()
 
         # Check if serial port exists
-        if not os.path.exists(self.port):
+        if not self.port.exists():
             print(f"The target serial port '{self.port}' can't be found.")
             if settings.dockerized:
                 print("Please add the following to your docker command.")
@@ -46,7 +46,7 @@ class SerialPlugin(BasePlugin):
         """Open a connection to the serial interface, returning True if successful else False."""
         try:
             self.sserver.baudrate = self.baudrate
-            self.sserver.port = self.port
+            self.sserver.port = str(self.port)
             self.sserver.open()
         except Exception:
             self.timeout.sleep()
@@ -106,7 +106,7 @@ class SerialPlugin(BasePlugin):
                 except Exception as err:
                     scope.set_context("Serial Interface", {
                         "baudrate": self.baudrate,
-                        "port": self.port,
+                        "port": str(self.port),
                     })
                     capture_exception(err, scope=scope)
                 else:

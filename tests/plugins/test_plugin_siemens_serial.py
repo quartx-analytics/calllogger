@@ -1,6 +1,5 @@
 # Third Party
 import pytest
-import serial
 
 # Local
 from calllogger.plugins.internal import siemens_serial
@@ -157,24 +156,6 @@ def mock_plugin(mocker):
     # This will protect from slow failing tests
     mocker.patch.object(plugin.timeout, "sleep")
     yield plugin
-
-
-@pytest.fixture
-def mock_serial(mocker):
-    """Mock the serial lib Serial object to control return values."""
-    mocked = mocker.patch.object(serial, "Serial", spec=True)
-
-    def open_on_request():
-        mocked.return_value.configure_mock(is_open=True)
-
-    def close_request():
-        mocked.return_value.configure_mock(is_open=False)
-
-    # By default the serial interface will be closed until open is called
-    mocked.return_value.open.side_effect = open_on_request
-    mocked.return_value.close.side_effect = close_request
-    mocked.return_value.configure_mock(is_open=True)
-    yield mocked.return_value
 
 
 @pytest.mark.parametrize("raw_line", good_lines)

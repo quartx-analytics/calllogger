@@ -9,7 +9,7 @@ if ! isPathMounted "$DATA_LOCATION"; then
   echo "The $DATA_LOCATION directory is required to be a mounted docker volume."
   echo "Please add the following to your docker command."
   echo "--volume='calllogger-data:$DATA_LOCATION'"
-  exit 1
+  exit 0
 fi
 
 # Ensure that the docker container is in network host mode
@@ -17,6 +17,7 @@ if [ ! -d "/sys/class/net/docker0" ]; then
   echo "Looks like the docker network mode was not set to host."
   echo "Please add the following to your docker command."
   echo "--network host"
+  exit 0
 fi
 
 case $1 in

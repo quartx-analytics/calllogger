@@ -52,9 +52,8 @@ def get_token() -> str:
             logger.debug("Writing token to datastore")
             return token
         else:
-            print("Unable to register device.")
-            # TODO: Look into better exit code for link device
-            sys.exit(1)
+            print("Unable to register device. Can not proceed. Quitting.")
+            sys.exit(0)
     else:
         if identifier is None:
             logger.info("Device registration unavailable. Missing required device identifier")

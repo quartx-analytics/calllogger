@@ -88,7 +88,6 @@ def sleeper(timeout: float, callback: callable):
         timeout -= 1
 
 
-# TODO: Create tests for this function
 def decode_env(env, default="") -> str:
     """Decode a Base64 encoded environment variable."""
     encode_check = "encoded:"

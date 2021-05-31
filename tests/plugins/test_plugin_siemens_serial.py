@@ -148,6 +148,11 @@ good_lines = b"""
 """.strip().split(b"\n")
 
 
+@pytest.fixture(autouse=True)
+def mock_port(mock_serial_port):
+    return mock_serial_port
+
+
 @pytest.fixture
 def mock_plugin(mocker):
     plugin = call_plugin(siemens_serial.SiemensHipathSerial)

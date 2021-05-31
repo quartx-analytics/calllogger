@@ -20,6 +20,11 @@ class TestPlugin(SerialPlugin):
         return record
 
 
+@pytest.fixture(autouse=True)
+def mock_port(mock_serial_port):
+    return mock_serial_port
+
+
 @pytest.fixture
 def mock_plugin(mocker):
     plugin = call_plugin(TestPlugin)
@@ -73,3 +78,13 @@ def test_invalid_parse_object(mock_serial, mock_plugin, mocker):
 
     assert mock_serial.readline.called
     assert mock_serial.is_open
+
+
+@pytest.mark.parametrize("dockerized", [False, True])
+def test_none_existing_port(mock_port, mock_settings, dockerized):
+    mock_port.exists.return_value = False
+    mock_settings("dockerized", dockerized)
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        TestPlugin()
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 0

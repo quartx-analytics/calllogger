@@ -31,11 +31,13 @@ def link_device(identifier) -> Union[str, None]:
                 "reg_key": settings.reg_key,
             }
         )
-        if resp.status_code == codes["created"]:  # 201
+        # Resp may be None if program is shutting down
+        status_code = getattr(resp, "status_code", None)
+        if status_code == codes["created"]:  # 201
             logger.info("Device token received")
             data = resp.json()
             return data["token"]
-        elif resp.status_code == codes["no_content"]:  # 204
+        elif status_code == codes["no_content"]:  # 204
             logger.debug("Device registration rejected. Will try again soon.")
             utils.sleeper(settings.device_reg_check, running.is_set)
             # Keep attempting registration until timeout elapse
@@ -46,5 +48,9 @@ def link_device(identifier) -> Union[str, None]:
                 return None
         else:
             # Have no idea what to do here only return None
-            logger.info(f"Device registration failed: {resp.status_code} -> {resp.reason}")
+            logger.info(
+                "Device registration failed: %s -> %s",
+                getattr(resp, "status_code", ""),
+                getattr(resp, "reason", "")
+            )
             return None

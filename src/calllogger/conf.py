@@ -52,7 +52,7 @@ class Settings:
     timeout: int = 3
     #: Multiplier that increases the timeout on continuous errors.
     timeout_decay: float = 1.5
-    #: The max timeout can be after continuous decay.
+    #: The max the timeout can be after continuous decay.
     max_timeout: int = 300
     #: Size of the call queue
     queue_size: int = 1_000

@@ -49,7 +49,7 @@ Below is a list of environment variables that can be used to configure the calll
 
 * ``TIMEOUT``: Timeout in seconds to sleep between errors.
 * ``TIMEOUT_DECAY``: Multiplier that increases the timeout on continuous errors.
-* ``MAX_TIMEOUT``: The max timeout can be after continuous decay.
+* ``MAX_TIMEOUT``: The max the timeout can be after continuous decay.
 * ``QUEUE_SIZE``: Size of the call queue.
 * ``DEBUG``: Set to ``true`` to enable debug logging.
 

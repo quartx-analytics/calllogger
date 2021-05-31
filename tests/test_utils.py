@@ -2,6 +2,8 @@
 import logging
 
 # Third Party
+import os
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -49,3 +51,40 @@ def test_sleeper(disable_sleep):
     """Test that time.sleep gets called twice as much as the timeout."""
     utils.sleeper(5, lambda: True)
     assert disable_sleep.call_count == 10
+
+
+@pytest.mark.parametrize("env_string", [
+    "testdata",
+    "ZW5jb2RlZDo=dGVzdGRhdGE=",
+])
+def test_base64_decoder(env_string, mock_env):
+    mock_env("dummy_env", env_string)
+    value = utils.decode_env("dummy_env")
+    assert value == "testdata"
+
+
+class TestExitCodeManager:
+    def test_dups_ignored(self):
+        """Test that exit code can't be changed once set."""
+        exit_code = utils.ExitCodeManager()
+
+        # Exit code should be set to 22
+        exit_code.set(22)
+        assert exit_code.value() == 22
+
+        # Exit code should be ignored and say at 22
+        exit_code.set(11)
+        assert exit_code.value() == 22
+
+    def test_reset(self):
+        """Test that exit code can be reset."""
+        exit_code = utils.ExitCodeManager()
+
+        # Exit code should be set to 22
+        exit_code.set(22)
+        assert exit_code.value() == 22
+
+        # Reset should allow the code to be changed again
+        exit_code.reset()
+        exit_code.set(11)
+        assert exit_code.value() == 11

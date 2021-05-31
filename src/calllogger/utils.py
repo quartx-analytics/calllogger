@@ -90,10 +90,11 @@ def sleeper(timeout: float, callback: callable):
 
 def decode_env(env, default="") -> str:
     """Decode a Base64 encoded environment variable."""
-    encode_check = "encoded:"
+    encode_check = "ZW5jb2RlZDo="
     value = os.environ.get(env, default)
     if value and value.startswith(encode_check):
-        value = base64.b64decode(value.lstrip(encode_check)).decode("utf8")
+        value = value[len(encode_check):]
+        value = base64.b64decode(value).decode("utf8")
     return value
 
 
@@ -146,6 +147,4 @@ class ExitCodeManager:
 
     def value(self) -> int:
         """Return the exit code and reset."""
-        value = self.__exit_code
-        self.reset()
-        return value
+        return self.__exit_code

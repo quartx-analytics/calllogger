@@ -2,6 +2,8 @@
 import logging
 
 # Third Party
+import os
+
 import pytest
 import serial
 
@@ -64,3 +66,26 @@ def mock_settings(mocker):
             return_value=value,
         )
     yield mock_settings
+
+
+@pytest.fixture
+def mock_env():
+    # Keep track of original key, value
+    tracker = []
+
+    def env_mocker(key, value):
+        org_value = os.environ.get(key, None)
+        tracker.append((key, org_value))
+        os.environ[key] = str(value)
+
+    yield env_mocker
+
+    # Reset environment state
+    for k, v in tracker:
+        # Remove key if there is no original value for it
+        if v is None and k in os.environ:
+            del os.environ[k]
+
+        # Replace key with original value
+        elif v is not None:
+            os.environ[k] = v

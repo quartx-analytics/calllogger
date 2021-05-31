@@ -12,6 +12,7 @@ def test_success(mocker):
     causes no errors and returns True
     """
     spy_running_clear = mocker.spy(running, "clear")
+    ThreadExceptionManager.exit_code.reset()
 
     class Success(ThreadExceptionManager):
         def entrypoint(self):
@@ -28,6 +29,7 @@ def test_system_exit(mocker):
     and that the code is captured too.
     """
     spy_running_clear = mocker.spy(running, "clear")
+    ThreadExceptionManager.exit_code.reset()
 
     class Success(ThreadExceptionManager):
         def entrypoint(self):
@@ -46,6 +48,7 @@ def test_exception(mocker, exc):
     and that the code is captured too.
     """
     spy_running_clear = mocker.spy(running, "clear")
+    ThreadExceptionManager.exit_code.reset()
 
     class Success(ThreadExceptionManager):
         def entrypoint(self):

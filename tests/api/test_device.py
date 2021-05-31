@@ -17,8 +17,10 @@ def test_success(requests_mock, mock_running):
     assert resp == mock_token
 
 
-def test_retry(requests_mock, mock_running, disable_sleep):
+@pytest.mark.parametrize("timeout", [60, -1])
+def test_retry(requests_mock, mock_running, disable_sleep, timeout, mock_settings):
     expected_resp = {"token": mock_token}
+    mock_settings("device_reg_timeout", timeout)
     mocked_request = requests_mock.post(device.linking_url, response_list=[
         {"status_code": 204},
         {"status_code": 201, "json": expected_resp},
@@ -27,8 +29,7 @@ def test_retry(requests_mock, mock_running, disable_sleep):
 
     assert disable_sleep.called
     assert mock_running.called
-    assert mocked_request.call_count == 2
-    assert resp == mock_token
+    assert mocked_request.call_count == (2 if timeout > 0 else 1)
 
 
 def test_unexpected_status(requests_mock, mock_running):

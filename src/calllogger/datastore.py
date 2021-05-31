@@ -1,6 +1,8 @@
 # Standard Lib
+from pathlib import PosixPath
 from typing import Union
 import logging
+import base64
 import sys
 import os
 
@@ -8,7 +10,7 @@ import os
 from getmac import get_mac_address
 
 # Local
-from calllogger import api, utils
+from calllogger import api
 from calllogger.conf import settings
 
 __all__ = ["get_token", "revoke_token", "get_identifier"]
@@ -17,18 +19,34 @@ token_store = settings.datastore.joinpath("token")
 identifier_store = settings.datastore.joinpath("identifier")
 
 
+def read_datastore(path: PosixPath, encoding="UTF8") -> str:
+    """Decode stored data and return."""
+    with path.open("rb") as stream:
+        encoded_data = stream.read()
+        decoded_data = base64.b64decode(encoded_data)
+        return decoded_data.decode(encoding)
+
+
+def write_datastore(path: PosixPath, data: str, encoding="UTF8"):
+    """Encode data and save to disk."""
+    with path.open("wb") as stream:
+        decoded_data = data.encode(encoding)
+        encoded_data = base64.b64encode(decoded_data)
+        stream.write(encoded_data)
+
+
 def get_identifier() -> Union[str, None]:
     """Get the unique identifier for this device."""
     # Stored locally
     if identifier_store.exists():
         logger.debug("Loading device identifier from datastore.")
-        return utils.read_datastore(identifier_store)
+        return read_datastore(identifier_store)
 
     # Fetch and save
     identifier = get_mac_address()
     if identifier and identifier != "00:00:00:00:00:00":
         logger.debug("Storing device identifier to datastore.")
-        utils.write_datastore(identifier_store, identifier)
+        write_datastore(identifier_store, identifier)
         return identifier
     else:
         return None
@@ -43,12 +61,12 @@ def get_token() -> str:
     # Option 2: Stored locally
     elif token_store.exists():
         logger.debug("Loading token from datastore.")
-        return utils.read_datastore(token_store)
+        return read_datastore(token_store)
 
     # Option 3: Register with server
     elif (identifier := get_identifier()) and settings.reg_key:
         if token := api.link_device(identifier):
-            utils.write_datastore(token_store, token)
+            write_datastore(token_store, token)
             logger.debug("Writing token to datastore")
             return token
         else:

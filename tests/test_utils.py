@@ -45,8 +45,7 @@ def test_timeout_decay(mocker: MockerFixture):
     assert timeout.value == 3
 
 
-def test_sleeper(mocker: MockerFixture):
+def test_sleeper(disable_sleep):
     """Test that time.sleep gets called twice as much as the timeout."""
-    mocked = mocker.patch("time.sleep")
     utils.sleeper(5, lambda: True)
-    assert mocked.call_count == 10
+    assert disable_sleep.call_count == 10

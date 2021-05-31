@@ -129,6 +129,9 @@ class QuartxAPIHandler:
             elif self.suppress_errors:
                 return False
             else:
+                # This will pervent too many errors
+                # if we get stuck in a restart loop
+                self.timeout.sleep()
                 raise
 
     def error_check(self, scope, err: Exception) -> bool:

@@ -22,7 +22,7 @@ def link_device(identifier) -> Union[str, None]:
     api = QuartxAPIHandler()
     start = time.time()
 
-    while True:
+    while running.is_set():
         resp = api.make_request(
             method="POST",
             url=linking_url,

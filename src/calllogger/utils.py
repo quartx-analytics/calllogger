@@ -129,6 +129,11 @@ class ExitCodeManager:
         self.lock = threading.Lock()
         # Exit code of zero says that the program
         # exited gracefully (Linux Default)
+        self.__exit_code = self.__set = None
+        self.reset()
+
+    def reset(self):
+        """Reset to defaults."""
         self.__exit_code = 0
         self.__set = False
 
@@ -140,5 +145,7 @@ class ExitCodeManager:
                 self.__set = True
 
     def value(self) -> int:
-        """Return the exit code."""
-        return self.__exit_code
+        """Return the exit code and reset."""
+        value = self.__exit_code
+        self.reset()
+        return value

@@ -12,7 +12,7 @@ from calllogger import running
 class ThreadExceptionManager(threading.Thread):
     exit_code = ExitCodeManager()
 
-    def run(self):
+    def run(self) -> bool:
         try:
             self.entrypoint()
         except Exception as err:

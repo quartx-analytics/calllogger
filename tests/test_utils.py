@@ -2,8 +2,6 @@
 import logging
 
 # Third Party
-import os
-
 import pytest
 from pytest_mock import MockerFixture
 

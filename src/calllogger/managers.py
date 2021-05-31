@@ -27,5 +27,5 @@ class ThreadExceptionManager(threading.Thread):
         finally:
             running.clear()
 
-    def entrypoint(self):
+    def entrypoint(self):  # pragma: no cover
         raise NotImplementedError

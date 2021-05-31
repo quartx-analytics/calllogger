@@ -7,7 +7,6 @@ import serial
 
 # Local
 from calllogger.plugins.serial import SerialPlugin
-from calllogger.conf import settings
 
 
 @pytest.fixture(autouse=True)
@@ -20,6 +19,7 @@ def disable_logging():
 @pytest.fixture
 def mock_serial_port(mocker):
     mocked = mocker.patch.object(SerialPlugin, "port", spec=True)
+    mocked.__str__.return_value = "/port"
     mocked.exists.return_value = True
     yield mocked
 
@@ -45,6 +45,9 @@ def mock_serial(mocker):
 @pytest.fixture
 def mock_settings(mocker):
     def mock_settings(key, value):
-        mocked = mocker.patch.object(settings, key, new_callable=mocker.PropertyMock)
-        mocked.return_value = value
+        mocker.patch(
+            f"calllogger.conf.Settings.{key}",
+            new_callable=mocker.PropertyMock,
+            return_value=value,
+        )
     yield mock_settings

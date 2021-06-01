@@ -20,7 +20,7 @@ class PluginSettings(abc.ABCMeta):
 
     def __call__(cls, **kwargs):
         inst = super().__call__()
-        merge_settings(cls, inst.__dict__, prefix="plugin", **kwargs)
+        merge_settings(inst, prefix="plugin_", **kwargs)
         return inst
 
 

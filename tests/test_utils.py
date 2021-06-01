@@ -51,16 +51,6 @@ def test_sleeper(disable_sleep):
     assert disable_sleep.call_count == 10
 
 
-@pytest.mark.parametrize("env_string", [
-    "testdata",
-    "ZW5jb2RlZDo=dGVzdGRhdGE=",
-])
-def test_base64_decoder(env_string, mock_env):
-    mock_env("dummy_env", env_string)
-    value = utils.decode_env("dummy_env")
-    assert value == "testdata"
-
-
 class TestExitCodeManager:
     def test_dups_ignored(self):
         """Test that exit code can't be changed once set."""

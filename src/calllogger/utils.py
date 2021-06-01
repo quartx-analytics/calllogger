@@ -10,9 +10,7 @@ It should be self contained, third party imports are fine.
 # Standard Lib
 import threading
 import logging
-import base64
 import time
-import os
 
 # Third Party
 from requests.auth import AuthBase
@@ -85,16 +83,6 @@ def sleeper(timeout: float, callback: callable):
     while timeout > 0 and callback():
         time.sleep(.5)
         timeout -= 1
-
-
-def decode_env(env, default="") -> str:
-    """Decode a Base64 encoded environment variable."""
-    encode_check = "ZW5jb2RlZDo="
-    value = os.environ.get(env, default)
-    if value and value.startswith(encode_check):
-        value = value[len(encode_check):]
-        value = base64.b64decode(value).decode("utf8")
-    return value
 
 
 class ExitCodeManager:

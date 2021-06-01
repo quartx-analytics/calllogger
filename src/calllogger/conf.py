@@ -2,6 +2,7 @@
 from functools import cached_property
 from pathlib import PosixPath
 import logging
+import base64
 import sys
 import os
 
@@ -9,27 +10,48 @@ import os
 from decouple import config, undefined, UndefinedValueError
 import appdirs
 
-# Local
-from calllogger.utils import decode_env
-
 __all__ = ["settings", "merge_settings"]
 logger = logging.getLogger(__name__)
 
 
-def merge_settings(cls, settings_store: dict, prefix="", **defaults):
-    # Merge class, instance and defaults together
-    defaults_store = dict(**cls.__dict__, **defaults)
-    prefix = f"{prefix}_" if prefix else ""
-    settings_store.update(defaults)
+def decode_env(env, default="") -> str:
+    """Decode a Base64 encoded environment variable."""
+    encode_check = "ZW5jb2RlZDo="
+    value = os.environ.get(env, default)
+    if value and value.startswith(encode_check):
+        value = value[len(encode_check):]
+        value = base64.b64decode(value).decode("utf8")
+    return value
+
+
+def merge_settings(ins, prefix="", **defaults):
+    """
+    Populate class defined settings from environment variables.
+
+    This function will scan for class variables that have type annotations
+    and check if there is a environment variable with the same name.
+    It will then asigned the environment variable value to that class variable.
+
+    If a class variable exists with type annotation and has no default value and
+    there is no environment variable with the variable name. Then the program
+    will quit and complain of missing environment variables.
+
+    :param ins: The class instance where the variables will be set.
+    :param prefix: Only check environment variables with the given prefix. Defaults to "".
+    :param defaults: Extra keyword only arguments to override defaults.
+    """
+    # Merge class variable defaults with override defaults
+    ins.__dict__.update(defaults)
     errors = []
 
     # Check if all settings with annotations have a environment variable set for them
-    for key, cast in cls.__dict__.get("__annotations__", {}).items():
-        default = defaults_store.get(key, undefined)
-        env_key = f"{prefix}{key}"
+    for key, cast in ins.__class__.__dict__.get("__annotations__", {}).items():
+        fallback = ins.__class__.__dict__.get(key, undefined)
+        default = defaults.get(key, fallback)
+        env_key = f"{prefix}{key}".upper()
+
         try:
-            setting = config(env_key.upper(), default, cast)
-            settings_store[key] = setting
+            ins.__dict__[key] = config(env_key, default, cast)
         except UndefinedValueError:
             errors.append(f"Missing required environment variable: {env_key}")
         except (ValueError, TypeError):
@@ -71,13 +93,13 @@ class Settings:
     device_reg_check: int = 60
 
     def __init__(self):
-        merge_settings(self.__class__, self.__dict__)
+        merge_settings(self)
 
-    @cached_property
+    @property
     def sentry_dsn(self) -> str:
         return decode_env("SENTRY_DSN")
 
-    @cached_property
+    @property
     def reg_key(self) -> str:
         return decode_env("REG_KEY")
 

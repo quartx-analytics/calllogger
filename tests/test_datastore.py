@@ -94,6 +94,12 @@ class TestToken:
     # Test token
     token = "testtoken"
 
+    @pytest.fixture(autouse=True)
+    def clear_token(self, mock_env):
+        """Ensure that token env does not exist."""
+        mock_env(token="")
+        yield
+
     def test_revoke_token(self, mocker: MockerFixture):
         """Test that token_store unlink is called"""
         mocked_spy = mocker.spy(datastore, "token_store")
@@ -104,5 +110,18 @@ class TestToken:
         mock_env(TOKEN=self.token)
         tokenauth = datastore.get_token()
 
+        assert isinstance(tokenauth, TokenAuth)
+        assert tokenauth.token == self.token
+
+    def test_stored_token(self, mocker: MockerFixture):
+        mocked_stored = mocker.patch.object(datastore, "token_store")
+        mocked_stored.exists.return_value = True
+        mocked_read = mocker.patch.object(datastore, "read_datastore")
+        mocked_read.return_value = self.token
+
+        tokenauth = datastore.get_token()
+
+        assert mocked_stored.exists.called
+        assert mocked_read.called
         assert isinstance(tokenauth, TokenAuth)
         assert tokenauth.token == self.token

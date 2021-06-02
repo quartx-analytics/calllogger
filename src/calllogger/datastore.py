@@ -58,9 +58,8 @@ def get_token() -> TokenAuth:
     datastore. If no token is found then request token from server.
     """
     # Option 1: Environment Variable
-    if "TOKEN" in os.environ:
+    if token := os.environ.get("TOKEN", ""):
         logger.debug("Loading token from environment variable.")
-        token = os.environ["TOKEN"]
         return TokenAuth(token)
 
     # Option 2: Stored locally
@@ -72,7 +71,7 @@ def get_token() -> TokenAuth:
     else:
         # Option 3: Register with server
         token = request_token()
-        TokenAuth(token)
+        return TokenAuth(token)
 
 
 def request_token() -> str:

@@ -8,6 +8,7 @@ import pytest
 
 # Local
 from calllogger import datastore
+from calllogger.utils import TokenAuth
 
 
 class TestReadWrite:
@@ -100,4 +101,8 @@ class TestToken:
         assert mocked_spy.unlink.called
 
     def test_token_in_env(self, mock_env):
-        mock_env(TOKEN="")
+        mock_env(TOKEN=self.token)
+        tokenauth = datastore.get_token()
+
+        assert isinstance(tokenauth, TokenAuth)
+        assert tokenauth.token == self.token

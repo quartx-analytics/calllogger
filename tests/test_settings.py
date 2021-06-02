@@ -93,8 +93,12 @@ class TestMergeSettings:
 class TestDataStoreSettings:
     @pytest.fixture(autouse=True)
     def clear_cache(self):
+        """Clear datastore cached_property."""
+        if hasattr(settings, "datastore"):
+            del settings.datastore
         yield
-        del settings.datastore
+        if hasattr(settings, "datastore"):
+            del settings.datastore
 
     def test_env_set(self, mock_env):
         mock_env(DATA_LOCATION="/")

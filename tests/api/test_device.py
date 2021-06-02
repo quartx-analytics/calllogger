@@ -20,7 +20,7 @@ def test_success(requests_mock, mock_running):
 @pytest.mark.parametrize("timeout", [60, -1])
 def test_retry(requests_mock, mock_running, disable_sleep, timeout, mock_settings):
     expected_resp = {"token": mock_token}
-    mock_settings("device_reg_timeout", timeout)
+    mock_settings(device_reg_timeout=timeout)
     mocked_request = requests_mock.post(device.linking_url, response_list=[
         {"status_code": 204},
         {"status_code": 201, "json": expected_resp},

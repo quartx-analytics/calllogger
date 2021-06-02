@@ -83,7 +83,7 @@ def test_invalid_parse_object(mock_serial, mock_plugin, mocker):
 @pytest.mark.parametrize("dockerized", [False, True])
 def test_none_existing_port(mock_port, mock_settings, dockerized):
     mock_port.exists.return_value = False
-    mock_settings("dockerized", dockerized)
+    mock_settings(dockerized=dockerized)
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         TestPlugin()
     assert pytest_wrapped_e.type == SystemExit

@@ -59,13 +59,14 @@ def mock_serial(mocker):
 
 @pytest.fixture
 def mock_settings(mocker):
-    def mock_settings(key, value):
-        mocker.patch(
-            f"calllogger.conf.Settings.{key}",
-            new_callable=mocker.PropertyMock,
-            return_value=value,
-        )
-    yield mock_settings
+    def worker(**kwargs):
+        for key, val in kwargs.items():
+            mocker.patch(
+                f"calllogger.conf.Settings.{key}",
+                new_callable=mocker.PropertyMock,
+                return_value=val,
+            )
+    yield worker
 
 
 @pytest.fixture

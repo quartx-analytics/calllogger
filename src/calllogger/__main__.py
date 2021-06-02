@@ -4,6 +4,7 @@ import argparse
 import logging
 import signal
 import sys
+import os
 
 # Third Party
 import sentry_sdk
@@ -35,15 +36,18 @@ def get_plugin(selected_plugin: str):
     if plugin := installed.get(selected_plugin.lower()):
         return plugin
     elif installed:
-        print("Specified plugin not found:", selected_plugin)
+        if selected_plugin:
+            print("Specified plugin not found:", selected_plugin)
+        else:
+            print("No plugin specified")
         print("Available plugins are:")
         for plugin in installed.values():
             print(f"--> {plugin.__name__} - {plugin.__doc__}")
     else:
         print("No plugins are installed")
 
-    # We only get here if the selected
-    # plugin was not found
+    # We only get here if the selected plugin
+    # was not found or no plugin was specified
     sys.exit(0)
 
 
@@ -90,7 +94,7 @@ def _main_loop(plugin) -> int:
 # Entrypoint: calllogger
 def monitor() -> int:
     """Normal logger that calls the users preferred plugin."""
-    plugin = get_plugin(settings.plugin)
+    plugin = get_plugin(os.environ.get("PLUGIN", ""))
     return main_loop(plugin)
 
 

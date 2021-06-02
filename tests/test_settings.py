@@ -1,8 +1,11 @@
+# Standard Lib
+from pathlib import PosixPath
+
 # Third Party
 import pytest
 
 # Local
-from calllogger import conf
+from calllogger import conf, settings
 
 
 class MockSettings:
@@ -85,3 +88,17 @@ class TestMergeSettings:
         mocked_settings = MockSettings()
         with pytest.raises(SystemExit):
             conf.merge_settings(mocked_settings)
+
+
+class TestDataStoreSettings:
+    @pytest.fixture(autouse=True)
+    def clear_cache(self):
+        yield
+        del settings.datastore
+
+    def test_env_set(self, mock_env):
+        mock_env(DATA_LOCATION="/")
+        assert settings.datastore == PosixPath("/")
+
+    def test_appdirs(self):
+        assert str(settings.datastore).endswith("/.local/share/quartx-calllogger")

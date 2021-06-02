@@ -114,12 +114,3 @@ class Settings:
         logger.debug("Datastore Location: %s", locale)
         os.makedirs(locale, exist_ok=True)
         return locale
-
-    @property
-    def plugin(self):
-        """The name of the plugin to use."""
-        if "PLUGIN" in os.environ["PLUGIN"]:
-            return os.environ["PLUGIN"]
-        else:
-            print("Missing required environment variable: PLUGIN")
-            sys.exit(0)

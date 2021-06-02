@@ -12,16 +12,7 @@ class MockSettings:
     test4: float = 1.1
     test5 = "1"
     test6: str
-
-
-@pytest.mark.parametrize("env_string", [
-    "testdata",
-    "ZW5jb2RlZDo=dGVzdGRhdGE=",
-])
-def test_base64_decoder(env_string, mock_env):
-    mock_env(DUMMY_ENV=env_string)
-    value = conf.decode_env("DUMMY_ENV")
-    assert value == "testdata"
+    test7: conf.b64 = ""
 
 
 class TestMergeSettings:
@@ -69,6 +60,28 @@ class TestMergeSettings:
 
     def test_cast_fail(self, mock_env):
         mock_env(TEST1="int", TEST6="test")
+        mocked_settings = MockSettings()
+        with pytest.raises(SystemExit):
+            conf.merge_settings(mocked_settings)
+
+    @pytest.mark.parametrize("env_string", [
+        "testdata",
+        "ZW5jb2RlZDo=dGVzdGRhdGE=",
+    ])
+    def test_b64decode(self, env_string, mock_env):
+        mock_env(TEST7=env_string, TEST6="test")
+        mocked_settings = MockSettings()
+        conf.merge_settings(mocked_settings)
+
+        assert mocked_settings.test7 == "testdata"
+
+    @pytest.mark.parametrize("env_string", [
+        "ZW5jb2RlZDo=ZW5jb2RlZDo",
+        "ZW5jb2RlZDo=dfdd34hgf",
+    ])
+    def test_b64decode_error(self, env_string, mock_env):
+        """Test if system exit is call after missing required error."""
+        mock_env(TEST7=env_string, TEST6="test")
         mocked_settings = MockSettings()
         with pytest.raises(SystemExit):
             conf.merge_settings(mocked_settings)

@@ -1,6 +1,7 @@
 # Standard lib
 from functools import cached_property
 from pathlib import PosixPath
+import binascii
 import logging
 import base64
 import sys
@@ -14,10 +15,9 @@ __all__ = ["settings", "merge_settings"]
 logger = logging.getLogger(__name__)
 
 
-def decode_env(env, default="") -> str:
+def b64(value: str) -> str:
     """Decode a Base64 encoded environment variable."""
     encode_check = "ZW5jb2RlZDo="
-    value = os.environ.get(env, default)
     if value and value.startswith(encode_check):
         value = value[len(encode_check):]
         value = base64.b64decode(value).decode("utf8")
@@ -47,13 +47,15 @@ def merge_settings(ins, prefix="", **defaults):
     # Check if all settings with annotations have a environment variable set for them
     for key, cast in ins.__class__.__dict__.get("__annotations__", {}).items():
         fallback = ins.__class__.__dict__.get(key, undefined)
-        default = defaults.get(key, fallback)
+        default = ins.__dict__.get(key, fallback)
         env_key = f"{prefix}{key}".upper()
 
         try:
             ins.__dict__[key] = config(env_key, default, cast)
         except UndefinedValueError:
             errors.append(f"Missing required environment variable: {env_key}")
+        except binascii.Error as err:
+            errors.append(f"Decoding failed: '{err}'")
         except (ValueError, TypeError):
             errors.append(f"Invalid type for setting '{env_key}', expecting '{cast.__name__}'")
 
@@ -92,16 +94,12 @@ class Settings:
     # Device registration check timeout in seconds
     device_reg_check: int = 60
 
+    # Base64 encoded Environment variables
+    sentry_dsn: b64 = ""
+    reg_key: b64 = ""
+
     def __init__(self):
         merge_settings(self)
-
-    @property
-    def sentry_dsn(self) -> str:
-        return decode_env("SENTRY_DSN")
-
-    @property
-    def reg_key(self) -> str:
-        return decode_env("REG_KEY")
 
     @cached_property
     def datastore(self) -> PosixPath:

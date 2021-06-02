@@ -12,9 +12,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 
 # Local
 from calllogger.utils import Timeout
-from calllogger.conf import settings
-from calllogger import running
-from calllogger import datastore
+from calllogger import running, settings, datastore
 
 logger = logging.getLogger(__name__)
 RetryResponse = Union[bool, requests.Response]

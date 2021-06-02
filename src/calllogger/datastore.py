@@ -10,8 +10,7 @@ import os
 from getmac import get_mac_address
 
 # Local
-from calllogger import api
-from calllogger.conf import settings
+from calllogger import api, settings
 
 __all__ = ["get_token", "revoke_token", "get_identifier"]
 logger = logging.getLogger(__name__)

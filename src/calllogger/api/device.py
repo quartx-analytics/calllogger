@@ -9,8 +9,7 @@ from requests import codes
 
 # Local
 from calllogger.api import QuartxAPIHandler
-from calllogger.conf import settings
-from calllogger import utils, running
+from calllogger import utils, running, settings
 
 linking_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/link-device/")
 logger = logging.getLogger(__name__)

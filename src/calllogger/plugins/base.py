@@ -6,10 +6,10 @@ import abc
 
 # Local
 from calllogger.managers import ThreadExceptionManager
-from calllogger.conf import settings, merge_settings
+from calllogger.conf import merge_settings
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
-from calllogger import running
+from calllogger import running, settings
 
 logger = logging.getLogger(__name__)
 installed_plugins = {}

@@ -10,7 +10,7 @@ import requests
 from calllogger.managers import ThreadExceptionManager
 from calllogger.api import QuartxAPIHandler
 from calllogger.utils import TokenAuth
-from calllogger.conf import settings
+from calllogger import settings
 
 # We keep the url here for easier testing
 cdr_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/")

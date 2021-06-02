@@ -12,7 +12,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 # Local
 from calllogger.record import CallDataRecord
 from calllogger.plugins.base import BasePlugin
-from calllogger.conf import settings
+from calllogger import settings
 
 logger = logging.getLogger(__name__)
 

@@ -9,9 +9,8 @@ import sys
 import sentry_sdk
 
 # Local
-from calllogger.conf import settings
 from calllogger.plugins import installed
-from calllogger import __version__, running, api
+from calllogger import __version__, running, api, settings
 from calllogger.datastore import get_token, get_identifier
 from calllogger.managers import ThreadExceptionManager
 from calllogger.utils import TokenAuth

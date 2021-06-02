@@ -11,7 +11,7 @@ import os
 from decouple import config, undefined, UndefinedValueError
 import appdirs
 
-__all__ = ["settings", "merge_settings"]
+__all__ = ["Settings", "merge_settings"]
 logger = logging.getLogger(__name__)
 
 
@@ -40,7 +40,7 @@ def merge_settings(ins, prefix="", **defaults):
     :param prefix: Only check environment variables with the given prefix. Defaults to "".
     :param defaults: Extra keyword only arguments to override defaults.
     """
-    # Merge class variable defaults with override defaults
+    # Merge instance variables with defaults override
     ins.__dict__.update(defaults)
     errors = []
 
@@ -123,6 +123,3 @@ class Settings:
         else:
             print("Missing required environment variable: PLUGIN")
             sys.exit(0)
-
-
-settings = Settings()

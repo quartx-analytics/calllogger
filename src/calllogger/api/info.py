@@ -2,7 +2,7 @@
 from urllib import parse as urlparse
 
 # Local
-from calllogger.conf import settings
+from calllogger import settings
 from calllogger.api import QuartxAPIHandler
 from calllogger.utils import TokenAuth
 

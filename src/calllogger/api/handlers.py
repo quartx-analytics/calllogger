@@ -4,6 +4,7 @@ from typing import Union
 import json as _json
 import logging
 import sys
+import os
 
 # Third party
 import requests
@@ -164,7 +165,10 @@ class QuartxAPIHandler:
             logger.error("Quitting as the token does not have the required permissions or has been revoked.")
             datastore.revoke_token()
             self.running.clear()
-            sys.exit(1)
+            if "TOKEN" in os.environ:
+                sys.exit(0)
+            else:
+                sys.exit(1)
 
         # Server is expereancing problems, reattempting request later
         elif status_code in (codes.not_found, codes.request_timeout) or status_code >= codes.server_error:

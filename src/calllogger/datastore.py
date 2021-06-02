@@ -11,6 +11,7 @@ from getmac import get_mac_address
 
 # Local
 from calllogger import api, settings
+from calllogger.utils import TokenAuth
 
 __all__ = ["get_token", "revoke_token", "get_identifier"]
 logger = logging.getLogger(__name__)
@@ -51,19 +52,32 @@ def get_identifier() -> Union[str, None]:
         return None
 
 
-def get_token() -> str:
+def get_token() -> TokenAuth:
+    """
+    Fetch the CDR token from environment variable if given, else fallback to
+    datastore. If no token is found then request token from server.
+    """
     # Option 1: Environment Variable
     if "TOKEN" in os.environ:
         logger.debug("Loading token from environment variable.")
-        return os.environ["TOKEN"]
+        token = os.environ["TOKEN"]
+        return TokenAuth(token)
 
     # Option 2: Stored locally
     elif token_store.exists():
         logger.debug("Loading token from datastore.")
-        return read_datastore(token_store)
+        token = read_datastore(token_store)
+        return TokenAuth(token)
 
-    # Option 3: Register with server
-    elif (identifier := get_identifier()) and settings.reg_key:
+    else:
+        # Option 3: Register with server
+        token = request_token()
+        TokenAuth(token)
+
+
+def request_token() -> str:
+    """Request token from server. This won't be possible if we have no identifier."""
+    if (identifier := get_identifier()) and settings.reg_key:
         if token := api.link_device(identifier):
             write_datastore(token_store, token)
             logger.debug("Writing token to datastore")

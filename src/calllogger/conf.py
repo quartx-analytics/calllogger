@@ -80,19 +80,21 @@ class Settings:
     max_timeout: int = 300
     #: Size of the call queue
     queue_size: int = 1_000
-    # The domain to send the call logs to, used in development.
-    domain: str = "https://quartx.ie"
     #: Set to true to enable debug logging.
     debug: bool = False
+    #: Device registration cutoff timeout in seconds
+    device_reg_timeout: int = 3 * 60 * 60
+    #: Device registration check time in seconds
+    device_reg_check: int = 10
 
+    # The domain to send the call logs to, used in development.
+    domain: str = "https://quartx.ie"
     # Environment name, e.g. 'testing', 'production'
     environment: str = "Testing"
     # Flag to indicate if program is dockerized
     dockerized: bool = False
-    # Device registration cutoff timeout in seconds
-    device_reg_timeout: int = 3 * 60 * 60
-    # Device registration check timeout in seconds
-    device_reg_check: int = 60
+    # The plugin the will be used
+    plugin: str = ""
 
     # Base64 encoded Environment variables
     sentry_dsn: b64 = ""

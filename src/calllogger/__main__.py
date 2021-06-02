@@ -4,7 +4,6 @@ import argparse
 import logging
 import signal
 import sys
-import os
 
 # Third Party
 import sentry_sdk
@@ -67,8 +66,7 @@ def main_loop(*args, **kwargs) -> int:
 
 def _main_loop(plugin) -> int:
     running.set()
-    token = get_token()
-    tokenauth = TokenAuth(token)
+    tokenauth = get_token()
     queue = Queue(settings.queue_size)
 
     # Configure sentry
@@ -94,7 +92,7 @@ def _main_loop(plugin) -> int:
 # Entrypoint: calllogger
 def monitor() -> int:
     """Normal logger that calls the users preferred plugin."""
-    plugin = get_plugin(os.environ.get("PLUGIN", ""))
+    plugin = get_plugin(settings.plugin)
     return main_loop(plugin)
 
 
@@ -107,7 +105,8 @@ def mockcalls() -> int:
 
 # Entrypoint: calllogger-getid
 def getid() -> int:
-    print(get_identifier())
+    identifier = get_identifier()
+    print(identifier)
     return 0
 
 

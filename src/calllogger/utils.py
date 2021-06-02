@@ -66,10 +66,10 @@ class TokenAuth(AuthBase):
     """Requests Token authentication class."""
 
     def __init__(self, token: str):
-        self.__token = token
+        self.token = token
 
     def __call__(self, req):
-        req.headers["Authorization"] = f"Token {self.__token}"
+        req.headers["Authorization"] = f"Token {self.token}"
         return req
 
 

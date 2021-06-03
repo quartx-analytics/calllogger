@@ -13,7 +13,7 @@ from calllogger import running
 
 
 # noinspection PyAbstractClass
-class TestPlugin(SerialPlugin):
+class MockPlugin(SerialPlugin):
     def parse(self, validated_line):
         record = CallDataRecord(2)
         record.number = "+353876185584"
@@ -27,7 +27,7 @@ def mock_port(mock_serial_port):
 
 @pytest.fixture
 def mock_plugin(mocker):
-    plugin = call_plugin(TestPlugin)
+    plugin = call_plugin(MockPlugin)
     mocked_runner = mocker.patch.object(running, "is_set")
     mocked_runner.side_effect = [True, False]
     mocker.patch.object(time, "sleep")
@@ -85,6 +85,6 @@ def test_none_existing_port(mock_port, mock_settings, dockerized):
     mock_port.exists.return_value = False
     mock_settings(dockerized=dockerized)
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        TestPlugin()
+        MockPlugin()
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 0

@@ -54,4 +54,4 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     @abc.abstractmethod
     def entrypoint(self) -> NoReturn:  # pragma: no cover
         """Main entry point for the plugins. Must be overridden."""
-        pass
+        raise NotImplementedError

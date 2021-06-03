@@ -9,7 +9,7 @@ import sys
 import sentry_sdk
 
 # Local
-from calllogger.plugins import installed
+from calllogger.plugins import get_plugin
 from calllogger import __version__, running, api, settings
 from calllogger.datastore import get_token, get_identifier
 from calllogger.managers import ThreadExceptionManager
@@ -30,26 +30,6 @@ def terminate(*_):
     return 130
 
 
-def get_plugin(selected_plugin: str):
-    """Return the selected plugin."""
-    if plugin := installed.get(selected_plugin.lower()):
-        return plugin
-    elif installed:
-        if selected_plugin:
-            print("Specified plugin not found:", selected_plugin)
-        else:
-            print("No plugin specified")
-        print("Available plugins are:")
-        for plugin in installed.values():
-            print(f"--> {plugin.__name__} - {plugin.__doc__}")
-    else:
-        print("No plugins are installed")
-
-    # We only get here if the selected plugin
-    # was not found or no plugin was specified
-    sys.exit(0)
-
-
 def set_sentry_user(token_auth: TokenAuth):
     """Request CDR user info and remap name to username for sentry support."""
     user_info = api.get_owner_info(token_auth)
@@ -62,6 +42,8 @@ def main_loop(*args, **kwargs) -> int:
         return _main_loop(*args, **kwargs)
     except KeyboardInterrupt:
         return terminate()
+    finally:
+        running.clear()
 
 
 def _main_loop(plugin) -> int:

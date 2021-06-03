@@ -165,7 +165,7 @@ class QuartxAPIHandler:
             logger.error("Quitting as the token does not have the required permissions or has been revoked.")
             datastore.revoke_token()
             self.running.clear()
-            if "TOKEN" in os.environ:
+            if os.environ.get("TOKEN"):
                 sys.exit(0)
             else:
                 sys.exit(1)

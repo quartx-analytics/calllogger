@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Parse command line args. Only used for version right now.
 parser = argparse.ArgumentParser(prog="Quartx CallLogger")
 parser.add_argument('--version', action='version', version=f"calllogger {__version__}")
-parser.parse_args()
+parser.parse_known_args()
 
 
 def terminate(*_):

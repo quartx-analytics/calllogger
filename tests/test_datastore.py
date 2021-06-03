@@ -147,6 +147,11 @@ class TestRequestToken:
         return mocker.patch.object(datastore.api, "link_device", return_value=self.token)
 
     @pytest.fixture(autouse=True)
+    def set_reg_key(self, mock_settings):
+        mock_settings(reg_key="kdkfjo23ik98u098u")
+        return
+
+    @pytest.fixture(autouse=True)
     def disable_env_and_store(self, mocker: MockerFixture, mock_env):
         """Ensure that token env and token store does not exist."""
         mocked_stored = mocker.patch.object(datastore, "token_store")

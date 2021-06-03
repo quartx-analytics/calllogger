@@ -82,13 +82,15 @@ def request_token() -> str:
             logger.debug("Writing token to datastore")
             return token
         else:
-            print("Unable to register device. Can not proceed. Quitting.")
+            print("Unable to register device. Can not proceed.")
             sys.exit(0)
     else:
         if identifier is None:
             logger.info("Device registration unavailable. Missing required device identifier")
+            print("Missing required device identifier")
         if not settings.reg_key:
             logger.info("Device registration unavailable. Missing required registration key")
+            print("Missing required registration key")
 
         print("Unable to proceed, missing required TOKEN.")
         print("Please set the TOKEN environment variable")

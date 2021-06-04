@@ -4,6 +4,7 @@ import signal
 # Third Party
 from pytest_mock import MockerFixture
 import sentry_sdk
+import pytest
 
 # Local
 from calllogger import __main__ as entrypoint
@@ -30,14 +31,19 @@ def test_set_sentry_user(mocker: MockerFixture):
     mocked_set_user.assert_called_with(expected_data)
 
 
-def test_graceful_exception(mocker: MockerFixture):
+@pytest.mark.parametrize("return_data", [KeyboardInterrupt, "testdata"])
+def test_graceful_exception(mocker: MockerFixture, return_data):
     spy_running_clear = mocker.spy(entrypoint.running, "clear")
     spy_terminate = mocker.spy(entrypoint, "terminate")
 
     @entrypoint.graceful_exception
     def worker():
-        raise KeyboardInterrupt
+        if isinstance(return_data, str):
+            return return_data
+        else:
+            raise KeyboardInterrupt
 
     worker()
     assert spy_running_clear.called
-    spy_terminate.assert_called_with(signal.SIGINT)
+    if isinstance(return_data, Exception):
+        spy_terminate.assert_called_with(signal.SIGINT)

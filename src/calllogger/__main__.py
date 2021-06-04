@@ -23,37 +23,44 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_known_args()
 
 
-def terminate(*_):
+def terminate(signum, *_):
     """This will allow the threads to gracefully shutdown."""
-    logger.debug("initiating graceful shutdown")
+    code = 143 if signum == signal.SIGTERM else 130
     running.clear()
-    return 130
+    return code
 
 
-def set_sentry_user(token_auth: TokenAuth):
-    """Request CDR user info and remap name to username for sentry support."""
-    user_info = api.get_owner_info(token_auth)
-    user_info["username"] = user_info.pop("name")
-    sentry_sdk.set_user(user_info)
+def graceful_exception(func):
+    """Function to handle exceptions gracefully."""
+    def wrapper(*args, **kwargs) -> int:
+        try:
+            return func(*args, **kwargs)
+        except KeyboardInterrupt:
+            return terminate(signal.SIGINT)
+        finally:
+            running.clear()
+    return wrapper
 
 
-def main_loop(*args, **kwargs) -> int:
-    try:
-        return _main_loop(*args, **kwargs)
-    except KeyboardInterrupt:
-        return terminate()
-    finally:
-        running.clear()
+def set_sentry_user(client_info: dict):
+    """Setup sentry user using client info."""
+    sentry_sdk.set_user({
+        "id": client_info["id"],
+        "username": client_info["name"],
+        "email": client_info["email"],
+    })
 
 
-def _main_loop(plugin) -> int:
+def main_loop(plugin) -> int:
+    """Call the selected plugin and wait for program shutdown."""
     running.set()
     tokenauth = get_token()
     queue = Queue(settings.queue_size)
 
     # Configure sentry
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    set_sentry_user(tokenauth)
+    client_info = api.get_owner_info(tokenauth)
+    set_sentry_user(client_info)
 
     # Start the CDR worker to monitor the record queue
     cdr_thread = api.CDRWorker(queue, tokenauth)
@@ -72,6 +79,7 @@ def _main_loop(plugin) -> int:
 
 
 # Entrypoint: calllogger
+@graceful_exception
 def monitor() -> int:
     """Normal logger that calls the users preferred plugin."""
     plugin = get_plugin(settings.plugin)
@@ -79,6 +87,7 @@ def monitor() -> int:
 
 
 # Entrypoint: calllogger-mock
+@graceful_exception
 def mockcalls() -> int:
     """Force use of the mock logger."""
     plugin = get_plugin("MockCalls")
@@ -86,6 +95,7 @@ def mockcalls() -> int:
 
 
 # Entrypoint: calllogger-getid
+@graceful_exception
 def getid() -> int:
     identifier = get_identifier()
     print(identifier)

@@ -40,7 +40,7 @@ class TestGetPlugin:
             plugins.get_plugin(value)
 
     @pytest.mark.parametrize("value", ["pluginnotfound", ""])
-    def test_(self, mocker: MockerFixture, value):
+    def test_no_plugins_installed(self, mocker: MockerFixture, value):
         """Test that no registered plugin will cause SystemExit to be raised too."""
         mocker.patch.object(plugins, "installed", {})
         with pytest.raises(SystemExit):

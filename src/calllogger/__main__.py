@@ -1,5 +1,6 @@
 # Standard Lib
 from queue import Queue
+import functools
 import argparse
 import logging
 import signal
@@ -34,6 +35,7 @@ def graceful_exception(func):
     Decorator function to handle exceptions gracefully.
     And signal any threads to end.
     """
+    @functools.wraps(func)
     def wrapper(*args, **kwargs) -> int:
         try:
             return func(*args, **kwargs)

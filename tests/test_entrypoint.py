@@ -47,14 +47,3 @@ def test_graceful_exception(mocker: MockerFixture, return_data):
     assert spy_running_clear.called
     if isinstance(return_data, Exception):
         spy_terminate.assert_called_with(signal.SIGINT)
-
-
-def test_main_loop(mocker: MockerFixture):
-    mocked_cdrworker = mocker.patch.object(entrypoint.api, "CDRWorker")
-    mocked_info = mocker.patch.object(entrypoint.api, "get_owner_info")
-    mocked_get_token = mocker.patch.object(entrypoint, "get_token")
-    mock_plugin = mocker.MagicMock
-
-    entrypoint.main_loop(mock_plugin)
-
-

@@ -13,7 +13,6 @@ from calllogger.plugins import get_plugin
 from calllogger import __version__, running, api, settings
 from calllogger.datastore import get_token, get_identifier
 from calllogger.managers import ThreadExceptionManager
-from calllogger.utils import TokenAuth
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,10 @@ def terminate(signum, *_):
 
 
 def graceful_exception(func):
-    """Function to handle exceptions gracefully."""
+    """
+    Decorator function to handle exceptions gracefully.
+    And signal any threads to end.
+    """
     def wrapper(*args, **kwargs) -> int:
         try:
             return func(*args, **kwargs)

@@ -13,6 +13,7 @@ info_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/info/")
 def get_local_ip() -> str:
     """Return the local network IP address."""
     if hostname := socket.gethostname():
+        print(type(hostname), hostname)
         return socket.gethostbyname(hostname)
 
 

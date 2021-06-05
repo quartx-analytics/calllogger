@@ -10,7 +10,7 @@ def test_get_owner_info(requests_mock, mocker):
     mocked.return_value = True
     expected_resp = {'id': 1, 'name': 'Test', 'email': 'test@test.com'}
     mocked_request = requests_mock.get(info.info_url, status_code=200, json=expected_resp)
-    resp = info.get_owner_info(tokenauth)
+    resp = info.get_owner_info(tokenauth, "identifier")
 
     assert mocked_request.called
     assert resp == expected_resp

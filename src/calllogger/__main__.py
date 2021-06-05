@@ -59,11 +59,12 @@ def main_loop(plugin) -> int:
     """Call the selected plugin and wait for program shutdown."""
     running.set()
     tokenauth = get_token()
+    identifier = get_identifier()
     queue = Queue(settings.queue_size)
 
     # Configure sentry
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    client_info = api.get_owner_info(tokenauth)
+    client_info = api.get_owner_info(tokenauth, identifier)
     set_sentry_user(client_info)
 
     # Start the CDR worker to monitor the record queue

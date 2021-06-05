@@ -1,0 +1,2 @@
+# Make serial devices readable by non-root users
+KERNEL=="ttyUSB[0-9]*",MODE="0666"

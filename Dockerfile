@@ -21,7 +21,8 @@ ENV SENTRY_DSN=$SENTRY_DSN
 ENV REG_KEY=$REG_KEY
 
 # Entrypoint setup
-COPY entrypoint.sh /entrypoint.sh
+COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules
+COPY data/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["calllogger"]
 

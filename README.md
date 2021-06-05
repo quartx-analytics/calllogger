@@ -17,7 +17,7 @@ Phone system support is done using plugins. The currently available plugins are:
 * ``Mock``: Generate random call records continuously.
 
 This package is designed to be run within a containerized environment, for this we use docker.
-The containerized image is built to work on linux/amd64, linux/arm64 and linux/arm/v7.
+The containerized image is built to work on linux/amd64 and linux/arm64.
 
 
 Configuration
@@ -32,18 +32,12 @@ Here is a list of command options that we will use to configure the docker conta
 * ``--name "calllogger"``: Set the identifier name for the container.
 * ``--volume="calllogger-data:/data"``: Create a docker data volume and mounts it into the container,
   this is required as containers are stateless.
+* ``--volume="/dev:/dev"``: Mounts all devices into the container. Required for serial port access.
 * ``--restart=on-failure``: Tell docker to start on startup and restart the docker container if
   the program exits unexpectedly.
 * ``--network host``: Give the container direct access to the network devices. This is required
   for device identification.
 * ``--env "KEY=VALUE"``: Set environment variables to be used by the calllogger.
-
-If using the SiemensHipathSerial plugin, the serial interface needs to be passed
-to the docker container using the ``--device`` option in docker.
-
-```bash
---device="/dev/ttyUSB0:/dev/ttyUSB0"
-```
 
 Below is a list of environment variables that can be used to configure the calllogger.
 
@@ -67,5 +61,5 @@ There is only one command required to install, configure and run the call logger
 Ensure that the path to the serial device is correct if using the SiemensHipathSerial plugin.
 
 ```bash
-docker run --detach --name "calllogger" --device="/dev/ttyUSB0:/dev/ttyUSB0" --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger plugin SiemensHipathSerial
+docker run --detach --name "calllogger" --volume="/dev:/dev" --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger plugin SiemensHipathSerial
 ```

@@ -22,7 +22,6 @@ def register_plugins(*plugins: Type[BasePlugin]):
     for plugin in plugins:
         name = plugin.__name__
         installed[name.lower()] = plugin
-        installed[plugin.id] = plugin
         logger.debug("Plugin Registered: %s - %s", name, plugin.__doc__)
 
 

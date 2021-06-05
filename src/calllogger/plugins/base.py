@@ -31,7 +31,6 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
 
-    id = 0
     _queue: Queue
 
     def __init__(self):

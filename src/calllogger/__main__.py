@@ -55,7 +55,7 @@ def set_sentry_user(client_info: dict):
     })
 
 
-def main_loop() -> int:
+def main_loop(plugin) -> int:
     """Call the selected plugin and wait for program shutdown."""
     running.set()
     tokenauth = get_token()
@@ -64,7 +64,6 @@ def main_loop() -> int:
 
     # Configure sentry
     client_info = api.get_client_info(tokenauth, identifier)
-    plugin = get_plugin(client_info["plugin"])
     sentry_sdk.set_tag("plugin", plugin.__name__)
     set_sentry_user(client_info)
 
@@ -96,8 +95,8 @@ def monitor() -> int:
 @graceful_exception
 def mockcalls() -> int:
     """Force use of the mock logger."""
-    #plugin = get_plugin("MockCalls")
-    return main_loop()
+    plugin = get_plugin("MockCalls")
+    return main_loop(plugin)
 
 
 # Entrypoint: calllogger-getid

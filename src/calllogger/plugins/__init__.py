@@ -28,7 +28,7 @@ def register_plugins(*plugins: Type[BasePlugin]):
 
 def get_plugin(selected_plugin: str):
     """Return the selected plugin."""
-    if plugin := installed.get(selected_plugin.lower()):
+    if plugin := installed.get(selected_plugin):
         return plugin
     elif installed:
         if selected_plugin:

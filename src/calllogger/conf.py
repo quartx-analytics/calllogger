@@ -97,7 +97,7 @@ class Settings:
     plugin: str = ""
 
     # Base64 encoded Environment variables
-    sentry_dsn: b64 = ""
+    sentry_dsn: b64 = None
     reg_key: b64 = ""
 
     def __init__(self):

@@ -15,7 +15,10 @@ def get_local_ip() -> str:
     return socket.gethostbyname(hostname)
 
 
-def get_owner_info(token: TokenAuth, identifier) -> dict:
+print(get_local_ip())
+
+
+def get_client_info(token: TokenAuth, identifier) -> dict:
     """Request information about the client."""
     api = QuartxAPIHandler()
 

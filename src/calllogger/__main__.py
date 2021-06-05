@@ -63,8 +63,8 @@ def main_loop(plugin) -> int:
     queue = Queue(settings.queue_size)
 
     # Configure sentry
+    client_info = api.get_client_info(tokenauth, identifier)
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    client_info = api.get_owner_info(tokenauth, identifier)
     set_sentry_user(client_info)
 
     # Start the CDR worker to monitor the record queue

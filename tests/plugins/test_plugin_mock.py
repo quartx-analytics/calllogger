@@ -20,6 +20,7 @@ def mock_plugin(mocker):
     mocked_runner = mocker.patch.object(running, "is_set")
     mocked_runner.side_effect = [True, False]
     mocker.patch.object(mockcalls, "sleeper")
+    plugin.exts = 3  # Limit extensions
     yield plugin
 
 

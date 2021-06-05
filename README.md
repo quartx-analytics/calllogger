@@ -32,12 +32,16 @@ Here is a list of command options that we will use to configure the docker conta
 * ``--name "calllogger"``: Set the identifier name for the container.
 * ``--volume="calllogger-data:/data"``: Create a docker data volume and mounts it into the container,
   this is required as containers are stateless.
-* ``--volume="/dev:/dev"``: Mounts all devices into the container. Required for serial port access.
 * ``--restart=on-failure``: Tell docker to start on startup and restart the docker container if
   the program exits unexpectedly.
 * ``--network host``: Give the container direct access to the network devices. This is required
   for device identification.
 * ``--env "KEY=VALUE"``: Set environment variables to be used by the calllogger.
+* ``--volume="/dev:/dev"``: Mounts all devices into the container. Required for serial port access.
+* ``--privileged``: Run the container in privileged mode. This is required for device access to work.
+
+If you do not need access to any serial device, you can omit the
+``--volume="/dev:/dev`` and ``--privileged`` options.
 
 Below is a list of environment variables that can be used to configure the calllogger.
 

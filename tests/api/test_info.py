@@ -1,10 +1,14 @@
+# Third Party
+import pytest
+
 # Local
 from calllogger.api import info
 from calllogger.utils import TokenAuth
 from calllogger import running
 
 
-def test_get_owner_info(requests_mock, mocker):
+@pytest.mark.parametrize("identifier", ["C4:11:0B:0F:F5:C5", None])
+def test_get_owner_info(requests_mock, mocker, identifier):
     tokenauth = TokenAuth("token")
     mocked = mocker.patch.object(running, "is_set")
     mocked.return_value = True

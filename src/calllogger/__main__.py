@@ -88,15 +88,15 @@ def main_loop() -> int:
 @graceful_exception
 def monitor() -> int:
     """Normal logger that calls the users preferred plugin."""
-    # plugin = get_plugin(settings.plugin)
-    return main_loop()
+    plugin = get_plugin(settings.plugin)
+    return main_loop(plugin)
 
 
 # Entrypoint: calllogger-mock
 @graceful_exception
 def mockcalls() -> int:
     """Force use of the mock logger."""
-    # plugin = get_plugin("MockCalls")
+    #plugin = get_plugin("MockCalls")
     return main_loop()
 
 

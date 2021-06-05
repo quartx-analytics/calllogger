@@ -34,7 +34,7 @@ def get_client_info(token: TokenAuth, identifier) -> dict:
         params["device_id"] = identifier
 
     # Add the local IP address
-    if local_ip := get_local_ip():  # pragma: no branch
+    if local_ip := get_local_ip():
         params["local_ip"] = local_ip
 
     resp = api.make_request(

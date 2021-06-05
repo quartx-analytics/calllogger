@@ -12,12 +12,9 @@ info_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/info/")
 
 def get_local_ip() -> str:
     """Return the local network IP address."""
-    if hostname := socket.gethostname():
-        print(type(hostname), hostname)
-        return socket.gethostbyname(hostname)
-
-
-print(get_local_ip())
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect(("quartx.ie", 80))
+        return s.getsockname()[0]
 
 
 def get_client_info(token: TokenAuth, identifier) -> dict:
@@ -44,3 +41,6 @@ def get_client_info(token: TokenAuth, identifier) -> dict:
         params=params,
     )
     return resp.json()
+
+
+print(get_local_ip())

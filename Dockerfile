@@ -35,7 +35,7 @@ RUN mkdir -p $DATA_LOCATION && \
     rm -rf /src && \
     adduser -D -u 1000 -G users runner && \
     mkdir -p $DATA_LOCATION && \
-    && chown -R runner:users $DATA_LOCATION
+    chown -R runner:users $DATA_LOCATION
 
 # Make all commands run as user runner
 USER runner:users

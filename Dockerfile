@@ -29,7 +29,7 @@ CMD ["calllogger"]
 # Install as Python Package
 COPY . /src
 RUN mkdir -p $DATA_LOCATION && \
-    apk add --no-cache findmnt && \
+    apk add --no-cache findmnt py3-psutil && \
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir /src && \
     rm -rf /src && \

@@ -30,6 +30,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
 
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
+    id = None
 
     _queue: Queue
 

@@ -36,6 +36,7 @@ for number in numbers:
 
 class MockCalls(BasePlugin):
     """Generate random call records continuously."""
+    id = 1
 
     #: Time in seconds to delay, 0 will skip incoming and push at full speed.
     sleep: float = 1

@@ -1,5 +1,5 @@
 # Standard library
-from typing import Type
+from typing import Type, Union
 import logging
 import sys
 
@@ -21,12 +21,13 @@ def register_plugins(*plugins: Type[BasePlugin]):
     """Register internal plugins."""
     for plugin in plugins:
         name = plugin.__name__
-        installed[name.lower()] = plugin
+        installed[name.lower()] = installed[str(plugin.id)] = plugin
         logger.debug("Plugin Registered: %s - %s", name, plugin.__doc__)
 
 
-def get_plugin(selected_plugin: str):
+def get_plugin(selected_plugin: Union[str, int]):
     """Return the selected plugin."""
+    selected_plugin = str(selected_plugin)
     if plugin := installed.get(selected_plugin.lower()):
         return plugin
     elif installed:
@@ -36,7 +37,7 @@ def get_plugin(selected_plugin: str):
             print("No plugin specified")
         print("Available plugins are:")
         for plugin in installed.values():
-            print(f"--> {plugin.__name__} - {plugin.__doc__}")
+            print(f"--> {plugin.id} {plugin.__name__} - {plugin.__doc__}")
     else:
         print("No plugins are installed")
 

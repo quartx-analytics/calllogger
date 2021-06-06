@@ -7,6 +7,8 @@ from calllogger import plugins
 
 
 class MockedPlugin(plugins.BasePlugin):
+    id = 1
+
     def entrypoint(self):
         pass
 
@@ -17,6 +19,7 @@ def test_register_plugins(mocker: MockerFixture):
 
     assert plugins.installed
     assert "mockedplugin" in plugins.installed
+    assert str(MockedPlugin.id) in plugins.installed
     assert plugins.installed["mockedplugin"] is MockedPlugin
 
 
@@ -28,9 +31,10 @@ class TestGetPlugin:
         mocker.patch.object(plugins, "installed", {})
         plugins.register_plugins(MockedPlugin)
 
-    def test_plugin_found(self, register_plugin):
+    @pytest.mark.parametrize("plugin_id", [MockedPlugin.__name__, MockedPlugin.id])
+    def test_plugin_found(self, register_plugin, plugin_id):
         """Test that get_plugin returns the plugin with the given name."""
-        plugin = plugins.get_plugin("mockedplugin")
+        plugin = plugins.get_plugin(plugin_id)
         assert plugin is MockedPlugin
 
     @pytest.mark.parametrize("value", ["pluginnotfound", ""])

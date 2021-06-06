@@ -33,7 +33,9 @@ RUN mkdir -p $DATA_LOCATION && \
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir /src && \
     rm -rf /src && \
-    adduser -D -u 1000 -G users runner
+    adduser -D -u 1000 -G users runner && \
+    mkdir -p $DATA_LOCATION && \
+    && chown -R runner:users $DATA_LOCATION
 
 # Make all commands run as user runner
 USER runner:users

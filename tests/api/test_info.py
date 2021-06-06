@@ -19,7 +19,6 @@ def test_get_local_ip(mocker):
     assert ip == "192.168.1.1"
 
 
-@pytest.mark.skip
 def test_get_local_ip_error(mocker):
     """Test that an empty string is return on error."""
     mocker.patch.object(socket.socket, "connect", side_effect=OSError)

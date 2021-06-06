@@ -32,4 +32,9 @@ RUN mkdir -p $DATA_LOCATION && \
     apk add --no-cache findmnt && \
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir /src && \
-    rm -rf /src
+    rm -rf /src && \
+    addgroup -g 1000 users && \
+    adduser -D -u 1000 -G users runner
+
+# Make all commands run as user runner
+USER runner:users

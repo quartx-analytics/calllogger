@@ -1,4 +1,5 @@
 # Standard Lib
+from pytest_mock import MockerFixture
 import logging
 
 # Third Party
@@ -9,7 +10,7 @@ import serial
 
 # Local
 from calllogger.plugins.serial import SerialPlugin
-from calllogger import running
+from calllogger import running, utils
 
 
 @pytest.fixture(autouse=True)
@@ -70,6 +71,17 @@ def mock_settings(mocker):
 
 
 @pytest.fixture
+def mock_setting(mocker):
+    def worker(key, val):
+        return mocker.patch(
+            f"calllogger.conf.Settings.{key}",
+            new_callable=mocker.PropertyMock,
+            return_value=val,
+        )
+    yield worker
+
+
+@pytest.fixture
 def mock_env():
     # Keep track of original key, value
     tracker = []
@@ -92,3 +104,8 @@ def mock_env():
         # Replace key with original value
         elif v is not None:
             os.environ[k] = v
+
+
+@pytest.fixture
+def disable_write_datastore(mocker: MockerFixture):
+    return mocker.patch.object(utils, "write_datastore")

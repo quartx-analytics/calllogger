@@ -21,32 +21,36 @@ __all__ = ["__version__", "__package__", "running", "settings"]
 
 # Standard lib
 from importlib.metadata import version
+from typing import Any
 import logging.config
 import threading
 
 # Third Party
 import sentry_sdk
+from decouple import config
 from sentry_sdk.integrations.threading import ThreadingIntegration
 
 # Local
-from calllogger.conf import Settings
+from calllogger import conf
 
 __package__ = "quartx-calllogger"
 __version__ = version(__package__)
-running = threading.Event()
-settings = Settings()
 
 # Setup Sentry
 sentry_sdk.init(
-    settings.sentry_dsn,
+    config("SENTRY_DSN", default="", cast=conf.b64),
     release=__version__,
-    environment=settings.environment,
+    environment=config("ENVIRONMENT", default="Testing", cast=str),
     integrations=[ThreadingIntegration(propagate_hub=True)],
     max_breadcrumbs=25,
 )
 
-# Setup Logging
-logging.config.dictConfig({
+# Initialize Settings
+running = threading.Event()
+settings = conf.Settings()
+
+# Logging configuration
+logging_config: Any = {
     "version": 1,
     "filters": {
         "only_messages": {
@@ -61,8 +65,9 @@ logging.config.dictConfig({
             "()": "fluent.handler.FluentRecordFormatter",
             "format": {
                 "level": "%(levelname)s",
-                "hostname": "%(hostname)s",
-                "where": "%(module)s.%(funcName)s",
+                "logger": "%(name)s",
+                "identifier": settings.identifier,
+                "thread": "%(threadName)s",
             }
         }
     },
@@ -84,16 +89,28 @@ logging.config.dictConfig({
             "class": "fluent.handler.FluentHandler",
             "host": "localhost",
             "port": 24224,
-            "tag": "test.logging",
+            "tag": "calllogger",
             "buffer_overflow_handler": "overflow_handler",
             "formatter": "fluent_fmt",
             "level": "DEBUG",
         }
     },
     "loggers": {
-        __name__: {
+        "calllogger": {
             "handlers": ["console_messages", "console_errors"],
             "level": "DEBUG",
+        },
+        "calllogger.record": {
+            "handlers": ["console_messages"],
+            "level": "DEBUG",
+            "propagate": False,
         }
     }
-})
+}
+
+if settings.send_logs:
+    # Enable fluent logging
+    logging_config["loggers"]["calllogger"]["handlers"].append("fluent")
+
+# Apply logging config
+logging.config.dictConfig(logging_config)

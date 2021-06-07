@@ -2,10 +2,11 @@
 from pathlib import PosixPath
 
 # Third Party
+from pytest_mock import MockerFixture
 import pytest
 
 # Local
-from calllogger import conf, settings
+from calllogger import conf, settings, utils
 
 
 class MockSettings:
@@ -16,6 +17,18 @@ class MockSettings:
     test5 = "1"
     test6: str
     test7: conf.b64 = ""
+
+
+@pytest.fixture
+def clear_settings_cache():
+    """Clear datastore cached_property."""
+    def worker(attr: str):
+        if hasattr(settings, attr):
+            delattr(settings, attr)
+        yield
+        if hasattr(settings, attr):
+            delattr(settings, attr)
+    return worker
 
 
 class TestMergeSettings:
@@ -106,3 +119,59 @@ class TestDataStoreSettings:
 
     def test_appdirs(self):
         assert str(settings.datastore).endswith("/.local/share/quartx-calllogger")
+
+
+class TestGetIdentifier:
+    """Test get_identifier function."""
+
+    # Example mac address
+    mac_addr = "CB:BB:27:BF:51:5C"
+
+    @pytest.fixture(autouse=True)
+    def clear_cache(self):
+        """Clear datastore cached_property."""
+        if hasattr(settings, "identifier"):
+            del settings.identifier
+        yield
+        if hasattr(settings, "identifier"):
+            del settings.identifier
+
+    def test_stored(self, mocker: MockerFixture):
+        """Test fetching identifier from datastore."""
+        mocked_stored = mocker.patch.object(settings, "_identifier_store")
+        mocked_stored.exists.return_value = True
+
+        mocked_read = mocker.patch.object(utils, "read_datastore")
+        mocked_read.return_value = self.mac_addr
+
+        identifier = settings.identifier
+        assert mocked_stored.exists.called
+        assert mocked_read.called
+        assert identifier == self.mac_addr
+
+    def test_from_network(self, mocker: MockerFixture, disable_write_datastore):
+        """Test fetching identifier from network device."""
+        # Force identifier_store to not exist
+        mocked_stored = mocker.patch.object(settings, "_identifier_store")
+        mocked_stored.exists.return_value = False
+        # Return known mac address from get_mac_address function from getmac lib
+        mocked_get_mac = mocker.patch.object(conf, "get_mac_address", return_value=self.mac_addr)
+
+        identifier = settings.identifier
+        assert mocked_get_mac.called
+        assert disable_write_datastore.called
+        assert identifier == self.mac_addr
+
+    @pytest.mark.parametrize("invalid_mac", ["00:00:00:00:00:00", None])
+    def test_invalid_identifier(self, mocker: MockerFixture, invalid_mac, disable_write_datastore):
+        """Test that a invalid identifier returns 'None'."""
+        # Force identifier_store to not exist
+        mocked_stored = mocker.patch.object(settings, "_identifier_store")
+        mocked_stored.exists.return_value = False
+        # Return known mac address from get_mac_address function from getmac lib
+        mocked_get_mac = mocker.patch.object(conf, "get_mac_address", return_value=invalid_mac)
+
+        identifier = settings.identifier
+        assert mocked_get_mac.called
+        assert disable_write_datastore.called is False
+        assert identifier is None

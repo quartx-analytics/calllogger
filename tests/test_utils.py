@@ -1,5 +1,7 @@
 # Standard Lib
+from pathlib import PosixPath
 import logging
+import base64
 
 # Third Party
 import pytest
@@ -76,3 +78,30 @@ class TestExitCodeManager:
         exit_code.reset()
         exit_code.set(11)
         assert exit_code.value() == 11
+
+
+class TestReadWrite:
+    """Test read_datastore and write_datastore functions."""
+
+    def test_read(self, mocker: MockerFixture):
+        """Test that datastore reads and decodes correctly."""
+        encoded_data = base64.b64encode(b"testdata")
+        mocked_open = mocker.patch.object(PosixPath, "open", mocker.mock_open(read_data=encoded_data))
+
+        path = PosixPath("/data")
+        value = utils.read_datastore(path)
+
+        mocked_open.assert_called_with("rb")
+        assert mocked_open.return_value.read.called
+        assert value == "testdata"
+
+    def test_write(self, mocker: MockerFixture):
+        """Test that datastore writes encoded data."""
+        encoded_data = base64.b64encode(b"testdata")
+        mocked_open = mocker.patch.object(PosixPath, "open", mocker.mock_open())
+
+        path = PosixPath("/data")
+        utils.write_datastore(path, "testdata")
+
+        mocked_open.assert_called_with("wb")
+        mocked_open.return_value.write.assert_called_with(encoded_data)

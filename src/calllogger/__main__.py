@@ -11,8 +11,8 @@ import sentry_sdk
 # Local
 from calllogger.plugins import get_plugin
 from calllogger import __version__, running, api, settings
-from calllogger.datastore import get_token, get_identifier
 from calllogger.managers import ThreadExceptionManager
+from calllogger.auth import get_token
 
 # Parse command line args. Only used for version right now.
 parser = argparse.ArgumentParser(prog="Quartx CallLogger")
@@ -56,11 +56,10 @@ def main_loop(plugin: str) -> int:
     """Call the selected plugin and wait for program shutdown."""
     running.set()
     tokenauth = get_token()
-    identifier = get_identifier()
     queue = Queue(settings.queue_size)
 
     # Configure sentry
-    client_info = api.get_client_info(tokenauth, identifier)
+    client_info = api.get_client_info(tokenauth, settings.identifier)
     plugin = get_plugin(plugin if plugin else client_info["plugin"])
     sentry_sdk.set_tag("plugin", plugin.__name__)
     set_sentry_user(client_info)
@@ -97,7 +96,7 @@ def mockcalls() -> int:
 # Entrypoint: calllogger-getid
 @graceful_exception
 def getid() -> int:
-    identifier = get_identifier()
+    identifier = settings.identifier
     print(identifier)
     return 0
 

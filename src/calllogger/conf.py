@@ -1,6 +1,7 @@
 # Standard lib
 from functools import cached_property
 from pathlib import PosixPath
+from typing import Union
 import binascii
 import logging
 import base64
@@ -9,9 +10,13 @@ import os
 
 # Third Party
 from decouple import config, undefined, UndefinedValueError
+from getmac import get_mac_address
 import appdirs
 
-__all__ = ["Settings", "merge_settings"]
+# Local
+from calllogger import utils
+
+__all__ = ["Settings"]
 logger = logging.getLogger(__name__)
 
 
@@ -86,6 +91,10 @@ class Settings:
     device_reg_timeout: int = 3 * 60 * 60
     #: Device registration check time in seconds
     device_reg_check: int = 10
+    #: Send logs to remote server
+    send_logs: bool = True
+    #: Send metrics to remote server
+    send_metrics: bool = True
 
     # The domain to send the call logs to, used in development.
     domain: str = "https://quartx.ie"
@@ -102,6 +111,7 @@ class Settings:
 
     def __init__(self):
         merge_settings(self)
+        self._identifier_store = self.datastore.joinpath("identifier")
 
     @cached_property
     def datastore(self) -> PosixPath:
@@ -116,3 +126,19 @@ class Settings:
         logger.debug("Datastore Location: %s", locale)
         os.makedirs(locale, exist_ok=True)
         return locale
+
+    @cached_property
+    def identifier(self) -> Union[str, None]:
+        # Stored locally
+        if self._identifier_store.exists():
+            logger.debug("Loading device identifier from datastore.")
+            return utils.read_datastore(self._identifier_store)
+
+        # Fetch and save
+        identifier = get_mac_address()
+        if identifier and identifier != "00:00:00:00:00:00":
+            logger.debug("Storing device identifier to datastore.")
+            utils.write_datastore(self._identifier_store, identifier)
+            return identifier
+        else:
+            return None

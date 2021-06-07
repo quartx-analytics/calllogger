@@ -8,8 +8,10 @@ It should be self contained, third party imports are fine.
 """
 
 # Standard Lib
+from pathlib import PosixPath
 import threading
 import logging
+import base64
 import time
 
 # Third Party
@@ -119,3 +121,19 @@ class ExitCodeManager:
     def value(self) -> int:
         """Return the exit code and reset."""
         return self.__exit_code
+
+
+def read_datastore(path: PosixPath, encoding="UTF8") -> str:
+    """Decode stored data and return."""
+    with path.open("rb") as stream:
+        encoded_data = stream.read()
+        decoded_data = base64.b64decode(encoded_data)
+        return decoded_data.decode(encoding)
+
+
+def write_datastore(path: PosixPath, data: str, encoding="UTF8"):
+    """Encode data and save to disk."""
+    with path.open("wb") as stream:
+        decoded_data = data.encode(encoding)
+        encoded_data = base64.b64encode(decoded_data)
+        stream.write(encoded_data)

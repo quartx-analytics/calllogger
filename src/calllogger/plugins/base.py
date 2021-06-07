@@ -6,12 +6,12 @@ import abc
 
 # Local
 from calllogger.managers import ThreadExceptionManager
-from calllogger.conf import merge_settings
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
-from calllogger import running, settings
+from calllogger import running, settings, conf
 
 logger = logging.getLogger(__name__)
+record_logger = logging.getLogger("calllogger.record")
 installed_plugins = {}
 
 
@@ -20,7 +20,7 @@ class PluginSettings(abc.ABCMeta):
 
     def __call__(cls, **kwargs):
         inst = super().__call__()
-        merge_settings(inst, prefix="plugin_", **kwargs)
+        conf.merge_settings(inst, prefix="plugin_", **kwargs)
         return inst
 
 
@@ -46,7 +46,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
         """Send a call log record to the call monitoring API."""
         raw_data = record.__dict__
         self._queue.put(raw_data)
-        self.logger.debug(raw_data)
+        record_logger.debug(str(raw_data))
 
     @property
     def is_running(self) -> bool:

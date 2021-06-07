@@ -13,7 +13,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 
 # Local
 from calllogger.utils import Timeout
-from calllogger import running, settings, datastore
+from calllogger import running, settings, auth
 
 logger = logging.getLogger(__name__)
 RetryResponse = Union[bool, requests.Response]
@@ -163,7 +163,7 @@ class QuartxAPIHandler:
         # Quit if not authorized
         if status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
             logger.error("Quitting as the token does not have the required permissions or has been revoked.")
-            datastore.revoke_token()
+            auth.revoke_token()
             self.running.clear()
             if os.environ.get("TOKEN"):
                 sys.exit(0)

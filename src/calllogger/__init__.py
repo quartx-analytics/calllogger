@@ -64,6 +64,7 @@ logging.config.dictConfig({
             "stream": "ext://sys.stdout",
             "filters": ["only_messages"],
             "formatter": "levelname",
+            "level": "DEBUG" if settings.debug else "INFO",
         },
         "console_errors": {
             "class": "logging.StreamHandler",
@@ -75,7 +76,7 @@ logging.config.dictConfig({
     "loggers": {
         __name__: {
             "handlers": ["console_messages", "console_errors"],
-            "level": "DEBUG" if settings.debug else "INFO",
+            "level": "DEBUG",
         }
     }
 })

@@ -62,9 +62,10 @@ def test_dateline(mock_serial, mock_plugin):
     assert not mock_serial.close.called
 
 
-def test_failed_validate(mock_serial, mock_plugin, mocker):
+@pytest.mark.parametrize("return_value", [False, ""])
+def test_failed_validate(mock_serial, mock_plugin, mocker, return_value):
     mock_serial.readline.return_value = b"raw data line"
-    mocker.patch.object(mock_plugin, "validate", return_value=False)
+    mocker.patch.object(mock_plugin, "validate", return_value=return_value)
     mock_plugin.run()
 
     assert mock_serial.readline.called

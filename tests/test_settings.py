@@ -105,13 +105,8 @@ class TestMergeSettings:
 
 class TestDataStoreSettings:
     @pytest.fixture(autouse=True)
-    def clear_cache(self):
-        """Clear datastore cached_property."""
-        if hasattr(settings, "datastore"):
-            del settings.datastore
-        yield
-        if hasattr(settings, "datastore"):
-            del settings.datastore
+    def clear_cache(self, clear_settings_cache):
+        yield from clear_settings_cache("datastore")
 
     def test_env_set(self, mock_env):
         mock_env(DATA_LOCATION="/")
@@ -128,13 +123,9 @@ class TestGetIdentifier:
     mac_addr = "CB:BB:27:BF:51:5C"
 
     @pytest.fixture(autouse=True)
-    def clear_cache(self):
-        """Clear datastore cached_property."""
-        if hasattr(settings, "identifier"):
-            del settings.identifier
-        yield
-        if hasattr(settings, "identifier"):
-            del settings.identifier
+    def clear_cache(self, clear_settings_cache):
+        """Clear identifier cached_property."""
+        yield from clear_settings_cache("identifier")
 
     def test_stored(self, mocker: MockerFixture):
         """Test fetching identifier from datastore."""

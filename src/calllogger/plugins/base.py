@@ -5,10 +5,10 @@ import logging
 import abc
 
 # Local
+from calllogger import running, settings, conf
 from calllogger.managers import ThreadExceptionManager
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
-from calllogger import running, settings, conf
 
 logger = logging.getLogger(__name__)
 record_logger = logging.getLogger("calllogger.record")

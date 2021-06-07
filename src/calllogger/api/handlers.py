@@ -13,7 +13,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 
 # Local
 from calllogger.utils import Timeout
-from calllogger import running, settings, auth
+from calllogger import running, settings, auth, metrics
 
 logger = logging.getLogger(__name__)
 RetryResponse = Union[bool, requests.Response]
@@ -111,6 +111,7 @@ class QuartxAPIHandler:
 
             # Send Request
             response = self.session.send(request, timeout=self.timeout.value, **kwargs)
+            metrics.request_time_histogram.observe(response.elapsed.total_seconds())
             response.raise_for_status()
             return response
 

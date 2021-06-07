@@ -28,6 +28,7 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
 
     def __init__(self, call_queue: queue.Queue, token: TokenAuth):
         super().__init__(suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
+        logger.info("Initializing CDR queue monitoring")
         logger.debug("Sending CDRs to: %s", settings.domain)
         self.queue = call_queue
 

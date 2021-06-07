@@ -2,7 +2,6 @@
 from queue import Queue
 import functools
 import argparse
-import logging
 import signal
 import sys
 
@@ -14,8 +13,6 @@ from calllogger.plugins import get_plugin
 from calllogger import __version__, running, api, settings
 from calllogger.datastore import get_token, get_identifier
 from calllogger.managers import ThreadExceptionManager
-
-logger = logging.getLogger(__name__)
 
 # Parse command line args. Only used for version right now.
 parser = argparse.ArgumentParser(prog="Quartx CallLogger")
@@ -73,7 +70,6 @@ def main_loop(plugin: str) -> int:
     cdr_thread.start()
 
     # Start the plugin thread to monitor for call records
-    logger.info("Selected Plugin: %s - %s", plugin.__name__, plugin.__doc__)
     plugin_thread = plugin(_queue=queue)
     plugin_thread.start()
 

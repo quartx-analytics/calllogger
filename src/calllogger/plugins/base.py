@@ -37,6 +37,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         super(BasePlugin, self).__init__(name=f"Thread-{self.__class__.__name__}")
+        self.logger.info("Initializing plugin: %s", self.__class__.__name__)
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
         self.timeout = Timeout(settings, running.is_set)  # pragma: no branch

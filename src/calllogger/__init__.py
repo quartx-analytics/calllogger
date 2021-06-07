@@ -56,6 +56,14 @@ logging.config.dictConfig({
     "formatters": {
         "levelname": {
             "format": "%(levelname)s: %(message)s",
+        },
+        "fluent_fmt": {
+            "()": "fluent.handler.FluentRecordFormatter",
+            "format": {
+                "level": "%(levelname)s",
+                "hostname": "%(hostname)s",
+                "where": "%(module)s.%(funcName)s",
+            }
         }
     },
     "handlers": {
@@ -64,18 +72,28 @@ logging.config.dictConfig({
             "stream": "ext://sys.stdout",
             "filters": ["only_messages"],
             "formatter": "levelname",
+            "level": "DEBUG" if settings.debug else "INFO",
         },
         "console_errors": {
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stderr",
             "formatter": "levelname",
             "level": "WARNING",
+        },
+        "fluent": {
+            "class": "fluent.handler.FluentHandler",
+            "host": "localhost",
+            "port": 24224,
+            "tag": "test.logging",
+            "buffer_overflow_handler": "overflow_handler",
+            "formatter": "fluent_fmt",
+            "level": "DEBUG",
         }
     },
     "loggers": {
         __name__: {
             "handlers": ["console_messages", "console_errors"],
-            "level": "DEBUG" if settings.debug else "INFO",
+            "level": "DEBUG",
         }
     }
 })

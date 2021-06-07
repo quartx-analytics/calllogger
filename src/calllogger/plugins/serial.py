@@ -132,5 +132,10 @@ class SerialPlugin(BasePlugin):
             # Parse the serial line and push to the cloud
             if record := self.parse(validated_line):
                 self.push(record)
+
+        # Validate can return False for failed validation or an
+        # empty string if no data is left after stripping whitespace
+        elif validated_line == "":
+            logger.debug("Serial line is empty, ignoring")
         else:
             logger.debug("Serial line failed validation: %s", decoded_line)

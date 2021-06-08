@@ -177,13 +177,13 @@ class SerialPlugin(BasePlugin):
         scope.set_extra("raw_line", repr(raw_line))
 
         # Decode the serial line
-        decoded_line = self.decode(raw_line)
+        decoded_line = self.__decode(raw_line)
         scope.set_extra("decoded_line", decoded_line)
 
         # Validate the decoded serial line
-        validated_line = self.validate(decoded_line)
+        validated_line = self.__validate(decoded_line)
         scope.set_extra("validated_line", validated_line)
 
         # Parse the serial line and push to the cloud
-        record = self.parse(validated_line)
+        record = self.__parse(validated_line)
         self.push(record)

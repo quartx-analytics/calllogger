@@ -5,27 +5,27 @@ from prometheus_client import Counter
 
 # Counters
 serial_conn_error_counter = Counter(
-    "serial_conn_error_total",
+    "serial_conn_error",
     "Number of serial connection errors"
 )
 serial_read_error_counter = Counter(
-    "serial_read_error_total",
+    "serial_read_error",
     "Number of serial read errors"
 )
 failed_decode_counter = Counter(
-    "failed_decode_total",
+    "failed_decode",
     "Number of lines that failed to decode"
 )
 failed_validation_counter = Counter(
-    "failed_validation_total",
+    "failed_validation",
     "Number of lines that failed validation"
 )
 failed_parse_counter = Counter(
-    "failed_parse_total",
+    "failed_parse",
     "Number of lines that failed to parse"
 )
 empty_line_counter = Counter(
-    "empty_line_total",
+    "empty_line",
     "Number of empty serial lines"
 )
 

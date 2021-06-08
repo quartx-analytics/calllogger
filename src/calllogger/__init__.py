@@ -112,5 +112,9 @@ if settings.send_logs:
     # Enable fluent logging
     logging_config["loggers"]["calllogger"]["handlers"].append("fluent")
 
+if settings.send_metrics:
+    # Enable metrics reporting
+    pass
+
 # Apply logging config
 logging.config.dictConfig(logging_config)

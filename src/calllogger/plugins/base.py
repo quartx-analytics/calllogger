@@ -5,7 +5,7 @@ import logging
 import abc
 
 # Local
-from calllogger import running, settings, conf
+from calllogger import running, settings, conf, metrics
 from calllogger.managers import ThreadExceptionManager
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
@@ -47,6 +47,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
         raw_data = record.__dict__
         self._queue.put(raw_data)
         record_logger.debug(str(raw_data))
+        metrics.cdr_processed_counter.inc()
 
     @property
     def is_running(self) -> bool:

@@ -111,7 +111,7 @@ class QuartxAPIHandler:
 
             # Send Request
             response = self.session.send(request, timeout=self.timeout.value, **kwargs)
-            metrics.request_time_histogram.observe(response.elapsed.total_seconds())
+            metrics.track_http_resp_time(response)
             response.raise_for_status()
             return response
 
@@ -122,6 +122,12 @@ class QuartxAPIHandler:
             scope.set_extra("retry", retry)
             capture_exception(err, scope=scope)
             err.sentry = True
+
+            # Track request error metrics
+            if isinstance(err, requests.HTTPError):
+                metrics.track_http_status_errors(err.response)
+            else:
+                metrics.track_http_request_errors(request)
 
             # Return True if we need to retry, else re-raise the exception
             if retry is True:
@@ -143,7 +149,7 @@ class QuartxAPIHandler:
             return True
 
         # Check status code to deside what to do next
-        elif isinstance(err, requests.HTTPError) and err.response is not None:
+        elif isinstance(err, requests.HTTPError):
             logger.warning(
                 "API request failed with status code: %s %s",
                 err.response.status_code,

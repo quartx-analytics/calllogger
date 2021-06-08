@@ -83,7 +83,7 @@ class SerialPlugin(BasePlugin):
             return self.decode(raw)
         except Exception:
             logger.debug("Failed to decode serial line: %r", raw)
-            metrics.failed_decode_counter.inc()
+            metrics.decode_errors_counter.inc()
             raise
 
     def decode(self, raw: bytes) -> str:
@@ -112,7 +112,7 @@ class SerialPlugin(BasePlugin):
             raise
         except Exception:
             logger.debug("Serial line failed validation: %s", decoded_line)
-            metrics.failed_validation_counter.inc()
+            metrics.validation_errors_counter.inc()
             raise
 
     def validate(self, decoded_line: str) -> Union[str, bool]:
@@ -136,7 +136,7 @@ class SerialPlugin(BasePlugin):
                 raise ParseError("Invalid return type")
         except Exception:
             logger.debug("Failed to parse serial line: %s", validated_line)
-            metrics.failed_parse_counter.inc()
+            metrics.parse_errors_counter.inc()
             raise
 
     @abc.abstractmethod

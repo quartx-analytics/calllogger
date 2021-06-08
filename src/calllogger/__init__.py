@@ -29,6 +29,7 @@ import threading
 import sentry_sdk
 from decouple import config
 from sentry_sdk.integrations.threading import ThreadingIntegration
+import prometheus_client
 
 # Local
 from calllogger import conf
@@ -114,7 +115,7 @@ if settings.send_logs:
 
 if settings.send_metrics:
     # Enable metrics reporting
-    pass
+    prometheus_client.start_http_server(8000)
 
 # Apply logging config
 logging.config.dictConfig(logging_config)

@@ -5,35 +5,17 @@ from urllib.parse import urlparse
 import requests
 
 # Prometheus Types
-from prometheus_client import Histogram
-from prometheus_client import Counter
+from prometheus_client import Histogram, Counter
 
 
 # Counters
-serial_conn_error_counter = Counter(
-    name="serial_conn_error",
-    documentation="Number of serial connection errors",
+serial_error_counter = Counter(
+    name="serial_error",
+    documentation="Number of serial errors",
+    labelnames=["error_type"]
 )
-serial_read_error_counter = Counter(
-    name="serial_read_error",
-    documentation="Number of serial read errors"
-)
-decode_errors_counter = Counter(
-    name="failed_decode",
-    documentation="Number of lines that failed to decode",
-)
-validation_errors_counter = Counter(
-    name="failed_validation",
-    documentation="Number of lines that failed validation",
-)
-parse_errors_counter = Counter(
-    name="failed_parse",
-    documentation="Number of lines that failed to parse",
-)
-empty_line_counter = Counter(
-    name="empty_line",
-    documentation="Number of empty serial lines",
-)
+
+
 cdr_processed_counter = Counter(
     name="cdr_processed",
     documentation="Number of CDR processed",

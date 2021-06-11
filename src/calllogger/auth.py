@@ -36,25 +36,21 @@ def get_token() -> TokenAuth:
 
 def request_token() -> str:
     """Request token from server. This won't be possible if we have no identifier."""
-    if settings.identifier and settings.reg_key:
+    if settings.reg_key:
         if token := api.link_device(settings.identifier):
             utils.write_datastore(token_store, token)
             logger.debug("Writing token to datastore")
             return token
         else:
-            print("Unable to register device. Can not proceed.")
-            sys.exit(0)
+            print("Unable to register device. server rejected request.")
     else:
-        if settings.identifier is None:
-            logger.info("Device registration unavailable. Missing required device identifier")
-            print("Missing required device identifier")
-        if not settings.reg_key:
-            logger.info("Device registration unavailable. Missing required registration key")
-            print("Missing required registration key")
+        print("Missing optional registration key")
+        print("Please set the REG_KEY environment variable to auto register device.")
 
-        print("Unable to proceed, missing required TOKEN.")
-        print("Please set the TOKEN environment variable")
-        sys.exit(0)
+    logger.info("Device registration unavailable. Missing required registration key")
+    print("Unable to proceed, missing required TOKEN.")
+    print("Please set the TOKEN environment variable")
+    sys.exit(0)
 
 
 def revoke_token():

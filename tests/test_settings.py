@@ -162,7 +162,7 @@ class TestGetIdentifier:
         # Return known mac address from get_mac_address function from getmac lib
         mocked_get_mac = mocker.patch.object(conf, "get_mac_address", return_value=invalid_mac)
 
-        identifier = settings.identifier
+        with pytest.raises(SystemExit):
+            identifier = settings.identifier
         assert mocked_get_mac.called
         assert disable_write_datastore.called is False
-        assert identifier is None

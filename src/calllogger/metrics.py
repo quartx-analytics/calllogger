@@ -21,7 +21,7 @@ serial_error_counter = Counter(
 http_errors_counter = Counter(
     name="calllogger_http_status_errors",
     documentation="Number of http errors",
-    labelnames=["method", "path", "code"]
+    labelnames=["path", "code"]
 )
 
 
@@ -29,22 +29,21 @@ http_errors_counter = Counter(
 request_time_histogram = Histogram(
     name="calllogger_http_request_duration_seconds",
     documentation="Request latency",
-    labelnames=["method", "path", "code"],
+    labelnames=["path", "code"],
 )
 
 
 def track_http_request_errors(request: requests.PreparedRequest):
     """Track requests connection errors."""
     http_errors_counter.labels(
-        method=request.method,
         path=urlparse(request.path_url).path,
+        code="",
     ).inc()
 
 
 def track_http_status_errors(resp: requests.Response):
     """Track requests http errors."""
     http_errors_counter.labels(
-        method=resp.request.method,
         path=urlparse(resp.request.path_url).path,
         code=resp.status_code,
     ).inc()
@@ -53,7 +52,6 @@ def track_http_status_errors(resp: requests.Response):
 def track_http_resp_time(resp: requests.Response):
     """Track requests response time."""
     request_time_histogram.labels(
-        method=resp.request.method,
         path=urlparse(resp.request.path_url).path,
         code=resp.status_code,
     ).observe(

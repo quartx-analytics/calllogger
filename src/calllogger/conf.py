@@ -141,4 +141,5 @@ class Settings:
             utils.write_datastore(self._identifier_store, identifier)
             return identifier
         else:
-            return None
+            logger.error("Unable to identify device, missing identifier.")
+            sys.exit(0)

@@ -44,13 +44,15 @@ def test_open_serial_exception(mock_serial, mock_plugin, mocker):
     assert not mock_serial.is_open
 
 
-def test_read_serial_line_exception(mock_serial, mock_plugin):
+def test_read_serial_line_exception(mock_serial, mock_plugin, mocker):
     mock_serial.readline.side_effect = serial.SerialException
+    spy_decode = mocker.spy(mock_plugin, "decode")
     mock_plugin.run()
 
     assert mock_serial.readline.called
     assert not mock_serial.is_open
     assert mock_serial.close.called
+    assert not spy_decode.called
 
 
 def test_dateline(mock_serial, mock_plugin):
@@ -60,6 +62,17 @@ def test_dateline(mock_serial, mock_plugin):
     assert mock_serial.readline.called
     assert mock_serial.is_open
     assert not mock_serial.close.called
+
+
+def test_failed_decode(mock_serial, mock_plugin, mocker):
+    mock_serial.readline.return_value = b"raw data line"
+    mocker.patch.object(mock_plugin, "decode", side_effect=UnicodeDecodeError)
+    spy_validate = mocker.spy(mock_plugin, "validate")
+    mock_plugin.run()
+
+    assert mock_serial.readline.called
+    assert mock_serial.is_open
+    assert not spy_validate.called
 
 
 @pytest.mark.parametrize("return_value", [False, ""])

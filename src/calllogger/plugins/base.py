@@ -31,7 +31,6 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
     id = None
-
     _queue: Queue
 
     def __init__(self):
@@ -44,10 +43,9 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
 
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""
-        raw_data = record.__dict__
-        self._queue.put(raw_data)
-        record_logger.debug(str(raw_data))
-        metrics.cdr_processed_counter.inc()
+        self._queue.put(record.__dict__)
+        record_logger.debug(record)
+        metrics.cdr_processed_counter.tag("call_type", record.call_type).inc()
 
     @property
     def is_running(self) -> bool:

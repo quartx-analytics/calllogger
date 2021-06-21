@@ -12,7 +12,7 @@ def strip_str(_, __, value):
     return value.strip() if isinstance(value, str) else value
 
 
-@attr.s(auto_attribs=True, collect_by_mro=True, on_setattr=strip_str)
+@attr.s(auto_attribs=True, collect_by_mro=True, on_setattr=strip_str, repr=True)
 class CallDataRecord:
     """
     The dataclass is for call data records.

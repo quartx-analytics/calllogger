@@ -62,7 +62,7 @@ class SerialPlugin(BasePlugin):
             self.sserver.open()
         except Exception:
             logger.debug("Failed to connect to serial interface")
-            metrics.serial_error_counter.labels(error_type="conn").inc()
+            metrics.serial_error_counter.tags(error_type="conn").inc()
             self.timeout.sleep()
             self.sserver.close()
             raise
@@ -73,7 +73,7 @@ class SerialPlugin(BasePlugin):
             return self.sserver.readline()
         except Exception:
             logger.debug("Failed to read from serial interface")
-            metrics.serial_error_counter.labels(error_type="read").inc()
+            metrics.serial_error_counter.tags(error_type="read").inc()
             self.timeout.sleep()
             self.sserver.close()
             raise
@@ -83,7 +83,7 @@ class SerialPlugin(BasePlugin):
             return self.decode(raw)
         except Exception:
             logger.debug("Failed to decode serial line: %r", raw)
-            metrics.serial_error_counter.labels(error_type="decode").inc()
+            metrics.serial_error_counter.tags(error_type="decode").inc()
             raise
 
     def decode(self, raw: bytes) -> str:
@@ -108,11 +108,11 @@ class SerialPlugin(BasePlugin):
                 raise ValidationError("Validation failed")
         except EmptyLine:
             logger.debug("Serial line is empty, ignoring")
-            metrics.serial_error_counter.labels(error_type="empty_line").inc()
+            metrics.serial_error_counter.tags(error_type="empty_line").inc()
             raise
         except Exception:
             logger.debug("Serial line failed validation: %s", decoded_line)
-            metrics.serial_error_counter.labels(error_type="validation").inc()
+            metrics.serial_error_counter.tags(error_type="validation").inc()
             raise
 
     def validate(self, decoded_line: str) -> Union[str, bool]:
@@ -136,7 +136,7 @@ class SerialPlugin(BasePlugin):
                 raise ParseError("Invalid return type")
         except Exception:
             logger.debug("Failed to parse serial line: %s", validated_line)
-            metrics.serial_error_counter.labels(error_type="parse").inc()
+            metrics.serial_error_counter.tags(error_type="parse").inc()
             raise
 
     @abc.abstractmethod

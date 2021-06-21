@@ -40,7 +40,8 @@ attrs = "^21.2.0"
 appdirs = "^1.4.4"
 getmac = "^0.8.2"
 fluent-logger = "^0.10.0"
-prometheus-client = "^0.11.0"
+psutil = "^5.8.0"
+influxdb-client = "^1.18.0"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.23.1"

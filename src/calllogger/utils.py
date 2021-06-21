@@ -80,11 +80,17 @@ def sleeper(timeout: float, callback: callable):
     Sleep for a given amount of time while checking callback
     every half a second to see if sleeping is still required.
     This allows for the program to gracefully shutdown.
+
+    Returns ``True`` if function is allowed to complete without stopping,
+    else returns ``False`` if program is stopped before timeout is done.
     """
     timeout = timeout * 2
     while timeout > 0 and callback():
         time.sleep(.5)
         timeout -= 1
+
+    # Indicate if ran successfully
+    return callback()
 
 
 class ExitCodeManager:

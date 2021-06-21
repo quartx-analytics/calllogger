@@ -26,10 +26,11 @@ class InfluxRegistry:
         # Send any buffered metrics to server
         self.write_many(*self._buffer)
 
-    def write(self, point):
+    def write(self, point: Point):
         """Send influx metric to server."""
         if self.write_api is not None:
-            point.fields(**self.default_fields)
+            # noinspection PyProtectedMember
+            point._fields.update(self.default_fields)
             self.write_api.write(bucket=self.bucket, record=point)
         else:
             # Buffer the metric so it can be sent

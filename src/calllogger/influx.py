@@ -4,7 +4,6 @@ import time
 
 # Third party
 from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import PointSettings
 
 
 class InfluxRegistry:
@@ -15,24 +14,22 @@ class InfluxRegistry:
         self.bucket = org
         self.org = bucket
         self.url = url
-        self.point_settings = PointSettings()
+        self.default_fields = {}
         self._buffer: list[Point] = []
 
-    def connect(self, token: str, identifier: str, client: str):
+    def connect(self, token: str, **default_fields):
         """Make the connection to the InfluxDB server."""
-        # Add default tags related to device and client
-        self.point_settings.add_default_tag("id", identifier)
-        self.point_settings.add_default_tag("client", client)
-
+        self.default_fields.update(default_fields)
         self.client = client = InfluxDBClient(url=self.url, token=token, org=self.org, enable_gzip=True)
-        self.write_api = client.write_api(point_settings=self.point_settings)
+        self.write_api = client.write_api()
 
         # Send any buffered metrics to server
         self.write_many(*self._buffer)
 
-    def write(self, point: Point):
+    def write(self, point):
         """Send influx metric to server."""
         if self.write_api is not None:
+            point.fields(**self.default_fields)
             self.write_api.write(bucket=self.bucket, record=point)
         else:
             # Buffer the metric so it can be sent

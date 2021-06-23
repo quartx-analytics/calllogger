@@ -36,9 +36,9 @@ class SystemMetrics(threading.Thread):
     """Monitor the system metrics like CPU usage, Memory usage, disk usage and swap usage."""
 
     def run(self):
-        # We will sleep by 14 seconds instead of the desired 15
+        # We will sleep by 59 seconds instead of the desired 60
         # This is because the cpu_percent command will take 1 second to complete
-        while sleeper(14, running.is_set):
+        while sleeper(59, running.is_set):
             self.gather_metrics()
 
     # noinspection PyMethodMayBeStatic

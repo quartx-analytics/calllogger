@@ -1,9 +1,10 @@
 # Standard Lib
 from copy import deepcopy
-import time
+from datetime import datetime
 
 # Third party
-from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS, ASYNCHRONOUS
 
 
 class InfluxRegistry:
@@ -11,41 +12,33 @@ class InfluxRegistry:
 
     def __init__(self, url: str, org: str, bucket: str):
         self.client = self.write_api = None
-        self.bucket = org
-        self.org = bucket
+        self.bucket = bucket
+        self.org = org
         self.url = url
         self.default_fields = {}
-        self._buffer: list[Point] = []
 
     def connect(self, token: str, **default_fields):
         """Make the connection to the InfluxDB server."""
         self.default_fields.update(default_fields)
         self.client = client = InfluxDBClient(url=self.url, token=token, org=self.org, enable_gzip=True)
-        self.write_api = client.write_api()
+        self.write_api = client.write_api()#write_options=ASYNCHRONOUS)
 
-        # Send any buffered metrics to server
-        self.write_many(*self._buffer)
-
+    # noinspection PyProtectedMember
     def write(self, point: Point):
         """Send influx metric to server."""
         if self.write_api is not None:
-            # noinspection PyProtectedMember
+            # Better to put the identifying data into fields, Better for performance
             point._fields.update(self.default_fields)
-            self.write_api.write(bucket=self.bucket, record=point)
-        else:
-            # Buffer the metric so it can be sent
-            # later when a connection is available
-            self._buffer.append(point)
-
-    def write_many(self, *points: Point):
-        """Send influx metrics to server."""
-        for point in points:
-            self.write(point)
+            self.write_api.write(bucket=self.bucket, org=self.org, record=point)
 
     def close(self):
         """Send any buffered metrics to server then close."""
         if self.write_api is not None:
             self.write_api.close()
+            self.write_api = None
+        if self.client is not None:
+            self.client.close()
+            self.client = None
 
 
 class Metric(Point):
@@ -82,7 +75,7 @@ class Metric(Point):
         return clone
 
     def write(self):
-        clone = self.time(time.time(), write_precision=WritePrecision.MS) if self._time is None else self
+        clone = self.time(datetime.utcnow()) if self._time is None else self
         self._registry.write(clone)
 
 

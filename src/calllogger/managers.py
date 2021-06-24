@@ -38,7 +38,7 @@ class SystemMetrics(threading.Thread):
     def run(self):
         # We will sleep by 59 seconds instead of the desired 60
         # This is because the cpu_percent command will take 1 second to complete
-        while sleeper(59, running.is_set):
+        while sleeper(1, running.is_set):
             self.gather_metrics()
 
     # noinspection PyMethodMayBeStatic
@@ -47,7 +47,7 @@ class SystemMetrics(threading.Thread):
         disk = psutil.disk_usage("/")
         ram = psutil.virtual_memory()
         swap = psutil.swap_memory()
-        cpu_percent = min(100, psutil.cpu_percent(interval=1))
+        cpu_percent = min(100, psutil.cpu_percent())#interval=1))
 
         # Use influx fields to store the values
         metrics.system_stats.fields(

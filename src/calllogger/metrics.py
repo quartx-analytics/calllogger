@@ -39,7 +39,7 @@ def track_http_resp_time(resp: requests.Response):
 collector = InfluxRegistry(
     url="https://influxdb.tools.quartx.dev",
     org="quartx",
-    bucket="calllogger",
+    bucket="temp",
 )
 
 # Number of CDR processed

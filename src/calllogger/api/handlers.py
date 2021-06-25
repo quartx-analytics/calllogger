@@ -13,7 +13,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 
 # Local
 from calllogger.utils import Timeout
-from calllogger import running, settings, auth, metrics
+from calllogger import running, settings, auth, metrics, __version__
 
 logger = logging.getLogger(__name__)
 RetryResponse = Union[bool, requests.Response]
@@ -74,6 +74,9 @@ class QuartxAPIHandler:
         self.suppress_errors = suppress_errors
         self.session = requests.Session()
         self.running = running
+
+        # Add custom calllogger useragent
+        self.session.headers["User-Agent"] = f"quartx-calllogger/{__version__}"
 
     def make_request(self, *args, **kwargs) -> requests.Response:
         """Contruct a request object and send the request."""

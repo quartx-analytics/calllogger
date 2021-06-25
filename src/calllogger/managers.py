@@ -1,5 +1,6 @@
 # Standard Lib
 import threading
+import os
 
 # Third Party
 from sentry_sdk import capture_exception
@@ -35,22 +36,29 @@ class ThreadExceptionManager(threading.Thread):
 class SystemMetrics(threading.Thread):
     """Monitor the system metrics like CPU usage, Memory usage, disk usage and swap usage."""
 
+    def __init__(self, *args, **kwargs):
+        super(SystemMetrics, self).__init__(*args, **kwargs)
+        # We get the pid here as we should still be in the main thread
+        # We do not get the right pid if running in a thread
+        self.pid = os.getpid()
+
     def run(self):
-        # We will sleep by 59 seconds instead of the desired 60
+        # We will sleep by 58 seconds instead of the desired 60
         # This is because the cpu_percent command will take 1 second to complete
-        while sleeper(1, running.is_set):
-            self.gather_metrics()
+        while sleeper(58, running.is_set):
+            self.gather_system_metrics()
+            self.gather_process_metrics()
 
     # noinspection PyMethodMayBeStatic
-    def gather_metrics(self):
+    def gather_system_metrics(self):
         # Extract system stats
         disk = psutil.disk_usage("/")
         ram = psutil.virtual_memory()
         swap = psutil.swap_memory()
-        cpu_percent = min(100, psutil.cpu_percent())#interval=1))
+        cpu_percent = min(100, psutil.cpu_percent(interval=1))
 
         # Use influx fields to store the values
-        metrics.system_stats.fields(
+        metrics.system_stats(fields=dict(
             disk_used=disk.used,
             disk_total=disk.total,
             ram_used=ram.used,
@@ -58,4 +66,14 @@ class SystemMetrics(threading.Thread):
             swap_used=swap.used,
             swap_total=swap.total,
             cpu_percent=cpu_percent,
-        ).write()
+        )).write()
+
+    # noinspection PyMethodMayBeStatic
+    def gather_process_metrics(self):
+        process = psutil.Process(self.pid)
+
+        # Use influx fields to store the values
+        metrics.process_stats(fields=dict(
+            ram_used=process.memory_full_info().uss,
+            cpu_percent=process.cpu_percent(interval=1),
+        )).write()

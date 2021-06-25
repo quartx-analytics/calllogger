@@ -16,6 +16,7 @@ from calllogger.managers import ThreadExceptionManager, SystemMetrics
 from calllogger.auth import get_token
 
 logger = logging.getLogger("calllogger")
+
 # Parse command line args. Only used for version right now.
 parser = argparse.ArgumentParser(prog="Quartx CallLogger")
 parser.add_argument('--version', action='version', version=f"calllogger {__version__}")
@@ -65,38 +66,34 @@ def main_loop(plugin: str) -> int:
     # Enable metrics reporting
     if settings.send_metrics and client_info["influxdb_token"]:
         metrics.collector.connect(
-            # token="tvuZHIQHKcu7TuUkMJ4kDv__sWwYptoKyED6NCbfrwxIXggGOi9hSNPsGki2woLjWZ9Pbhu-aZD62EFFnHIXkQ==",
-            token="rGZ5SNpn3GLYccWmMlR3xxEErUxji2b4oQB0AFTrcjuNklVt0CYuptpn4DKEYHjadHBJZzycL_B3aXEwGLQ6og==",
-            # token=client_info["influxdb_token"],
+            token=client_info["influxdb_token"],
             identifier=settings.identifier,
             client=client_info["slug"],
         )
 
         # Monitor system stats
-        stats_thread = SystemMetrics()
+        stats_thread = SystemMetrics(daemon=True)
         stats_thread.start()
-        stats_thread.join()
-        return 0
 
     # Configure sentry
-    # plugin = get_plugin(plugin if plugin else client_info["plugin"])
-    # sentry_sdk.set_tag("plugin", plugin.__name__)
-    # set_sentry_user(client_info)
-    #
-    # # Start the CDR worker to monitor the record queue
-    # cdr_thread = api.CDRWorker(queue, tokenauth)
-    # cdr_thread.start()
-    #
-    # # Start the plugin thread to monitor for call records
-    # plugin_thread = plugin(_queue=queue)
-    # plugin_thread.start()
-    #
-    # # Sinse both threads share the same running event
-    # # If one dies, so should the other.
-    # cdr_thread.join()
-    # plugin_thread.join()
-    # metrics.collector.close()  # Flush metrics buffer
-    # return ThreadExceptionManager.exit_code.value()
+    plugin = get_plugin(plugin if plugin else client_info["plugin"])
+    sentry_sdk.set_tag("plugin", plugin.__name__)
+    set_sentry_user(client_info)
+
+    # Start the CDR worker to monitor the record queue
+    cdr_thread = api.CDRWorker(queue, tokenauth)
+    cdr_thread.start()
+
+    # Start the plugin thread to monitor for call records
+    plugin_thread = plugin(_queue=queue)
+    plugin_thread.start()
+
+    # Sinse both threads share the same running event
+    # If one dies, so should the other.
+    cdr_thread.join()
+    plugin_thread.join()
+    metrics.collector.close()  # Flush metrics buffer
+    return ThreadExceptionManager.exit_code.value()
 
 
 # Entrypoint: calllogger

@@ -1,10 +1,9 @@
 # Standard Lib
-from copy import deepcopy
 from datetime import datetime
+from functools import partial
 
 # Third party
 from influxdb_client import InfluxDBClient, Point
-from influxdb_client.client.write_api import SYNCHRONOUS, ASYNCHRONOUS
 
 
 class InfluxRegistry:
@@ -21,7 +20,7 @@ class InfluxRegistry:
         """Make the connection to the InfluxDB server."""
         self.default_fields.update(default_fields)
         self.client = client = InfluxDBClient(url=self.url, token=token, org=self.org, enable_gzip=True)
-        self.write_api = client.write_api()#write_options=ASYNCHRONOUS)
+        self.write_api = client.write_api()
 
     # noinspection PyProtectedMember
     def write(self, point: Point):
@@ -42,41 +41,28 @@ class InfluxRegistry:
 
 
 class Metric(Point):
-    def __init__(self, name: str, registry: InfluxRegistry):
+    @classmethod
+    def setup(cls, *args, **kwargs):
+        return partial(cls, *args, **kwargs)
+
+    def __init__(self, name: str, collector: InfluxRegistry, tags: dict = None, fields: dict = None):
         super(Metric, self).__init__(name)
-        self._registry = registry
-
-    # noinspection PyProtectedMember
-    def _clone(self):
-        clone = self.__class__(self._name, self._registry)
-        clone.__dict__ = deepcopy(self.__dict__)
-        return clone
-
-    def time(self, *args, **kwargs):
-        clone = self._clone()
-        return super(Metric, clone).time(*args, **kwargs)
-
-    def tag(self, *args):
-        clone = self._clone()
-        return super(Metric, clone).tag(*args)
+        self._collector = collector
+        self._tags = tags or {}
+        self._fields = fields or {}
 
     def tags(self, **kwargs):
-        clone = self._clone()
-        clone._tags.update(kwargs)
-        return clone
-
-    def field(self, *args):
-        clone = self._clone()
-        return super(Metric, clone).field(*args)
+        self._tags.update(kwargs)
+        return self
 
     def fields(self, **kwargs):
-        clone = self._clone()
-        clone._fields.update(kwargs)
-        return clone
+        self._fields.update(kwargs)
+        return self
 
     def write(self):
-        clone = self.time(datetime.utcnow()) if self._time is None else self
-        self._registry.write(clone)
+        if self._time is None:
+            self.time(datetime.utcnow())
+        self._collector.write(self)
 
 
 class Counter(Metric):

@@ -1,9 +1,11 @@
 # Standard Lib
 import threading
+import time
 import os
 
 # Third Party
 from sentry_sdk import capture_exception
+from uptime import uptime
 import psutil
 
 # Local
@@ -38,13 +40,13 @@ class SystemMetrics(threading.Thread):
 
     def __init__(self, *args, **kwargs):
         super(SystemMetrics, self).__init__(*args, **kwargs)
-        # We get the pid here as we should still be in the main thread
+        # We get the process here as we should still be in the main thread
         # We do not get the right pid if running in a thread
-        self.pid = os.getpid()
+        self.process = psutil.Process(os.getpid())
 
     def run(self):
         # We will sleep by 58 seconds instead of the desired 60
-        # This is because the cpu_percent command will take 1 second to complete
+        # This is because each cpu_percent command will take 1 second to complete
         while sleeper(58, running.is_set):
             self.gather_system_metrics()
             self.gather_process_metrics()
@@ -59,6 +61,7 @@ class SystemMetrics(threading.Thread):
 
         # Use influx fields to store the values
         metrics.system_stats(fields=dict(
+            uptime=uptime(),
             disk_used=disk.used,
             disk_total=disk.total,
             ram_used=ram.used,
@@ -70,11 +73,13 @@ class SystemMetrics(threading.Thread):
 
     # noinspection PyMethodMayBeStatic
     def gather_process_metrics(self):
-        process = psutil.Process(self.pid)
+        process_uptime = time.time() - self.process.create_time()
+        cpu_percent = min(100, self.process.cpu_percent(interval=1))
 
         # Use influx fields to store the values
         metrics.process_stats(fields=dict(
-            ram_uss=process.memory_full_info().uss,
-            ram_rss=process.memory_full_info().rss,
-            cpu_percent=min(100, process.cpu_percent(interval=1)),
+            uptime=process_uptime,
+            cpu_percent=cpu_percent,
+            ram_uss=self.process.memory_full_info().uss,
+            ram_rss=self.process.memory_full_info().rss,
         )).write()

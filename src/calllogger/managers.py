@@ -74,6 +74,7 @@ class SystemMetrics(threading.Thread):
 
         # Use influx fields to store the values
         metrics.process_stats(fields=dict(
-            ram_used=process.memory_full_info().uss,
-            cpu_percent=process.cpu_percent(interval=1),
+            ram_uss=process.memory_full_info().uss,
+            ram_rss=process.memory_full_info().rss,
+            cpu_percent=min(100, process.cpu_percent(interval=1)),
         )).write()

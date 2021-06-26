@@ -113,7 +113,7 @@ class QuartxAPIHandler:
                 request.prepare_body(data, None)
 
             # Send Request
-            response = self.session.send(request, timeout=self.timeout.value, **kwargs)
+            response = self.session.send(request, timeout=10.0, **kwargs)
             metrics.track_http_resp_time(response)
             response.raise_for_status()
             return response
@@ -164,6 +164,7 @@ class QuartxAPIHandler:
             logger.warning(str(err))
             return False
 
+    # TODO: Change method to except response and fix related tests
     def status_check(self, status_code) -> bool:
         """
         Check the status of the response,
@@ -173,14 +174,22 @@ class QuartxAPIHandler:
         # Quit if not authorized
         if status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
             logger.error("Quitting as the token does not have the required permissions or has been revoked.")
-            auth.revoke_token()
-            self.running.clear()
-            if os.environ.get("TOKEN"):
-                sys.exit(0)
-            else:
-                sys.exit(1)
+            self.handle_unauthorized()
 
         # Server is expereancing problems, reattempting request later
         elif status_code in (codes.not_found, codes.request_timeout) or status_code >= codes.server_error:
             logger.warning("Server is experiencing problems.")
             return True
+
+        # We don't know what other codes we might expect yet
+        # So will default to False (No Retry)
+        return False
+
+    def handle_unauthorized(self):
+        """Called when a token is no longer authorized."""
+        auth.revoke_token()
+        self.running.clear()
+        if os.environ.get("TOKEN"):
+            sys.exit(0)
+        else:
+            sys.exit(1)

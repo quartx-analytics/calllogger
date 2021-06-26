@@ -1,43 +1,35 @@
 # Standard Lib
 from datetime import datetime
 from functools import partial
+import logging
+import queue
 
 # Third party
-from influxdb_client import InfluxDBClient, Point
+from influxdb_client import Point
+
+logger = logging.getLogger(__name__)
 
 
-class InfluxRegistry:
+class InfluxCollector:
     """Registry will manage the communication with the influxdb server."""
 
     def __init__(self, url: str, org: str, bucket: str):
-        self.client = self.write_api = None
+        self.queue = queue.SimpleQueue()
+        self.default_fields = {}
+        self.precision = "ns"
         self.bucket = bucket
         self.org = org
         self.url = url
-        self.default_fields = {}
-
-    def connect(self, token: str, **default_fields):
-        """Make the connection to the InfluxDB server."""
-        self.default_fields.update(default_fields)
-        self.client = client = InfluxDBClient(url=self.url, token=token, org=self.org, enable_gzip=True)
-        self.write_api = client.write_api()
 
     # noinspection PyProtectedMember
     def write(self, point: Point):
         """Send influx metric to server."""
-        if self.write_api is not None:
-            # Better to put the identifying data into fields, Better for performance
-            point._fields.update(self.default_fields)
-            self.write_api.write(bucket=self.bucket, org=self.org, record=point)
-
-    def close(self):
-        """Send any buffered metrics to server then close."""
-        if self.write_api is not None:
-            self.write_api.close()
-            self.write_api = None
-        if self.client is not None:
-            self.client.close()
-            self.client = None
+        point._fields.update(self.default_fields)
+        line = point.to_line_protocol()
+        if self.queue.qsize() <= 1_000:
+            self.queue.put(line)
+        else:
+            logger.debug("Metrics queue full: %s", line)
 
 
 class Metric(Point):
@@ -45,7 +37,7 @@ class Metric(Point):
     def setup(cls, *args, **kwargs):
         return partial(cls, *args, **kwargs)
 
-    def __init__(self, name: str, collector: InfluxRegistry, tags: dict = None, fields: dict = None):
+    def __init__(self, name: str, collector: InfluxCollector, tags: dict = None, fields: dict = None):
         super(Metric, self).__init__(name)
         self._collector = collector
         self._tags = tags or {}

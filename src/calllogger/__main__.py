@@ -12,7 +12,7 @@ import sentry_sdk
 # Local
 from calllogger.plugins import get_plugin
 from calllogger import __version__, running, api, settings, metrics
-from calllogger.managers import ThreadExceptionManager, SystemMetrics
+from calllogger.managers import ThreadExceptionManager
 from calllogger.auth import get_token
 
 logger = logging.getLogger("calllogger")
@@ -26,7 +26,6 @@ parser.parse_known_args()
 def terminate(signum, *_) -> int:
     """This will allow the threads to gracefully shutdown."""
     code = 143 if signum == signal.SIGTERM else 130
-    metrics.collector.close()  # Flush metrics buffer
     running.clear()
     return code
 
@@ -65,15 +64,13 @@ def main_loop(plugin: str) -> int:
 
     # Enable metrics reporting
     if settings.send_metrics and client_info["influxdb_token"]:
-        metrics.collector.connect(
-            token=client_info["influxdb_token"],
+        api.InfluxWrite(
+            metrics.collector,
+            client_info["influxdb_token"],
+            # Default Fields
             identifier=settings.identifier,
             client=client_info["slug"],
-        )
-
-        # Monitor system stats
-        stats_thread = SystemMetrics(daemon=True)
-        stats_thread.start()
+        ).start()
 
     # Configure sentry
     plugin = get_plugin(plugin if plugin else client_info["plugin"])
@@ -92,7 +89,6 @@ def main_loop(plugin: str) -> int:
     # If one dies, so should the other.
     cdr_thread.join()
     plugin_thread.join()
-    metrics.collector.close()  # Flush metrics buffer
     return ThreadExceptionManager.exit_code.value()
 
 

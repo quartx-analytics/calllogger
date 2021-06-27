@@ -176,9 +176,14 @@ class QuartxAPIHandler:
             logger.error("Quitting as the token does not have the required permissions or has been revoked.")
             self.handle_unauthorized(resp)
 
-        # Server is expereancing problems, reattempting request later
+        # Server is expereancing problems
         elif resp.status_code in (codes.not_found, codes.request_timeout) or resp.status_code >= codes.server_error:
             logger.warning("Server is experiencing problems.")
+            return True
+
+        # Client sent Too Many Requests
+        elif resp.status_code == codes.too_many_requests:
+            # True will retry the request later after a small timeout
             return True
 
         # We don't know what other codes we might expect yet

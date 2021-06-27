@@ -46,20 +46,28 @@ class Timeout:
         self._settings = settings
         self._timeout = settings.timeout
         self._callback = callback
+        self._temp_delay = None
 
     def sleep(self):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.info("Retrying in '%d' seconds", self._timeout)
-        sleeper(self._timeout, self._callback)
+        sleeper(self.value, self._callback)
         self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
+        self._temp_delay = None
 
     def reset(self):
         """Reset the timeout value by undoing the timeout decay."""
         self._timeout = self._settings.timeout
+        self._temp_delay = None
 
     @property
     def value(self) -> int:
-        return self._timeout
+        return self._temp_delay or self._timeout
+
+    @value.setter
+    def value(self, value: int):
+        """Only allow user to change the timeout once. Will reset after."""
+        self._temp_delay = value
 
 
 class TokenAuth(AuthBase):

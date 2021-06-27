@@ -173,7 +173,6 @@ class QuartxAPIHandler:
 
         # Quit if not authorized
         if resp.status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
-            logger.error("Quitting as the token does not have the required permissions or has been revoked.")
             self.handle_unauthorized(resp)
 
         # Server is expereancing problems
@@ -183,7 +182,12 @@ class QuartxAPIHandler:
 
         # Client sent Too Many Requests
         elif resp.status_code == codes.too_many_requests:
+            logger.debug("Rate limiting is enabled, Retry request later")
             # True will retry the request later after a small timeout
+            retry_timeout = str(resp.headers.get("Retry-After", "")).strip()
+            if retry_timeout.isdigit():
+                # Change the timeout value temporarily
+                self.timeout.value = int(retry_timeout)
             return True
 
         # We don't know what other codes we might expect yet
@@ -192,6 +196,7 @@ class QuartxAPIHandler:
 
     def handle_unauthorized(self, resp: requests.Response):
         """Called when a token is no longer authorized."""
+        logger.error("Quitting as the token does not have the required permissions or has been revoked.")
         auth.revoke_token()
         self.running.clear()
         if os.environ.get("TOKEN"):

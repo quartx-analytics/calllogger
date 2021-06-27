@@ -79,5 +79,4 @@ class InfluxWrite(metrics.SystemMetrics, QuartxAPIHandler, threading.Thread):
 
     def handle_unauthorized(self, response):
         """Quit submiting metrics if the token is no longer valid."""
-        # TODO: We need to do more checks here to make sure that the token is invalid.
         self.quit = True

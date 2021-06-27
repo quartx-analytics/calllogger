@@ -159,25 +159,25 @@ class QuartxAPIHandler:
                 err.response.reason
             )
             response_scope(scope, err.response)
-            return self.status_check(err.response.status_code)
+            return self.status_check(err.response)
         else:
             logger.warning(str(err))
             return False
 
     # TODO: Change method to except response and fix related tests
-    def status_check(self, status_code) -> bool:
+    def status_check(self, resp: requests.Response) -> bool:
         """
         Check the status of the response,
         Returning True if request needs to be retried.
         """
 
         # Quit if not authorized
-        if status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
+        if resp.status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
             logger.error("Quitting as the token does not have the required permissions or has been revoked.")
-            self.handle_unauthorized()
+            self.handle_unauthorized(resp)
 
         # Server is expereancing problems, reattempting request later
-        elif status_code in (codes.not_found, codes.request_timeout) or status_code >= codes.server_error:
+        elif resp.status_code in (codes.not_found, codes.request_timeout) or resp.status_code >= codes.server_error:
             logger.warning("Server is experiencing problems.")
             return True
 
@@ -185,7 +185,7 @@ class QuartxAPIHandler:
         # So will default to False (No Retry)
         return False
 
-    def handle_unauthorized(self):
+    def handle_unauthorized(self, resp: requests.Response):
         """Called when a token is no longer authorized."""
         auth.revoke_token()
         self.running.clear()

@@ -46,8 +46,7 @@ class Metric(Point):
 
     def write(self):
         # Set time in nanoseconds
-        self.time(Point.MICROSECONDS)
-        self._collector.write(self)
+        self._collector.write(self.time())
 
 
 class Counter(Metric):

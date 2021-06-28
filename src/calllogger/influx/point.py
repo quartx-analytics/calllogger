@@ -33,7 +33,7 @@ class Point(object):
         self._fields = {}
         self._tags = {}
 
-    def time(self, write_precision: str = MICROSECONDS):
+    def time(self, write_precision: str = NANOSECONDS) -> Point:
         """
         Set timestamp for DataPoint with declared precision.
 
@@ -58,6 +58,7 @@ class Point(object):
             self._time = int(Decimal(_time) * 1000 * 1000 * 1000)
         else:
             raise ValueError("invalid value for write_precision, options are (s, ms, us, ns)")
+        return self
 
     def tag(self, key: str, value: Any) -> Point:
         """Add tag with key and value."""

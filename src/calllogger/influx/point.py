@@ -2,6 +2,9 @@ from __future__ import annotations
 
 # Standard Lib
 from typing import Any
+from decimal import Decimal
+import time
+
 
 ESCAPE_MEASUREMENT = str.maketrans({
     ',': r'\,',
@@ -18,12 +21,43 @@ ESCAPE_KEY = str.maketrans({
 class Point(object):
     """Point defines the values that will be written to the database."""
 
+    SECONDS = "s"
+    MILLISECONDS = "ms"
+    MICROSECONDS = "us"
+    NANOSECONDS = "ns"
+
     def __init__(self, measurement_name):
         """Initialize defaults."""
         self._name = measurement_name
         self._time = None
         self._fields = {}
         self._tags = {}
+
+    def time(self, write_precision: str = MICROSECONDS):
+        """
+        Set timestamp for DataPoint with declared precision.
+
+        Formats::
+
+            seconds = s
+            milliseconds = ms
+            microseconds = us (Default)
+            nanoseconds = ns
+
+        :param str write_precision: Precision of time in sort format.
+        """
+        _time = time.time()
+        if write_precision == self.SECONDS:
+            self._time = int(_time)
+        elif write_precision == self.MILLISECONDS:
+            self._time = int(_time * 1000)
+        elif write_precision == self.MICROSECONDS:
+            self._time = int(_time * 1000 * 1000)
+        elif write_precision == self.NANOSECONDS:
+            # To get more precision with nanoseconds we need to use Decimal
+            self._time = int(Decimal(_time) * 1000 * 1000 * 1000)
+        else:
+            raise ValueError("invalid value for write_precision, options are (s, ms, us, ns)")
 
     def tag(self, key: str, value: Any) -> Point:
         """Add tag with key and value."""
@@ -76,7 +110,7 @@ def _tags_protocol(tags: dict[str, Any]) -> str:
 
 def _fields_protocol(fields: dict[str, Any]) -> str:
     segments = []
-    for key, value in sorted(fields.items()):
+    for key, value in fields.items():
         # Influx don't care about empty fields
         if value is None:
             continue

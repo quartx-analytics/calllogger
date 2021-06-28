@@ -1,9 +1,7 @@
 # Standard Lib
 from functools import partial
-from decimal import Decimal
 import logging
 import queue
-import time
 
 # Local
 from calllogger.influx.point import Point
@@ -48,7 +46,7 @@ class Metric(Point):
 
     def write(self):
         # Set time in nanoseconds
-        self._time = int(Decimal(time.time()) * 1000 * 1000 * 1000)
+        self.time(Point.MICROSECONDS)
         self._collector.write(self)
 
 

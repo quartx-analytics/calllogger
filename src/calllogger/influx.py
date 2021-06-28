@@ -1,11 +1,12 @@
 # Standard Lib
-from datetime import datetime
 from functools import partial
+from decimal import Decimal
 import logging
 import queue
+import time
 
-# Third party
-from influxdb_client import Point
+# Local
+from calllogger.point import Point
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +27,12 @@ class InfluxCollector:
         """Send influx metric to server."""
         point._fields.update(self.default_fields)
         line = point.to_line_protocol()
-        if self.queue.qsize() <= 1_000:
+        if line and self.queue.qsize() <= 1_000:
             self.queue.put(line)
-        else:
+        elif line:
             logger.debug("Metrics queue full: %s", line)
+        else:
+            logger.debug("Metrics line is empty")
 
 
 class Metric(Point):
@@ -43,17 +46,9 @@ class Metric(Point):
         self._tags = tags or {}
         self._fields = fields or {}
 
-    def tags(self, **kwargs):
-        self._tags.update(kwargs)
-        return self
-
-    def fields(self, **kwargs):
-        self._fields.update(kwargs)
-        return self
-
     def write(self):
-        if self._time is None:
-            self.time(datetime.utcnow())
+        # Set time in nanoseconds
+        self._time = int(Decimal(time.time()) * 1000 * 1000 * 1000)
         self._collector.write(self)
 
 

@@ -6,7 +6,7 @@ import queue
 import time
 
 # Local
-from calllogger.point import Point
+from calllogger.influx.point import Point
 
 logger = logging.getLogger(__name__)
 

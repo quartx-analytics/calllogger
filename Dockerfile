@@ -20,20 +20,25 @@ ENV DATA_LOCATION="/data"
 ENV SENTRY_DSN=$SENTRY_DSN
 ENV REG_KEY=$REG_KEY
 
-# Entrypoint setup
+# Image setup
+RUN mkdir -p $DATA_LOCATION && \
+    useradd --no-log-init -r -g users runner && \
+    chown -R runner:users $DATA_LOCATION && \
+    python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy package data
 COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules
 COPY data/entrypoint.sh /entrypoint.sh
-
-# Install as Python Package
-COPY . /src
-RUN mkdir -p $DATA_LOCATION && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir /src && \
-    rm -rf /src && \
-    useradd --no-log-init -r -g users runner && \
-    mkdir -p $DATA_LOCATION && \
-    chown -R runner:users $DATA_LOCATION
-
-USER runner:users
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["calllogger"]
+COPY . /src
+
+# Now we can install the package in the virtual env
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir /src --use-feature=in-tree-build && \
+    chown -R runner:users /opt/venv && \
+    rm -rf /src
+
+# Best to run the program as a normal user
+USER runner:users

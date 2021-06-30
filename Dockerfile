@@ -23,7 +23,7 @@ ENV REG_KEY=$REG_KEY
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \
     useradd --no-log-init -r -g users runner && \
-    chown -R runner:users $DATA_LOCATION && \
+    chown runner:users $DATA_LOCATION && \
     python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
@@ -37,7 +37,6 @@ COPY . /src
 # Now we can install the package in the virtual env
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir /src --use-feature=in-tree-build && \
-    chown -R runner:users /opt/venv && \
     rm -rf /src
 
 # Best to run the program as a normal user

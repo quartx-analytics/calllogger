@@ -5,7 +5,7 @@ import logging
 import abc
 
 # Local
-from calllogger import running, settings, conf, metrics
+from calllogger import running, settings, conf
 from calllogger.managers import ThreadExceptionManager
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout

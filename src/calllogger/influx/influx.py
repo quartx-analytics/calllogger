@@ -49,6 +49,12 @@ class Metric(Point):
         self._collector.write(self.time())
 
 
+class Event(Metric):
+    def mark(self):
+        self.field("value", True)
+        self.write()
+
+
 class Counter(Metric):
     """A Counter tracks counts of events or running totals."""
     tracker: dict[str, int] = {}

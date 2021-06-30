@@ -1,4 +1,4 @@
-from .influx import InfluxCollector, Metric, Counter, Gauge, Histogram
+from .influx import InfluxCollector, Metric, Counter, Gauge, Histogram, Event
 from .point import Point
 
 __all__ = [
@@ -8,4 +8,5 @@ __all__ = [
     "Gauge",
     "Histogram",
     "Point",
+    "Event",
 ]

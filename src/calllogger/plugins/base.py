@@ -45,7 +45,6 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
         """Send a call log record to the call monitoring API."""
         self._queue.put(record.__dict__)
         record_logger.debug(record)
-        metrics.cdr_processed_counter().tag("call_type", record.call_type).inc()
 
     @property
     def is_running(self) -> bool:

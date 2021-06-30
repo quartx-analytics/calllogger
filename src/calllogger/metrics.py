@@ -9,7 +9,7 @@ import requests
 import psutil
 
 # Local
-from calllogger.influx import InfluxCollector, Metric, Counter, Histogram
+from calllogger.influx import InfluxCollector, Metric, Event, Histogram
 
 
 # We need to instantiate the collector here so
@@ -72,7 +72,7 @@ def track_http_request_errors(request: requests.PreparedRequest):
     http_errors_counter(tags=dict(
         endpoint=urlparse(request.path_url).path,
         code="",
-    )).inc()
+    )).mark()
 
 
 def track_http_status_errors(resp: requests.Response):
@@ -80,7 +80,7 @@ def track_http_status_errors(resp: requests.Response):
     http_errors_counter(tags=dict(
         endpoint=urlparse(resp.request.path_url).path,
         code=resp.status_code,
-    )).inc()
+    )).mark()
 
 
 def track_http_resp_time(resp: requests.Response):
@@ -93,12 +93,10 @@ def track_http_resp_time(resp: requests.Response):
     )
 
 
-# Number of CDR processed
-cdr_processed_counter = Counter.setup("calllogger_cdr_processed", collector)
 # Number of serial errors
-serial_error_counter = Counter.setup("calllogger_serial_error", collector)
+serial_error_counter = Event.setup("serial_error", collector)
 # Number of http errors
-http_errors_counter = Counter.setup("calllogger_http_errors", collector)
+http_errors_counter = Event.setup("http_errors", collector)
 
 # Request latency
-request_time = Histogram.setup("calllogger_http_request_duration_seconds", collector)
+request_time = Histogram.setup("http_request_duration_seconds", collector)

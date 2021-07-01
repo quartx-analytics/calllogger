@@ -19,13 +19,14 @@ ENV ENVIRONMENT="Deployed"
 ENV DATA_LOCATION="/data"
 ENV SENTRY_DSN=$SENTRY_DSN
 ENV REG_KEY=$REG_KEY
+ENV VIRTUAL_ENV=/opt/venv
 
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \
     useradd --no-log-init -r -g users runner && \
     chown runner:users $DATA_LOCATION && \
-    python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+    python -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy package data
 COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules

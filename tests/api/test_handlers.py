@@ -65,8 +65,9 @@ def test_ok_requests(api, requests_mock, status_code, mocker):
 @pytest.mark.parametrize("bad_code", [404, 408, 429, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
 def test_errors_causing_retry(api, requests_mock, mocker, bad_code):
     """Test for server/network errors that can be retried."""
+    header = {"Retry-After": "500"}
     requests_mock.get(test_url, response_list=[
-        {"status_code": bad_code} if isinstance(bad_code, int) else {"exc": bad_code},
+        {"status_code": bad_code, "headers": header} if isinstance(bad_code, int) else {"exc": bad_code},
         {"status_code": 201, "json": {"success": True}},
     ])
 

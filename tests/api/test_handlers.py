@@ -62,7 +62,7 @@ def test_ok_requests(api, requests_mock, status_code, mocker):
     assert request_spy.call_count == 1
 
 
-@pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
+@pytest.mark.parametrize("bad_code", [404, 408, 429, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
 def test_errors_causing_retry(api, requests_mock, mocker, bad_code):
     """Test for server/network errors that can be retried."""
     requests_mock.get(test_url, response_list=[

@@ -63,21 +63,19 @@ def test_ok_requests(api, requests_mock, status_code, mocker):
 
 
 @pytest.mark.parametrize("bad_code", [404, 408, 500, 501, 502, 503, requests.ConnectionError, requests.Timeout])
-def test_server_network_errors(api, requests_mock, mocker, bad_code):
+def test_errors_causing_retry(api, requests_mock, mocker, bad_code):
     """Test for server/network errors that can be retried."""
-    mocked = mocker.patch.object(running, "is_set")
-    mocked.side_effect = [True, True, False]
-    request_spy = mocker.spy(api, "_send_request")
-
     requests_mock.get(test_url, response_list=[
         {"status_code": bad_code} if isinstance(bad_code, int) else {"exc": bad_code},
         {"status_code": 201, "json": {"success": True}},
     ])
-    resp = api.make_request(method="GET", url=test_url)
 
-    assert resp.json() == {"success": True}
+    scope = mocker.MagicMock()
+    request = requests.Request(method="GET", url=test_url)
+    resp = api._send_request(scope, request.prepare(), None, {})
+
+    assert resp is True
     assert requests_mock.called
-    assert request_spy.call_count == 2
 
 
 def test_retry_with_break(api, requests_mock, mocker):

@@ -108,9 +108,9 @@ logging_config: Any = {
     }
 }
 
-if settings.send_logs:
-    # Enable fluent logging
-    logging_config["loggers"]["calllogger"]["handlers"].append("fluent")
+# if settings.send_logs:
+#     # Enable fluent logging
+#     logging_config["loggers"]["calllogger"]["handlers"].append("fluent")
 
 # Apply logging config
 logging.config.dictConfig(logging_config)

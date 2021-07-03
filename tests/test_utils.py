@@ -33,14 +33,23 @@ def test_timeout_decay(mocker: MockerFixture):
         timeout_decay = 1.5
 
     # Test that timeout decay is working
-    mocked = mocker.patch("time.sleep")
+    mocked = mocker.patch.object(utils, "sleeper")
     timeout = utils.Timeout(Settings, lambda: True)
-    assert timeout.value == 3
-    for i in [4, 6, 9, 13, 19, 28, 42, 63, 94, 141, 211, 300, 300, 300]:
+    values = [3, 4, 6, 9, 13, 19, 28, 42, 63, 94, 141, 211, 300, 300, 300]
+    for count, i in enumerate(values[1:]):
+        assert timeout.value == values[count]
         timeout.sleep()
-        mocked.assert_called()
+        mocked.assert_called_with(values[count], timeout._callback)
         assert timeout.value == i
         mocked.reset_mock()
+
+    # Test that value assignment get reset after sleeping
+    assert timeout.value == 300
+    timeout.value = 500
+    assert timeout.value == 500  # Should now be the new value
+    timeout.sleep()
+    mocked.assert_called_with(500, timeout._callback)
+    assert timeout.value == 300  # Should be original value
 
     # Test the reset works as exspected
     timeout.reset()

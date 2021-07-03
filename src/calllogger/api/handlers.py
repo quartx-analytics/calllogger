@@ -185,7 +185,7 @@ class QuartxAPIHandler:
             logger.debug("Rate limiting is enabled, Retry request later")
             # True will retry the request later after a small timeout
             retry_timeout = str(resp.headers.get("Retry-After", "")).strip()
-            if retry_timeout.isdigit():
+            if retry_timeout.isdigit():  # pragma: no branch
                 # Change the timeout value temporarily
                 self.timeout.value = int(retry_timeout)
             return True

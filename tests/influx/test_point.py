@@ -16,10 +16,11 @@ def point():
     (Point.MILLISECONDS, 13),
     (Point.SECONDS, 10),
 ])
-def test_time(point, precision, length):
+def test_time(point: Point, precision, length):
     """Test that time will be set to the correct precision."""
     assert point._time is None
-    point.time(precision)
+    ret = point.time(precision)
+    assert isinstance(ret, Point)
     assert isinstance(point._time, int)
     assert len(str(point._time)) == length
 
@@ -34,14 +35,16 @@ def test_time_invalid(point: Point):
 def test_set_tag(point: Point):
     """Test that point.tag works as expected."""
     assert not point._tags
-    point.tag("tag", "value")
+    ret = point.tag("tag", "value")
+    assert isinstance(ret, Point)
     assert point._tags.get("tag") == "value"
 
 
 def test_set_tags(point: Point):
     """Test that point.tags works as expected."""
     assert not point._tags
-    point.tags(tag1="value1", tag2="value2")
+    ret = point.tags(tag1="value1", tag2="value2")
+    assert isinstance(ret, Point)
     assert point._tags.get("tag1") == "value1"
     assert point._tags.get("tag2") == "value2"
 
@@ -49,14 +52,16 @@ def test_set_tags(point: Point):
 def test_set_field(point: Point):
     """Test that point.field works as expected."""
     assert not point._fields
-    point.field("field", "value")
+    ret = point.field("field", "value")
+    assert isinstance(ret, Point)
     assert point._fields.get("field") == "value"
 
 
 def test_set_fields(point: Point):
     """Test that point.fields works as expected."""
     assert not point._fields
-    point.fields(field1="value1", field2="value2")
+    ret = point.fields(field1="value1", field2="value2")
+    assert isinstance(ret, Point)
     assert point._fields.get("field1") == "value1"
     assert point._fields.get("field2") == "value2"
 

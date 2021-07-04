@@ -1,6 +1,36 @@
+# Standard lib
+from queue import Queue
+
 # Local
-from calllogger.influx import Event, Counter, Gauge
+from calllogger.influx import Metric, Event, Counter, Gauge, Histogram
 from calllogger.metrics import collector
+
+
+def test_metric():
+    metric = Metric("event_metric", collector)
+    queue_count = collector.queue.qsize()
+
+    metric.field("value", True).write()
+    line = metric.to_line_protocol()
+    assert line.startswith("event_metric value=true")
+    assert collector.queue.qsize() == queue_count + 1
+
+
+def test_metric_none():
+    metric = Metric("event_metric", collector)
+    queue_count = collector.queue.qsize()
+
+    metric.field("value", None).write()
+    line = metric.to_line_protocol()
+    assert line == ""
+    # Metric queue should not have increased as the line should be ignored
+    assert collector.queue.qsize() == queue_count
+
+
+def test_metric_queue_full(mocker):
+    metric = Metric("event_metric", collector)
+    mocker.patch.object(Queue, "qsize", return_value=1_001)
+    metric.field("value", True).write()
 
 
 def test_event():
@@ -51,3 +81,13 @@ def test_gauge():
     line = gauge.to_line_protocol()
     assert line.startswith("gauge_metric value=10i")
     assert collector.queue.qsize() == queue_count + 3
+
+
+def test_histogram():
+    histogram = Histogram("event_metric", collector)
+    queue_count = collector.queue.qsize()
+
+    histogram.observe(0.052)
+    line = histogram.to_line_protocol()
+    assert line.startswith("event_metric value=0.052")
+    assert collector.queue.qsize() == queue_count + 1

@@ -25,7 +25,7 @@ class InfluxWrite(metrics.SystemMetrics, QuartxAPIHandler, threading.Thread):
     :param token: The authentication token for the influxdb service.
     """
 
-    def __init__(self, collector, token: str, **default_fields):
+    def __init__(self, collector: metrics.InfluxCollector, token: str, **default_fields):
         super().__init__(suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.info("Initializing InfluxDB metrics monitoring")
         self.collector = collector

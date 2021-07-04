@@ -92,3 +92,9 @@ def test_field_value_types(point: Point, value, expected_line):
     point.field("field", value)
     line = point.to_line_protocol()
     assert line == expected_line
+
+
+def test_invalid_field_type(point: Point):
+    point.field("field", object())
+    with pytest.raises(ValueError):
+        point.to_line_protocol()

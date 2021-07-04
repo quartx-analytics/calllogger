@@ -65,7 +65,7 @@ class Point(object):
         self._tags[key] = value
         return self
 
-    def tags(self, **kwargs: dict[str, Any]) -> Point:
+    def tags(self, **kwargs: str) -> Point:
         """Add tags with key and value."""
         self._tags.update(kwargs)
         return self
@@ -75,7 +75,7 @@ class Point(object):
         self._fields[field] = value
         return self
 
-    def fields(self, **kwargs: dict[str, Any]) -> Point:
+    def fields(self, **kwargs: str) -> Point:
         """Add fields with key and value."""
         self._fields.update(kwargs)
         return self
@@ -88,7 +88,7 @@ class Point(object):
 
         # No point in returning a line protocol if there is no fields
         if fields:
-            return f"{measurement}{tags}{fields} {self._time}"
+            return f"{measurement}{tags}{fields} {self._time or ''}".strip()
         else:
             return ""
 

@@ -63,6 +63,32 @@ def test_line_protocol(point: Point):
 
 
 def test_line_protocol_no_field(point: Point):
+    """That that a point with no field outputs an empty line."""
     point.tag("tag", "value")
     line = point.to_line_protocol()
     assert line == ''
+
+
+def test_none_value(point: Point):
+    """Test that tags & fields ignore value of type None."""
+    point.tag("tag1", "value")
+    point.tag("tag2", None)
+    point.field("field1", "value")
+    point.field("field2", None)
+    line = point.to_line_protocol()
+    assert line == 'test_metric,tag1=value field1="value"'
+
+
+@pytest.mark.parametrize("value,expected_line", [
+    (10.1, "test_metric field=10.1"),
+    (10.0, "test_metric field=10"),
+    (True, "test_metric field=true"),
+    (False, "test_metric field=false"),
+    (0, "test_metric field=0i"),
+    (5, "test_metric field=5i"),
+    ("value", 'test_metric field="value"'),
+])
+def test_field_value_types(point: Point, value, expected_line):
+    point.field("field", value)
+    line = point.to_line_protocol()
+    assert line == expected_line

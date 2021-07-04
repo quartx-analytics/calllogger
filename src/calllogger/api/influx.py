@@ -63,7 +63,7 @@ class InfluxWrite(metrics.SystemMetrics, QuartxAPIHandler, threading.Thread):
         # Extrack upto the max of 1000 metric lines
         # This is the recommended ammount by influxdata
         try:
-            for i in range(1000):
+            for i in range(1000):  # pragma: no branch
                 record = self.collector.queue.get_nowait()
                 lines.append(record)
 

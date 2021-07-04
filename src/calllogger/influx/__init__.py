@@ -1,4 +1,5 @@
-from .influx import InfluxCollector, Metric, Counter, Gauge, Histogram, Event
+from .instruments import Metric, Counter, Gauge, Histogram, Event
+from .influx import InfluxCollector
 from .point import Point
 
 __all__ = [

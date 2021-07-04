@@ -17,6 +17,7 @@ def point():
     (Point.SECONDS, 10),
 ])
 def test_time(point, precision, length):
+    """Test that time will be set to the correct precision."""
     assert point._time is None
     point.time(precision)
     assert isinstance(point._time, int)
@@ -24,18 +25,21 @@ def test_time(point, precision, length):
 
 
 def test_time_invalid(point: Point):
+    """Test that an invalid precision value raises a ValueError."""
     assert point._time is None
     with pytest.raises(ValueError):
         point.time("invalid")
 
 
 def test_set_tag(point: Point):
+    """Test that point.tag works as expected."""
     assert not point._tags
     point.tag("tag", "value")
     assert point._tags.get("tag") == "value"
 
 
 def test_set_tags(point: Point):
+    """Test that point.tags works as expected."""
     assert not point._tags
     point.tags(tag1="value1", tag2="value2")
     assert point._tags.get("tag1") == "value1"
@@ -43,12 +47,14 @@ def test_set_tags(point: Point):
 
 
 def test_set_field(point: Point):
+    """Test that point.field works as expected."""
     assert not point._fields
     point.field("field", "value")
     assert point._fields.get("field") == "value"
 
 
 def test_set_fields(point: Point):
+    """Test that point.fields works as expected."""
     assert not point._fields
     point.fields(field1="value1", field2="value2")
     assert point._fields.get("field1") == "value1"
@@ -56,6 +62,7 @@ def test_set_fields(point: Point):
 
 
 def test_line_protocol(point: Point):
+    """Test that the line protocol output is as expected."""
     point.tag("tag", "value")
     point.field("field", "value")
     line = point.to_line_protocol()
@@ -89,12 +96,14 @@ def test_none_value(point: Point):
     ("value", 'test_metric field="value"'),
 ])
 def test_field_value_types(point: Point, value, expected_line):
+    """Test different value type get converted to the right format."""
     point.field("field", value)
     line = point.to_line_protocol()
     assert line == expected_line
 
 
 def test_invalid_field_type(point: Point):
+    """Test that an unsupported value type raises ValueError."""
     point.field("field", object())
     with pytest.raises(ValueError):
         point.to_line_protocol()

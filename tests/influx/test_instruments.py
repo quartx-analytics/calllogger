@@ -1,5 +1,5 @@
 # Standard lib
-from queue import Queue
+import queue
 
 # Local
 from calllogger.influx import Metric, Event, Counter, Gauge, Histogram
@@ -29,7 +29,8 @@ def test_metric_none():
 
 def test_metric_queue_full(mocker):
     metric = Metric("event_metric", collector)
-    mocker.patch.object(Queue, "qsize", return_value=1_001)
+    mocked_q = mocker.patch.object(queue, "SimpleQueue")
+    mocked_q.return_value.qsize.return_value = 1_001
     metric.field("value", True).write()
 
 

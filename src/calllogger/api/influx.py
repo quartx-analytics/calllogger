@@ -23,16 +23,21 @@ class InfluxWrite(metrics.SystemMetrics, QuartxAPIHandler, threading.Thread):
 
     :param collector: The influx collector object.
     :param token: The authentication token for the influxdb service.
+    :param default_fields: Dict of default fields to add to every point.
+    :param default_tags: Dict of default tags to add to every point.
     """
 
-    def __init__(self, collector: metrics.InfluxCollector, token: str, **default_fields):
+    def __init__(self, collector: metrics.InfluxCollector, token: str, default_fields=None, default_tags=None):
         super().__init__(suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.info("Initializing InfluxDB metrics monitoring")
         self.collector = collector
         self.quit = False
 
         # Add the default fields to the collector
-        collector.default_fields.update(default_fields)
+        if default_fields:
+            collector.default_fields.update(default_fields)
+        if default_tags:
+            collector.default_tags.update(default_tags)
 
         # Request
         self.request = requests.Request(

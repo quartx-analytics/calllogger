@@ -14,6 +14,7 @@ class InfluxCollector:
     def __init__(self, url: str, org: str, bucket: str):
         self.queue = queue.SimpleQueue()
         self.default_fields = {}
+        self.default_tags = {}
         self.precision = "ns"
         self.bucket = bucket
         self.org = org

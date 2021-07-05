@@ -55,22 +55,26 @@ def set_sentry_user(client_info: dict):
     })
 
 
+def collect_telemetry(client_info: dict):
+    # Enable metrics reporting
+    if settings.telemetry and client_info["influxdb_token"]:
+        api.InfluxWrite(
+            metrics.collector,
+            client_info["influxdb_token"],
+            default_fields=dict(
+                identifier=settings.identifier,
+                client=client_info["slug"],
+            )
+        ).start()
+
+
 def main_loop(plugin: str) -> int:
     """Call the selected plugin and wait for program shutdown."""
     running.set()
     tokenauth = get_token()
     queue = Queue(settings.queue_size)
     client_info = api.get_client_info(tokenauth, settings.identifier)
-
-    # Enable metrics reporting
-    if settings.send_metrics and client_info["influxdb_token"]:
-        api.InfluxWrite(
-            metrics.collector,
-            client_info["influxdb_token"],
-            # Default Fields
-            identifier=settings.identifier,
-            client=client_info["slug"],
-        ).start()
+    collect_telemetry(client_info)
 
     # Configure sentry
     plugin = get_plugin(plugin if plugin else client_info["plugin"])

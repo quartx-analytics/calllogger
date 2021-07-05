@@ -35,14 +35,14 @@ collector = InfluxCollector(
 class SystemMetrics:
     """Monitor the system metrics like CPU usage, Memory usage, disk usage and swap usage."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, system_collector, *args, **kwargs):
         super(SystemMetrics, self).__init__(*args, **kwargs)
         # We get the process here as we should still be in the main thread
         # We do not get the right pid if running in a thread
         self._process = psutil.Process(os.getpid())
 
-        self.system_stats = Metric.setup("calllogger_system_stats", collector)
-        self.process_stats = Metric.setup("calllogger_process_stats", collector)
+        self.system_stats = Metric.setup("calllogger_system_stats", system_collector)
+        self.process_stats = Metric.setup("calllogger_process_stats", system_collector)
 
     # noinspection PyMethodMayBeStatic
     def gather_system_metrics(self):

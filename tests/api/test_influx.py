@@ -6,13 +6,23 @@ import psutil
 
 # Local
 from calllogger.api import influx
-from calllogger.telemetry import collector
+from calllogger.telemetry import InfluxCollector, collector
 
 
 @pytest.fixture
-def api(mocker):
+def new_collector():
+    """Create a new collector when required."""
+    return InfluxCollector(
+        collector.url,
+        collector.org,
+        collector.bucket,
+    )
+
+
+@pytest.fixture
+def api(mocker, new_collector):
     # Setup worker and mock running flag so loop will only run once
-    obj = influx.InfluxWrite(collector, "fake_token")
+    obj = influx.InfluxWrite(new_collector, "fake_token")
     mocker.patch.object(influx, "sleeper", side_effect=[True, False])
     yield obj
 
@@ -31,8 +41,6 @@ def test_success(api: influx.InfluxWrite, mocker, requests_mock, mock_running):
     api.run()
 
     assert mocked_req.called
-    # There should be 1 metric left as this is created after the request
-    assert api.collector.queue.qsize() == 1
 
 
 # noinspection PyUnusedLocal
@@ -69,3 +77,19 @@ def test_no_metrics(api: influx.InfluxWrite, mocker, requests_mock):
     assert not mocked_req.called
     # There should be 1 metric left as this is created after the request
     assert api.collector.queue.empty()
+
+
+def test_defaults(new_collector):
+    """Test that default_fields & default_tags get added to the collector."""
+    default_fields = {"field": "value"}
+    default_tags = {"tag": "value"}
+
+    influx.InfluxWrite(
+        new_collector,
+        "fake_token",
+        default_tags=default_tags,
+        default_fields=default_fields,
+    )
+
+    assert new_collector.default_tags == default_tags
+    assert new_collector.default_fields == default_fields

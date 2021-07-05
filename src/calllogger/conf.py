@@ -144,13 +144,13 @@ class Settings:
             logger.error("Unable to identify device, missing identifier.")
             sys.exit(0)
 
-    def override(self, overrides: dict[str, Any]):
+    def override(self, **overrides: dict[str, Any]):
         """
         Override settings that have not been set from an environment variable.
 
         Environment variables retain highest priority.
 
-        :param overrides: Dict of settings to override.
+        :key overrides: Dict of settings to override.
         """
         for key, val in overrides.items():
             env_key = key.upper()

@@ -3,8 +3,8 @@ import os
 # Test Defaults
 defaults = dict(
     debug=0,
-    send_logs=0,
-    send_metrics=0,
+    collect_logs=0,
+    collect_metrics=0,
     sentry_dsn="",
 )
 

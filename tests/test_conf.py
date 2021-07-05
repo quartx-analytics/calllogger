@@ -163,6 +163,25 @@ class TestGetIdentifier:
         mocked_get_mac = mocker.patch.object(conf, "get_mac_address", return_value=invalid_mac)
 
         with pytest.raises(SystemExit):
-            identifier = settings.identifier
+            _ = settings.identifier
         assert mocked_get_mac.called
         assert disable_write_datastore.called is False
+
+
+def test_setting_override():
+    """Test that a setting gets overridden."""
+    assert settings.timeout == 3
+    settings.override(timeout=10)
+    assert settings.timeout == 10
+    settings.timeout = 3  # Reset it back
+
+
+def test_setting_override_blocked():
+    """Test that only settings that have been changed by environment variables get overridden."""
+    # Debug should already be changed by environment variables
+    # This is done as part of the testing environment
+    assert settings.debug is False
+    settings.override(debug=True)
+
+    # Debug should not be changed
+    assert settings.debug is False

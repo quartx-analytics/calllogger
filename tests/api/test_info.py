@@ -3,6 +3,8 @@ import socket
 
 # Third Party
 import pytest
+import sentry_sdk
+from pytest_mock import MockerFixture
 
 # Local
 from calllogger.api import info
@@ -39,3 +41,24 @@ def test_get_owner_info(requests_mock, mocker, identifier, get_private_ip):
 
     assert mocked_request.called
     assert resp == expected_resp
+
+
+def test_set_sentry_user(mocker: MockerFixture):
+    """
+    Test that set_sentry_user takes client data
+    and converts it to what sentry expects.
+    """
+    mocked_set_user = mocker.patch.object(sentry_sdk, "set_user")
+    client_data = {
+        "id": 1,
+        "name": "TestClient",
+        "email": "testclient@gmail.com",
+    }
+    expected_data = {
+        "id": 1,
+        "username": "TestClient",
+        "email": "testclient@gmail.com",
+    }
+
+    info.set_sentry_user(client_data)
+    mocked_set_user.assert_called_with(expected_data)

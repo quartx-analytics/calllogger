@@ -1,6 +1,5 @@
 # Standard Lib
 from queue import Queue
-import functools
 import argparse
 import logging
 import signal
@@ -11,9 +10,10 @@ import sentry_sdk
 
 # Local
 from calllogger.plugins import get_plugin
-from calllogger import __version__, running, api, settings, telemetry, closeers
-from calllogger.managers import ThreadExceptionManager
+from calllogger import __version__, running, api, settings, telemetry
+from calllogger.misc import ThreadExceptionManager
 from calllogger.auth import get_token
+from calllogger.misc import graceful_exception, terminate
 
 logger = logging.getLogger("calllogger")
 
@@ -23,47 +23,7 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_known_args()
 
 
-# noinspection PyBroadException
-def terminate(signum, *_) -> int:
-    """This will allow the threads to gracefully shutdown."""
-    # Close registered closers
-    for callable_func in closeers:
-        try:
-            callable_func()
-        except Exception:
-            pass
-
-    code = 143 if signum == signal.SIGTERM else 130
-    running.clear()
-    return code
-
-
-def graceful_exception(func):
-    """
-    Decorator function to handle exceptions gracefully.
-    And signal any threads to end.
-    """
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> int:
-        try:
-            return func(*args, **kwargs)
-        except KeyboardInterrupt:
-            return terminate(signal.SIGINT)
-        finally:
-            running.clear()
-    return wrapper
-
-
-def set_sentry_user(client_info: dict):
-    """Setup sentry user using client info."""
-    sentry_sdk.set_user({
-        "id": client_info["id"],
-        "username": client_info["name"],
-        "email": client_info["email"],
-    })
-
-
-def collect_telemetry(client_info: dict):
+def initialise_telemetry(client_info: dict):
     """Collect system metrics and logs."""
     # Enable metrics telemetry
     if settings.collect_metrics and client_info["influxdb_token"]:
@@ -90,13 +50,12 @@ def main_loop(plugin: str) -> int:
     queue = Queue(settings.queue_size)
     client_info = api.get_client_info(tokenauth, settings.identifier)
 
-    # Collect telemetry if we are able to
-    collect_telemetry(client_info)
+    # Initialise telemetry if we are able to
+    initialise_telemetry(client_info)
 
     # Configure sentry
     plugin = get_plugin(plugin if plugin else client_info["plugin"])
     sentry_sdk.set_tag("plugin", plugin.__name__)
-    set_sentry_user(client_info)
 
     # Start the CDR worker to monitor the record queue
     cdr_thread = api.CDRWorker(queue, tokenauth)

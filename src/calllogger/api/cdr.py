@@ -7,7 +7,7 @@ import queue
 import requests
 
 # Local
-from calllogger.managers import ThreadExceptionManager
+from calllogger.misc import ThreadExceptionManager
 from calllogger.api import QuartxAPIHandler
 from calllogger.utils import TokenAuth
 from calllogger import settings

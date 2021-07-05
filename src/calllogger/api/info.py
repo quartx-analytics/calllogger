@@ -7,6 +7,7 @@ import time
 
 # Third party
 from requests import codes
+import sentry_sdk
 
 # Local
 from calllogger import settings, __version__, utils, running
@@ -16,6 +17,15 @@ from calllogger.utils import TokenAuth
 info_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/info/")
 linking_url = urlparse.urljoin(settings.domain, "/api/v1/monitor/cdr/link-device/")
 logger = logging.getLogger(__name__)
+
+
+def set_sentry_user(client_info: dict):
+    """Setup sentry user using client info."""
+    sentry_sdk.set_user({
+        "id": client_info["id"],
+        "username": client_info["name"],
+        "email": client_info["email"],
+    })
 
 
 def get_private_ip() -> str:
@@ -49,7 +59,10 @@ def get_client_info(token: TokenAuth, identifier: str) -> dict:
         json=params,
     )
     client_data = resp.json()
+    # Update settings
     settings.override(**client_data.get("setting_overrides", {}))
+    # Update sentry user
+    set_sentry_user(client_data)
     return client_data
 
 

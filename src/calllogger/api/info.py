@@ -48,7 +48,9 @@ def get_client_info(token: TokenAuth, identifier: str) -> dict:
         auth=token,
         json=params,
     )
-    return resp.json()
+    client_data = resp.json()
+    settings.override(client_data["setting_overrides"])
+    return client_data
 
 
 def link_device(identifier) -> Union[str, None]:

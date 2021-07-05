@@ -1,7 +1,7 @@
 # Standard lib
 from functools import cached_property
 from pathlib import PosixPath
-from typing import Union
+from typing import Union, Any
 import binascii
 import logging
 import base64
@@ -141,3 +141,17 @@ class Settings:
         else:
             logger.error("Unable to identify device, missing identifier.")
             sys.exit(0)
+
+    def override(self, overrides: dict[str, Any]):
+        """
+        Override settings that have not been set from an environment variable.
+
+        Environment variables retain highest priority.
+
+        :param overrides: Dict of settings to override.
+        """
+        for key, val in overrides.items():
+            env_key = key.upper()
+            # Env must not exist for this setting
+            if env_key not in os.environ:
+                setattr(self, key, val)

@@ -13,6 +13,16 @@ from .instruments import Metric, Histogram, Event
 from .collectors import InfluxCollector
 from .logs import setup_remote_logs
 
+__all__ = [
+    "setup_remote_logs",
+    "InfluxCollector",
+    "collector",
+    "SystemMetrics",
+    "serial_error_counter",
+    "http_errors_counter",
+    "request_time",
+]
+
 # We need to instantiate the collector here so
 # we can pass the collector to all metric classes
 collector = InfluxCollector(

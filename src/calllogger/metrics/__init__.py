@@ -9,8 +9,8 @@ import requests
 import psutil
 
 # Local
-from calllogger.influx import InfluxCollector, Metric, Event, Histogram
-
+from .instruments import Metric, Histogram, Event
+from .collectors import InfluxCollector
 
 # We need to instantiate the collector here so
 # we can pass the collector to all metric classes

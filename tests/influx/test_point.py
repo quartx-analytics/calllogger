@@ -2,7 +2,7 @@
 import pytest
 
 # Local
-from calllogger.influx import Point
+from calllogger.metrics.point import Point
 
 
 @pytest.fixture

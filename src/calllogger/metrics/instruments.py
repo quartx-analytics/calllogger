@@ -3,7 +3,7 @@ from functools import partial
 
 # Local
 from .point import Point
-from .influx import InfluxCollector
+from .collectors import InfluxCollector
 
 
 class Metric(Point):

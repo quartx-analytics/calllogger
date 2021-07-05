@@ -2,8 +2,9 @@
 import queue
 
 # Local
-from calllogger.influx import Metric, Event, Counter, Gauge, Histogram
-from calllogger.metrics import collector, InfluxCollector
+from calllogger.metrics.instruments import Metric, Event, Counter, Gauge, Histogram
+from calllogger.metrics.collectors import InfluxCollector
+from calllogger.metrics import collector
 
 
 def test_metric():

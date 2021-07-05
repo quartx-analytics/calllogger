@@ -3,7 +3,7 @@ import logging
 import queue
 
 # Local
-from calllogger.influx.point import Point
+from .point import Point
 
 logger = logging.getLogger(__name__)
 

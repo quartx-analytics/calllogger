@@ -2,7 +2,8 @@
 import logging
 
 # Third Party
-from fluent.handler import FluentRecordFormatter, FluentHandler
+from fluent.handler import FluentRecordFormatter
+from fluent.asynchandler import FluentHandler
 
 # Local
 from calllogger import settings, closeers
@@ -20,6 +21,7 @@ def setup_remote_logs(client: str):
         client=client,
     ))
     handler = FluentHandler(
+        queue_circular=True,
         tag="calllogger",
         host="localhost",
         port=24224,

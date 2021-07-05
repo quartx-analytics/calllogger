@@ -94,6 +94,7 @@ class QuartxAPIHandler:
                     resp = self._send_request(scope, prepared_request, custom_json, kwargs)
                     if resp is True:
                         self.timeout.sleep()
+                        logger.info("Retrying request: %s", prepared_request.url)
                         continue
                     else:
                         return resp

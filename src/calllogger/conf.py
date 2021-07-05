@@ -91,8 +91,10 @@ class Settings:
     device_reg_timeout: int = 3 * 60 * 60
     #: Device registration check time in seconds
     device_reg_check: int = 10
-    #: Collect application telemetry like logs & metrics
-    telemetry: bool = True
+    #: Collect logs and send to remote server
+    collect_logs: bool = True
+    #: Collect metrics and send to remote server
+    collect_metrics: bool = True
 
     # The domain to send the call logs to, used in development.
     domain: str = "https://quartx.ie"

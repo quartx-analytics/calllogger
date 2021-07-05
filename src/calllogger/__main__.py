@@ -11,7 +11,7 @@ import sentry_sdk
 
 # Local
 from calllogger.plugins import get_plugin
-from calllogger import __version__, running, api, settings, telemetry
+from calllogger import __version__, running, api, settings, telemetry, closeers
 from calllogger.managers import ThreadExceptionManager
 from calllogger.auth import get_token
 
@@ -23,8 +23,16 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_known_args()
 
 
+# noinspection PyBroadException
 def terminate(signum, *_) -> int:
     """This will allow the threads to gracefully shutdown."""
+    # Close registered closers
+    for callable_func in closeers:
+        try:
+            callable_func()
+        except Exception:
+            pass
+
     code = 143 if signum == signal.SIGTERM else 130
     running.clear()
     return code
@@ -58,7 +66,7 @@ def set_sentry_user(client_info: dict):
 def collect_telemetry(client_info: dict):
     """Collect system metrics and logs."""
     # Enable metrics telemetry
-    if client_info["influxdb_token"]:
+    if settings.collect_metrics and client_info["influxdb_token"]:
         api.InfluxWrite(
             collector=telemetry.collector,
             token=client_info["influxdb_token"],
@@ -69,9 +77,8 @@ def collect_telemetry(client_info: dict):
         ).start()
 
     # Enable logs telemetry
-    if client_info["fluentd_token"]:
+    if settings.collect_logs:
         telemetry.setup_remote_logs(
-            token=client_info["fluentd_token"],
             client=client_info["slug"],
         )
 
@@ -84,8 +91,7 @@ def main_loop(plugin: str) -> int:
     client_info = api.get_client_info(tokenauth, settings.identifier)
 
     # Collect telemetry if we are able to
-    if settings.telemetry:
-        collect_telemetry(client_info)
+    collect_telemetry(client_info)
 
     # Configure sentry
     plugin = get_plugin(plugin if plugin else client_info["plugin"])

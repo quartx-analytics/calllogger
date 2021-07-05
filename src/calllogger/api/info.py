@@ -49,7 +49,7 @@ def get_client_info(token: TokenAuth, identifier: str) -> dict:
         json=params,
     )
     client_data = resp.json()
-    settings.override(client_data["setting_overrides"])
+    settings.override(client_data.get("setting_overrides", {}))
     return client_data
 
 

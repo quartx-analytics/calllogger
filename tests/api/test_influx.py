@@ -6,7 +6,7 @@ import psutil
 
 # Local
 from calllogger.api import influx
-from calllogger.metrics import collector
+from calllogger.telemetry import collector
 
 
 @pytest.fixture

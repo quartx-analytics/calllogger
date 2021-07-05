@@ -2,7 +2,7 @@
 import pytest
 
 # Local
-from calllogger.metrics.point import Point
+from calllogger.telemetry.point import Point
 
 
 @pytest.fixture

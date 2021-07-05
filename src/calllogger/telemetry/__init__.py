@@ -11,6 +11,7 @@ import psutil
 # Local
 from .instruments import Metric, Histogram, Event
 from .collectors import InfluxCollector
+from .logs import setup_remote_logs
 
 # We need to instantiate the collector here so
 # we can pass the collector to all metric classes

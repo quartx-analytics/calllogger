@@ -10,13 +10,13 @@ import requests
 # Local
 from calllogger.api import QuartxAPIHandler
 from calllogger.utils import TokenAuth, sleeper
-from calllogger import metrics
+from calllogger import telemetry
 
 # We keep the url here for easier testing
 logger = logging.getLogger(__name__)
 
 
-class InfluxWrite(metrics.SystemMetrics, QuartxAPIHandler, threading.Thread):
+class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
     """
     Threaded class to monitor the metrics queue and send the metrics
     to the InfluxDB write API.
@@ -27,7 +27,7 @@ class InfluxWrite(metrics.SystemMetrics, QuartxAPIHandler, threading.Thread):
     :param default_tags: Dict of default tags to add to every point.
     """
 
-    def __init__(self, collector: metrics.InfluxCollector, token: str, default_fields=None, default_tags=None):
+    def __init__(self, collector: telemetry.InfluxCollector, token: str, default_fields=None, default_tags=None):
         super().__init__(suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.info("Initializing InfluxDB metrics monitoring")
         self.collector = collector

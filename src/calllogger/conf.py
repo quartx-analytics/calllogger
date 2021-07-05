@@ -100,7 +100,7 @@ class Settings:
     environment: str = "Testing"
     # Flag to indicate if program is dockerized
     dockerized: bool = False
-    # The plugin the will be used
+    # The plugin that will be used
     plugin: str = ""
 
     # Base64 encoded Environment variables

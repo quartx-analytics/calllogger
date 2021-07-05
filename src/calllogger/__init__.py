@@ -60,15 +60,6 @@ logging_config: Any = {
     "formatters": {
         "levelname": {
             "format": "%(levelname)s: %(message)s",
-        },
-        "fluent_fmt": {
-            "()": "fluent.handler.FluentRecordFormatter",
-            "format": {
-                "level": "%(levelname)s",
-                "logger": "%(name)s",
-                "identifier": settings.identifier,
-                "thread": "%(threadName)s",
-            }
         }
     },
     "handlers": {
@@ -84,15 +75,6 @@ logging_config: Any = {
             "stream": "ext://sys.stderr",
             "formatter": "levelname",
             "level": "WARNING",
-        },
-        "fluent": {
-            "class": "fluent.handler.FluentHandler",
-            "host": "localhost",
-            "port": 24224,
-            "tag": "calllogger",
-            "buffer_overflow_handler": "overflow_handler",
-            "formatter": "fluent_fmt",
-            "level": "DEBUG",
         }
     },
     "loggers": {
@@ -107,10 +89,6 @@ logging_config: Any = {
         }
     }
 }
-
-# if settings.send_logs:
-#     # Enable fluent logging
-#     logging_config["loggers"]["calllogger"]["handlers"].append("fluent")
 
 # Apply logging config
 logging.config.dictConfig(logging_config)

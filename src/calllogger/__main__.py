@@ -11,7 +11,7 @@ import sentry_sdk
 
 # Local
 from calllogger.plugins import get_plugin
-from calllogger import __version__, running, api, settings, metrics
+from calllogger import __version__, running, api, settings, telemetry
 from calllogger.managers import ThreadExceptionManager
 from calllogger.auth import get_token
 
@@ -56,16 +56,24 @@ def set_sentry_user(client_info: dict):
 
 
 def collect_telemetry(client_info: dict):
-    # Enable metrics reporting
-    if settings.telemetry and client_info["influxdb_token"]:
+    """Collect system metrics and logs."""
+    # Enable metrics telemetry
+    if client_info["influxdb_token"]:
         api.InfluxWrite(
-            metrics.collector,
-            client_info["influxdb_token"],
+            collector=telemetry.collector,
+            token=client_info["influxdb_token"],
             default_fields=dict(
                 identifier=settings.identifier,
                 client=client_info["slug"],
             )
         ).start()
+
+    # Enable logs telemetry
+    if client_info["fluentd_token"]:
+        telemetry.setup_remote_logs(
+            token=client_info["fluentd_token"],
+            client=client_info["slug"],
+        )
 
 
 def main_loop(plugin: str) -> int:
@@ -74,7 +82,10 @@ def main_loop(plugin: str) -> int:
     tokenauth = get_token()
     queue = Queue(settings.queue_size)
     client_info = api.get_client_info(tokenauth, settings.identifier)
-    collect_telemetry(client_info)
+
+    # Collect telemetry if we are able to
+    if settings.telemetry:
+        collect_telemetry(client_info)
 
     # Configure sentry
     plugin = get_plugin(plugin if plugin else client_info["plugin"])

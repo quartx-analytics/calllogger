@@ -3,7 +3,7 @@ import queue
 
 # Local
 from calllogger.influx import Metric, Event, Counter, Gauge, Histogram
-from calllogger.metrics import collector
+from calllogger.metrics import collector, InfluxCollector
 
 
 def test_metric():
@@ -28,8 +28,9 @@ def test_metric_none():
 
 
 def test_metric_queue_full(mocker):
-    metric = Metric("event_metric", collector)
     mocked_q = mocker.patch.object(queue, "SimpleQueue")
+    new_collector = InfluxCollector("", "", "")
+    metric = Metric("event_metric", new_collector)
     mocked_q.return_value.qsize.return_value = 1_001
     metric.field("value", True).write()
 

@@ -15,7 +15,7 @@ FLUENT_ADDRESS = "localhost"
 FLUENT_PORT = 24224
 
 
-def service_available(address: str, port: int):
+def service_available(address: str, port: int) -> bool:
     """Check that service at given address is available."""
     a_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result_of_check = a_socket.connect_ex((address, port))

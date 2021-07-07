@@ -51,8 +51,7 @@ Below is a list of environment variables that can be used to configure the calll
 * ``QUEUE_SIZE``: Size of the call queue.
 * ``DEBUG``: Set to ``true`` to enable debug logging.
 
-The plugin that will be used can be specified by appending the name of the plugin to the end of the docker run command.
-Some plugins also have there own set of configurations the can be set using.
+Some plugins also have their own set of configurations that can be set using environment variables.
 
 ```bash
 -e "PLUGIN_<SETTING>=<VALUE>"
@@ -65,5 +64,5 @@ There is only one command required to install, configure and run the call logger
 Ensure that the path to the serial device is correct if using the SiemensHipathSerial plugin.
 
 ```bash
-docker run --detach --name "calllogger" --volume="/dev:/dev" --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger plugin SiemensHipathSerial
+docker run --detach --name "calllogger" --privileged --volume="/dev:/dev" --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger
 ```

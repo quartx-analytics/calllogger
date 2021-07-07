@@ -38,7 +38,7 @@ def link_device(identifier) -> Union[str, None]:
             data = resp.json()
             return data["token"]
         elif status_code == codes["no_content"]:  # 204
-            logger.debug("Device registration rejected. Will try again soon.")
+            logger.debug("Device registration rejected. Will try again in %s seconds.", settings.device_reg_check)
             utils.sleeper(settings.device_reg_check, running.is_set)
             # Keep attempting registration until timeout elapse
             if time.time() - start < settings.device_reg_timeout:

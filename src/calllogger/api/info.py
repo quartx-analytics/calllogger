@@ -56,7 +56,7 @@ def get_client_info(token: TokenAuth, identifier: str) -> dict:
     )
     client_data = resp.json()
     # Update settings
-    settings.override(**client_data.get("setting_overrides", {}))
+    settings.override(**client_data.get("settings", {}))
     # Update sentry user
     set_sentry_user(client_data)
     return client_data

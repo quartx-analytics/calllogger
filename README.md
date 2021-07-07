@@ -61,7 +61,7 @@ Deployment
 ----------
 
 There is only one command required to install, configure and run the call logger.
-Ensure that the path to the serial device is correct if using the SiemensHipathSerial plugin.
+The plugin that will be used is determined by the server, but can be overridden.
 
 ```bash
 docker run --detach --name "calllogger" --privileged --volume="/dev:/dev" --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger

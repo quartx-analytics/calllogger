@@ -54,7 +54,7 @@ def main_loop(plugin: str) -> int:
     initialise_telemetry(client_info)
 
     # Configure sentry
-    plugin = get_plugin(plugin if plugin else client_info["plugin"])
+    plugin = get_plugin(plugin if plugin else client_info["settings"]["plugin"])
     sentry_sdk.set_tag("plugin", plugin.__name__)
 
     # Start the CDR worker to monitor the record queue

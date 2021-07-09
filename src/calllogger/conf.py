@@ -137,6 +137,7 @@ class Settings:
         # Fetch and save
         identifier = get_mac_address()
         if identifier and identifier != "00:00:00:00:00:00":
+            identifier = identifier.upper()
             logger.debug("Storing device identifier to datastore.")
             utils.write_datastore(self._identifier_store, identifier)
             return identifier

@@ -26,10 +26,10 @@ parser.parse_known_args()
 def initialise_telemetry(client_info: dict):
     """Collect system metrics and logs."""
     # Enable metrics telemetry
-    if settings.collect_metrics and client_info["influxdb_token"]:
+    if settings.collect_metrics and client_info["influx_token"]:
         api.InfluxWrite(
             collector=telemetry.collector,
-            token=client_info["influxdb_token"],
+            token=client_info["influx_token"],
             default_fields=dict(
                 identifier=settings.identifier,
                 client=client_info["slug"],

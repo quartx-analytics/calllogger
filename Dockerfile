@@ -1,16 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM python:3.9-buster as builder
-
-COPY . /src
-
-# Install the package in a virtual environment
-RUN python -m venv /opt/venv && \
-    . /opt/venv/bin/activate && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir /src --use-feature=in-tree-build
-
-
-FROM python:3.9-slim-buster
+FROM python:3.9-slim-buster as base
 
 # Add Labels for OCI Image Format Specification
 LABEL org.opencontainers.image.vendor="Quartx"
@@ -37,13 +26,27 @@ RUN mkdir -p $DATA_LOCATION && \
     useradd --no-log-init -r -g users runner && \
     chown runner:users $DATA_LOCATION
 
-# Copy package data
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-COPY --from=builder /opt/venv /opt/venv
+# Copy required scripts
 COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules
 COPY data/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["calllogger"]
 
-# Best to run the program as a normal user
+# Switch to full buster to be able to compile uptime & psutil
+FROM python:3.9-buster as compiler
+
+# Install the package in a virtual environment
+COPY . /src
+RUN python -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir /src --use-feature=in-tree-build
+
+
+# Switch back to base image to finish the build
+FROM base
+
+# Finalize build image
+COPY --from=compiler $VIRTUAL_ENV $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 USER runner:users

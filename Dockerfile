@@ -1,4 +1,15 @@
 # syntax=docker/dockerfile:1.2
+FROM python:3.9-buster as builder
+
+COPY . /src
+
+# Install the package in a virtual environment
+RUN python -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir /src --use-feature=in-tree-build
+
+
 FROM python:3.9-slim-buster
 
 # Add Labels for OCI Image Format Specification
@@ -24,22 +35,15 @@ ENV VIRTUAL_ENV=/opt/venv
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \
     useradd --no-log-init -r -g users runner && \
-    chown runner:users $DATA_LOCATION && \
-    python -m venv $VIRTUAL_ENV && \
-    apt-get update && apt-get install python3-psutil -y
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+    chown runner:users $DATA_LOCATION
 
 # Copy package data
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+COPY --from=builder /opt/venv /opt/venv
 COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules
 COPY data/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["calllogger"]
-COPY . /src
-
-# Now we can install the package in the virtual env
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir /src --use-feature=in-tree-build && \
-    rm -rf /src
 
 # Best to run the program as a normal user
 USER runner:users

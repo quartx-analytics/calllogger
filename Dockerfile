@@ -25,7 +25,8 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN mkdir -p $DATA_LOCATION && \
     useradd --no-log-init -r -g users runner && \
     chown runner:users $DATA_LOCATION && \
-    python -m venv $VIRTUAL_ENV
+    python -m venv $VIRTUAL_ENV && \
+    apt-get update && apt-get install python3-psutil -y
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy package data

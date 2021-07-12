@@ -32,6 +32,7 @@ COPY data/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["calllogger"]
 
+
 # Switch to full buster to be able to compile uptime & psutil
 FROM python:3.9-buster as compiler
 

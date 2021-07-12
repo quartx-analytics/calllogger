@@ -47,7 +47,7 @@ jobs:
   docker:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-     needs: [tests, flake8]
+    needs: [tests, flake8]
     steps:
       - uses: actions/checkout@v2
       - name: Set Environment Variables

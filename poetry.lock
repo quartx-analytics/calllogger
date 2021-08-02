@@ -370,7 +370,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "tox"
-version = "3.24.0"
+version = "3.24.1"
 description = "tox is a generic virtualenv management and test command line tool"
 category = "dev"
 optional = false
@@ -447,7 +447,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "74ea056148ee1bc485bed3c646c5ad027ec4b74f90a3064c9621fcff016af9d9"
+content-hash = "a8be5d566db32450b10d2b0ccd2f86a7e00638ff4fde6872dd16dff30fe82bca"
 
 [metadata.files]
 appdirs = [
@@ -689,8 +689,8 @@ toml = [
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
 tox = [
-    {file = "tox-3.24.0-py2.py3-none-any.whl", hash = "sha256:c990028355f0d0b681e3db9baa89dd9f839a6e999c320029339f6a6b36160591"},
-    {file = "tox-3.24.0.tar.gz", hash = "sha256:67636634df6569e450c4bc18fdfd8b84d7903b3902d5c65416eb6735f3d4afb8"},
+    {file = "tox-3.24.1-py2.py3-none-any.whl", hash = "sha256:60eda26fa47b7130e6fc1145620b1fd897963af521093c3685c3f63d1c394029"},
+    {file = "tox-3.24.1.tar.gz", hash = "sha256:9850daeb96d21b4abf049bc5f197426123039e383ebfed201764e9355fc5a880"},
 ]
 tox-poetry-installer = [
     {file = "tox-poetry-installer-0.8.1.tar.gz", hash = "sha256:e3ee6578baa7f0ff9129182cc68af9eb0bbde520f9b0460a3f6e451579832c21"},

@@ -1,0 +1,22 @@
+version: "3.9"
+
+volumes:
+  calllogger-data:
+
+services:
+  calllogger:
+    image: "ghcr.io/quartx-analytics/calllogger:latest"
+    privileged: true
+    restart: on-failure
+    network_mode: host
+    volumes:
+      - type: volume
+        source: calllogger-data
+        target: /data
+      - type: bind
+        source: /dev
+        target: /dev
+
+  fluentbit:
+    image: "fluent/fluent-bit:1.8"
+    network_mode: host

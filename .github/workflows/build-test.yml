@@ -120,6 +120,13 @@ jobs:
           chmod +x /usr/local/bin/mender-artifact
           curl https://raw.githubusercontent.com/quartx-analytics/mender-docker-module/main/docker-compose-artifact-gen --output /usr/local/bin/docker-compose-artifact-gen
           chmod +x /usr/local/bin/docker-compose-artifact-gen
+
       - name: Create mender artifact
         run: |
           docker-compose-artifact-gen docker-compose.yml --artifact-name Calllogger --device-types raspberrypi3 raspberrypi4 --software-name Calllogger --software-version 1.0
+
+      - name: Upload mender artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Docker Compose Artifact
+          path: docker-compose-artifact.mender

@@ -128,5 +128,5 @@ jobs:
       - name: Upload mender artifact
         uses: actions/upload-artifact@v2
         with:
-          name: Docker Compose Artifact
+          name: docker-compose-artifact
           path: docker-compose-artifact.mender

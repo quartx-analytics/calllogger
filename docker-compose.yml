@@ -18,3 +18,4 @@ services:
         target: /dev
     environment:
       DOMAIN: https://quartx.dev/
+      COLLECT_LOGS: false

@@ -123,7 +123,7 @@ jobs:
 
       - name: Create mender artifact
         run: |
-          docker-compose-artifact-gen docker-compose.yml --artifact-name Calllogger --device-types raspberrypi3 raspberrypi4 --software-name Calllogger --software-version 1.0
+          docker-compose-artifact-gen docker-compose.yml --device-types raspberrypi3 raspberrypi4 --software-name Calllogger --software-version r${{ github.run_id }}
 
       - name: Upload mender artifact
         uses: actions/upload-artifact@v2

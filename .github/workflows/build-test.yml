@@ -114,19 +114,16 @@ jobs:
     needs: [docker]
     steps:
       - uses: actions/checkout@v2
-      - name: Download mender artifact scripts
-        run: |
-          curl https://downloads.mender.io/mender-artifact/3.6.0/linux/mender-artifact --output /usr/local/bin/mender-artifact
-          chmod +x /usr/local/bin/mender-artifact
-          curl https://raw.githubusercontent.com/quartx-analytics/mender-docker-module/main/docker-compose-artifact-gen --output /usr/local/bin/docker-compose-artifact-gen
-          chmod +x /usr/local/bin/docker-compose-artifact-gen
 
-      - name: Create mender artifact
-        run: |
-          docker-compose-artifact-gen docker-compose.yml --device-types raspberrypi3 raspberrypi4 --software-name Calllogger --software-version r${{ github.run_id }}
+      - id: mender
+        name: Create mender artifact
+        uses: actions/mender-docker-module@v1
+        with:
+          compose-file: "docker-compose.yml"
+          software-name: "calllogger"
 
       - name: Upload mender artifact
         uses: actions/upload-artifact@v2
         with:
-          name: docker-compose-artifact
-          path: docker-compose-artifact.mender
+          name: calllogger-artifact
+          path: ${{ steps.mender.outputs.artifact-file }}

@@ -117,7 +117,7 @@ jobs:
 
       - id: mender
         name: Create mender artifact
-        uses: quartx-analytics/mender-docker-compose@main
+        uses: quartx-analytics/mender-docker-compose@v1
         with:
           compose-file: "docker-compose.yml"
           software-name: "calllogger"

@@ -125,5 +125,5 @@ jobs:
       - name: Upload mender artifact
         uses: actions/upload-artifact@v2
         with:
-          name: calllogger-artifact
+          name: mender-artifact
           path: ${{ steps.mender.outputs.artifact-file }}

@@ -44,7 +44,7 @@ psutil = "^5.8.0"
 uptime = "^3.0.1"
 
 [tool.poetry.dev-dependencies]
-tox = "^3.24.1"
+tox = "^3.24.2"
 pytest = "^6.2.4"
 flake8 = "^3.9.0"
 pytest-cov = "^2.12.1"

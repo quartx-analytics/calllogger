@@ -4,7 +4,7 @@ volumes:
   calllogger-data:
 
 services:
-  calllogger:
+  app:
     image: "ghcr.io/quartx-analytics/calllogger:latest"
     privileged: true
     restart: on-failure

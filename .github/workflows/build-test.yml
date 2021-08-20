@@ -89,7 +89,7 @@ jobs:
             org.opencontainers.image.created=${{ env.BUILD_DATE }}
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
-          cache-to: type=gha
+          cache-to: type=gha,mode=max
 
   anchore:
     if: github.ref == 'refs/heads/master'
@@ -117,7 +117,7 @@ jobs:
 
       - id: mender
         name: Create mender artifact
-        uses: quartx-analytics/mender-docker-compose@v1.0.1
+        uses: quartx-analytics/mender-docker-compose@main
         with:
           compose-file: "docker-compose.yml"
           software-name: "calllogger"

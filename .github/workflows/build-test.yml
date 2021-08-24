@@ -121,6 +121,7 @@ jobs:
         with:
           compose-file: "docker-compose.yml"
           software-name: "calllogger"
+          device-types: "raspberrypi3 raspberrypi4"
 
       - name: Upload mender artifact
         uses: actions/upload-artifact@v2

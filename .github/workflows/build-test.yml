@@ -122,7 +122,7 @@ jobs:
           compose-file: "docker-compose.yml"
           software-name: "calllogger"
           device-types: "raspberrypi3 raspberrypi4"
-          signing-key: ${{ secrets.ARTIFACT_SIGNING_KEY }}
+          signing-key: "${{ secrets.ARTIFACT_SIGNING_KEY }}"
 
       - name: Upload mender artifact
         uses: actions/upload-artifact@v2

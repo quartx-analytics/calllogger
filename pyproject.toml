@@ -32,7 +32,7 @@ calllogger-getid = "calllogger.__main__:getid"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-python-decouple = "^3.4"
+python-decouple = "^3.5"
 sentry-sdk = "^1.4.3"
 pyserial = "^3.5"
 requests = "^2.26.0"

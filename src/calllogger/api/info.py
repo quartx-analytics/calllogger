@@ -1,5 +1,6 @@
 # Standard lib
 from urllib.parse import urljoin
+import threading
 import logging
 import socket
 
@@ -36,6 +37,7 @@ def get_private_ip() -> str:
 
 def get_client_info(token: TokenAuth, identifier: str) -> dict:
     """Request information about the client."""
+    logger.info("Requesting client info and settings")
     api = QuartxAPIHandler()
 
     # We will pass data to server using query params
@@ -60,3 +62,8 @@ def get_client_info(token: TokenAuth, identifier: str) -> dict:
     # Update sentry user
     set_sentry_user(client_data)
     return client_data
+
+
+def setup_client_checkin(token: TokenAuth, identifier: str):
+    logger.info("Scheduling client checkin for every 30min")
+    threading.Timer(30*60, get_client_info, args=[token, identifier])

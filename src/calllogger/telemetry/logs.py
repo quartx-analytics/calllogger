@@ -43,5 +43,7 @@ def setup_remote_logs(client: str, retry=0):
         closeers.append(handler.close)
         logger.info("Connection made to local fluent server.")
     elif retry < 5:
-        logger.info("Local fluent server not available yet. Waiting...")
+        logger.debug("Local fluent server not available yet. Waiting...")
         threading.Timer(3, setup_remote_logs, args=[client, retry + 1])
+    else:
+        logger.info("Local fluent server unavailable. Disabling remote logs.")

@@ -27,6 +27,7 @@ class CallDataRecord:
         * **ring** (*int*) - The time in seconds that the caller was ringing for. Defaults = 0
         * **duration** (*int*) - The duration of the call in seconds. Defaults = 0
         * **answered** (*int*/*bool*) - Indicate if call was answered. Determined by duration if not given.
+        * **raw** (*str*) - The original unparsed raw call record.
 
     .. note:: **duration** & **ring** may also be in the format of ``HH:MM:SS`` or ``MM:SS``.
 
@@ -61,6 +62,7 @@ class CallDataRecord:
     ring: int = attr.ib(init=False)
     duration: int = attr.ib(init=False)
     answered: bool = attr.ib(init=False)
+    raw: str = attr.ib(init=False)
 
     # Class Vars
     INCOMING = 0

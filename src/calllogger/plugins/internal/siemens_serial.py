@@ -32,6 +32,7 @@ class SiemensHipathSerial(SerialPlugin):
         # Parse the received record
         call_type = validated_line[74:76].strip()
         record = CallDataRecord(int(call_type))
+        record.raw = validated_line
 
         # Add date as UTC
         # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes

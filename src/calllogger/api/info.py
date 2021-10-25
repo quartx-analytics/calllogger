@@ -1,6 +1,5 @@
 # Standard lib
 from urllib.parse import urljoin
-import threading
 import logging
 import socket
 
@@ -11,6 +10,7 @@ import sentry_sdk
 from calllogger import settings, __version__
 from calllogger.api import QuartxAPIHandler
 from calllogger.utils import TokenAuth
+from calllogger.misc import ThreadTimer
 
 info_url = urljoin(settings.domain, "/api/v1/monitor/cdr/info/")
 logger = logging.getLogger(__name__)
@@ -66,4 +66,5 @@ def get_client_info(token: TokenAuth, identifier: str) -> dict:
 
 def setup_client_checkin(token: TokenAuth, identifier: str):
     logger.info("Scheduling client checkin for every 30min")
-    threading.Timer(30*60, get_client_info, args=[token, identifier])
+    timer = ThreadTimer(30*60, get_client_info, args=[token, identifier], repeat=True)
+    timer.start()

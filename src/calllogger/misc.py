@@ -19,20 +19,28 @@ class ThreadTimer(threading.Thread):
     :param callable function: The function to call.
     :param args: The position args to send to the function.
     :param kwargs: The keyword args to send to the function.
+    :param bool repeat: When set to True, the thread will repeatedly call the function
     """
 
-    def __init__(self, interval, function, args=None, kwargs=None):
+    def __init__(self, interval, function, args=None, kwargs=None, repeat=False):
         super(ThreadTimer, self).__init__()
         self.interval = interval
         self.function = function
+        self.repeat = repeat
         self.args = args if args is not None else []
         self.kwargs = kwargs if kwargs is not None else {}
 
     def run(self):
         # Run the function after waiting
         # if program has not stopped
-        if not stopped.wait(self.interval):
+        while not stopped.wait(self.interval):
             self.function(*self.args, **self.kwargs)
+
+            # Keep looping if repeat is True, quit otherwise
+            if self.repeat:
+                continue
+            else:
+                break
 
 
 class ThreadExceptionManager(threading.Thread):

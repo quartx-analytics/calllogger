@@ -9,6 +9,7 @@ from fluent.asynchandler import FluentHandler
 
 # Local
 from calllogger import settings, closeers
+from calllogger.misc import ThreadTimer
 
 logger = logging.getLogger("calllogger")
 FLUENT_ADDRESS = "localhost"
@@ -44,6 +45,7 @@ def setup_remote_logs(client: str, retry=0):
         logger.info("Connection made to local fluent server.")
     elif retry < 5:
         logger.debug("Local fluent server not available yet. Waiting...")
-        threading.Timer(3, setup_remote_logs, args=[client, retry + 1])
+        timer = ThreadTimer(3, setup_remote_logs, args=[client, retry + 1])
+        timer.start()
     else:
         logger.info("Local fluent server unavailable. Disabling remote logs.")

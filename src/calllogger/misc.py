@@ -11,6 +11,30 @@ from calllogger.utils import ExitCodeManager
 from calllogger import closeers, stopped
 
 
+class ThreadTimer(threading.Thread):
+    """
+    Call a function after a specified number of seconds.
+
+    :param float or int interval: The time to wait for before executing the function.
+    :param callable function: The function to call.
+    :param args: The position args to send to the function.
+    :param kwargs: The keyword args to send to the function.
+    """
+
+    def __init__(self, interval, function, args=None, kwargs=None):
+        super(ThreadTimer, self).__init__()
+        self.interval = interval
+        self.function = function
+        self.args = args if args is not None else []
+        self.kwargs = kwargs if kwargs is not None else {}
+
+    def run(self):
+        # Run the function after waiting
+        # if program has not stopped
+        if not stopped.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
+
+
 class ThreadExceptionManager(threading.Thread):
     exit_code = ExitCodeManager()
 

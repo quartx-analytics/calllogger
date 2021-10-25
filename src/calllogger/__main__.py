@@ -38,8 +38,8 @@ def initialise_telemetry(client_info: dict):
 
     # Enable logs telemetry
     if settings.collect_logs:
-        telemetry.setup_remote_logs(
-            client=client_info["slug"],
+        telemetry.send_logs_to_logzio(
+            client_info=client_info,
         )
 
 
@@ -47,19 +47,19 @@ def main_loop(plugin: str) -> int:
     """Call the selected plugin and wait for program shutdown."""
     tokenauth = get_token()
     client_info = api.get_client_info(tokenauth, settings.identifier)
-    queue = Queue(settings.queue_size)
-
-    # Enable periodic checkin
-    api.setup_client_checkin(tokenauth, settings.identifier)
 
     # Initialise telemetry if we are able to
     initialise_telemetry(client_info)
+
+    # Enable periodic checkin
+    api.setup_client_checkin(tokenauth, settings.identifier)
 
     # Configure sentry
     plugin = get_plugin(plugin if plugin else client_info["settings"]["plugin"])
     sentry_sdk.set_tag("plugin", plugin.__name__)
 
     # Start the CDR worker to monitor the record queue
+    queue = Queue(settings.queue_size)
     cdr_thread = api.CDRWorker(queue, tokenauth)
     cdr_thread.start()
 

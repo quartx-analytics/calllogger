@@ -81,11 +81,6 @@ logging_config = {
         "calllogger": {
             "handlers": ["console_messages", "console_errors"],
             "level": "DEBUG",
-        },
-        "calllogger.record": {
-            "handlers": ["console_messages"],
-            "level": "DEBUG",
-            "propagate": False,
         }
     }
 }

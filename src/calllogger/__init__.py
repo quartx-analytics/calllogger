@@ -21,7 +21,6 @@ __all__ = ["__version__", "__package__", "stopped", "settings", "closeers"]
 
 # Standard lib
 from importlib.metadata import version
-from typing import Any
 import logging.config
 import threading
 
@@ -51,7 +50,7 @@ settings = conf.Settings()
 closeers: list[callable] = []
 
 # Logging configuration
-logging_config: Any = {
+logging_config = {
     "version": 1,
     "filters": {
         "only_messages": {

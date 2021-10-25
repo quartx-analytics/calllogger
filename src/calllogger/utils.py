@@ -12,7 +12,6 @@ from pathlib import PosixPath
 import threading
 import logging
 import base64
-import time
 
 # Third Party
 from requests.auth import AuthBase
@@ -39,19 +38,19 @@ class Timeout:
         method neeeds to be called to undo the timeout decay.
 
     :param settings: Programs settings object.
-    :param callback: A callable that should return True/False to state if program is still running.
+    :param stopped: The stopped event flag state if program is stopped or running.
     """
 
-    def __init__(self, settings, callback: callable):
+    def __init__(self, settings, stopped: threading.Event):
         self._settings = settings
         self._timeout = settings.timeout
-        self._callback = callback
+        self._stopped = stopped
         self._temp_delay = None
 
     def sleep(self):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.info("Retrying in '%d' seconds", self._timeout)
-        sleeper(self.value, self._callback)
+        self._stopped.wait(self.value)
         self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
         self._temp_delay = None
 
@@ -79,24 +78,6 @@ class TokenAuth(AuthBase):
     def __call__(self, req):
         req.headers["Authorization"] = f"Token {self.token}"
         return req
-
-
-def sleeper(timeout: float, callback: callable):
-    """
-    Sleep for a given amount of time while checking callback
-    every half a second to see if sleeping is still required.
-    This allows for the program to gracefully shutdown.
-
-    Returns ``True`` if function is allowed to complete without stopping,
-    else returns ``False`` if program is stopped before timeout is done.
-    """
-    timeout = timeout * 2
-    while timeout > 0 and callback():
-        time.sleep(.5)
-        timeout -= 1
-
-    # Indicate if ran successfully
-    return callback()
 
 
 class ExitCodeManager:

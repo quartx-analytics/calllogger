@@ -9,7 +9,7 @@ from requests_mock import Mocker
 from calllogger.api import cdr
 from calllogger.record import CallDataRecord
 from calllogger.utils import TokenAuth
-from calllogger import running
+from calllogger import stopped
 
 
 @pytest.fixture
@@ -31,8 +31,8 @@ def api(mocker):
 
     # Setup worker and mock running flag so loop will only run once
     obj = cdr.CDRWorker(queue, tokenauth)
-    mocked = mocker.patch.object(running, "is_set")
-    mocked.side_effect = [True, True, False]
+    mocked = mocker.patch.object(stopped, "is_set")
+    mocked.side_effect = [False, False, True]
     mocker.patch.object(obj.timeout, "sleep")
     yield obj
 

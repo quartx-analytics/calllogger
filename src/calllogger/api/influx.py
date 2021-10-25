@@ -9,7 +9,7 @@ import requests
 
 # Local
 from calllogger.api import QuartxAPIHandler
-from calllogger.utils import TokenAuth, sleeper
+from calllogger.utils import TokenAuth
 from calllogger import telemetry
 
 # We keep the url here for easier testing
@@ -54,8 +54,8 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
     def run(self):
         """Process the call record queue."""
         # We will sleep by 58 seconds instead of the desired 60
-        # This is because each cpu_percent command will take 1 second to complete
-        while sleeper(58, self.running.is_set) and self.quit is False:
+        # This is because each cpu_percent & process commands will take 2 second to complete
+        while not self.stopped.wait(58) and self.quit is False:
             # Gather extra metrics first
             self.gather_system_metrics()
             self.gather_process_metrics()
@@ -84,4 +84,5 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
 
     def handle_unauthorized(self, response):
         """Quit submiting metrics if the token is no longer valid."""
+        # We only want to quit sending metrics not quit the program
         self.quit = True

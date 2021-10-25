@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 # Local
-from calllogger import misc, running, closeers
+from calllogger import misc, stopped, closeers
 
 
 class TestThreadExceptionManager:
@@ -15,7 +15,7 @@ class TestThreadExceptionManager:
         Test that a successful call to entrypoint
         causes no errors and returns True
         """
-        spy_running_clear = mocker.spy(running, "clear")
+        spy_running_clear = mocker.spy(stopped, "set")
         misc.ThreadExceptionManager.exit_code.reset()
 
         class Success(misc.ThreadExceptionManager):
@@ -31,7 +31,7 @@ class TestThreadExceptionManager:
         Test that run catches the SystemExit exception
         and that the code is captured too.
         """
-        spy_running_clear = mocker.spy(running, "clear")
+        spy_running_clear = mocker.spy(stopped, "set")
         misc.ThreadExceptionManager.exit_code.reset()
 
         class Success(misc.ThreadExceptionManager):
@@ -49,7 +49,7 @@ class TestThreadExceptionManager:
         Test that run catches the SystemExit exception
         and that the code is captured too.
         """
-        spy_running_clear = mocker.spy(running, "clear")
+        spy_running_clear = mocker.spy(stopped, "set")
         misc.ThreadExceptionManager.exit_code.reset()
 
         class Success(misc.ThreadExceptionManager):
@@ -64,7 +64,7 @@ class TestThreadExceptionManager:
 
 @pytest.mark.parametrize("return_data", [KeyboardInterrupt, "testdata"])
 def test_graceful_exception(mocker: MockerFixture, return_data):
-    spy_running_clear = mocker.spy(running, "clear")
+    spy_running_clear = mocker.spy(stopped, "set")
     spy_terminate = mocker.spy(misc, "terminate")
 
     @misc.graceful_exception
@@ -82,22 +82,20 @@ def test_graceful_exception(mocker: MockerFixture, return_data):
 
 class Testterminate:
     def test_terminate(self):
-        """Test that terminate clears the running event flag."""
-        running.set()
+        """Test that terminate set the stopped event flag."""
         misc.terminate(signal.SIGINT)
-        assert not running.is_set()
+        assert stopped.is_set()
 
     @pytest.mark.parametrize("event,value", [(signal.SIGINT, 130), (signal.SIGTERM, 143)])
     def test_terminate_exit_code(self, event, value):
         """Test that terminate returns the right exit code for the right signal"""
-        running.set()
         ret = misc.terminate(event)
-        assert not running.is_set()
+        assert stopped.is_set()
         assert ret == value
 
     @pytest.mark.parametrize("error", [False, True])
     def test_terminate_call_close(self, error):
-        """Test that terminate clears the running event flag."""
+        """Test that terminate sets the stopped event flag."""
         closed = False
 
         def close():
@@ -109,10 +107,9 @@ class Testterminate:
         # Keep org to reset back later
         org_closers = closeers[:]
         closeers.append(close)
-        running.set()
 
         misc.terminate(signal.SIGINT)
-        assert not running.is_set()
+        assert stopped.is_set()
         assert closed
 
         # Reset back to org

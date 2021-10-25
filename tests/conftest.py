@@ -10,7 +10,7 @@ import serial
 
 # Local
 from calllogger.plugins.serial import SerialPlugin
-from calllogger import running, utils
+from calllogger import stopped, utils
 
 
 @pytest.fixture(autouse=True)
@@ -27,8 +27,8 @@ def disable_sleep(mocker):
 
 @pytest.fixture
 def mock_running(mocker):
-    mocked = mocker.patch.object(running, "is_set")
-    mocked.return_value = True
+    mocked = mocker.patch.object(stopped, "is_set")
+    mocked.return_value = False
     yield mocked
 
 

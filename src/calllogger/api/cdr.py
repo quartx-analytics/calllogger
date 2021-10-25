@@ -41,7 +41,7 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
 
     def entrypoint(self):
         """Process the call record queue."""
-        while self.running.is_set():
+        while not self.stopped.is_set():
             try:
                 record = self.queue.get(timeout=0.1)
             except queue.Empty:

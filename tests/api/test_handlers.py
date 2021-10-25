@@ -8,7 +8,7 @@ import pytest
 
 # Local
 from calllogger.api import handlers
-from calllogger import running
+from calllogger import stopped
 
 test_url = "https://testing.test/test"
 client_exit_status = [
@@ -21,8 +21,8 @@ client_exit_status = [
 @pytest.fixture
 def api(mocker):
     obj = handlers.QuartxAPIHandler()
-    mocked = mocker.patch.object(running, "is_set")
-    mocked.side_effect = [True, False]
+    mocked = mocker.patch.object(stopped, "is_set")
+    mocked.side_effect = [False, True]
     mocker.patch.object(obj.timeout, "sleep")
     yield obj
 
@@ -81,8 +81,8 @@ def test_errors_causing_retry(api, requests_mock, mocker, bad_code):
 
 def test_retry_with_break(api, requests_mock, mocker):
     """Test for server/network errors that can be retried."""
-    mocked = mocker.patch.object(running, "is_set")
-    mocked.side_effect = [True, False]
+    mocked = mocker.patch.object(stopped, "is_set")
+    mocked.side_effect = [False, True]
     request_spy = mocker.spy(api, "_send_request")
     api.suppress_errors = True
 
@@ -98,9 +98,9 @@ def test_retry_with_break(api, requests_mock, mocker):
 
 
 def client_errors(api, requests_mock, mocker, bad_code, cleard):
-    mocked = mocker.patch.object(running, "is_set")
-    mocked.side_effect = [True, False]
-    clear_spy = mocker.spy(running, "clear")
+    mocked = mocker.patch.object(stopped, "is_set")
+    mocked.side_effect = [False, True]
+    clear_spy = mocker.spy(stopped, "clear")
     request_spy = mocker.spy(api, "_send_request")
     requests_mock.get(test_url, status_code=bad_code, json={"success": False})
     resp = api.make_request(method="GET", url=test_url)

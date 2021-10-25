@@ -5,7 +5,7 @@ import logging
 import abc
 
 # Local
-from calllogger import running, settings, conf
+from calllogger import stopped, settings, conf
 from calllogger.misc import ThreadExceptionManager
 from calllogger.record import CallDataRecord
 from calllogger.utils import Timeout
@@ -39,7 +39,8 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
         self.logger.info("Initializing plugin: %s", self.__class__.__name__)
 
         #: Timeout control, Used to control the timeout decay when repeatedly called.
-        self.timeout = Timeout(settings, running.is_set)  # pragma: no branch
+        self.timeout = Timeout(settings, stopped)  # pragma: no branch
+        self.stopped = stopped
 
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""
@@ -49,7 +50,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     @property
     def is_running(self) -> bool:
         """Flag to indicate that everything is working and ready to keep monitoring."""
-        return running.is_set()
+        return not self.stopped.is_set()
 
     @abc.abstractmethod
     def entrypoint(self) -> NoReturn:  # pragma: no cover

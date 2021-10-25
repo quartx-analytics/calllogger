@@ -5,7 +5,6 @@ from typing import NoReturn
 import random
 
 # Local
-from calllogger.utils import sleeper
 from calllogger.plugins import BasePlugin
 from calllogger.record import CallDataRecord as Record
 
@@ -114,7 +113,7 @@ class MockCalls(BasePlugin):
 
             # Sleep between records if requested
             if self.sleep:
-                sleeper(self.sleep, lambda: self.is_running)  # pragma: no branch
+                self.stopped.wait(self.sleep)
 
     def outgoing(self):
         # Push the normal outgoing record
@@ -150,7 +149,7 @@ class MockCalls(BasePlugin):
             record.call_type = Record.INCOMING
             record.ext = self.rand_ext()
             self.push(record)
-            sleeper(self.incoming_delay, lambda: self.is_running)  # pragma: no branch
+            self.stopped.wait(self.incoming_delay)
 
     def transfered_call(self, record: Record, call_type: str):
         """Randomly choose between internal or external."""

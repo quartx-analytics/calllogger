@@ -13,7 +13,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 
 # Local
 from calllogger.utils import Timeout
-from calllogger import running, settings, auth, telemetry, __version__
+from calllogger import stopped, settings, auth, telemetry, __version__
 
 logger = logging.getLogger(__name__)
 RetryResponse = Union[bool, requests.Response]
@@ -70,10 +70,10 @@ class QuartxAPIHandler:
 
     def __init__(self, *args, suppress_errors=False, **kwargs):
         super(QuartxAPIHandler, self).__init__(*args, **kwargs)
-        self.timeout = Timeout(settings, running.is_set)  # pragma: no branch
+        self.timeout = Timeout(settings, stopped)  # pragma: no branch
         self.suppress_errors = suppress_errors
         self.session = requests.Session()
-        self.running = running
+        self.stopped = stopped
 
         # Add custom calllogger useragent
         self.session.headers["User-Agent"] = f"quartx-calllogger/{__version__}"
@@ -89,7 +89,7 @@ class QuartxAPIHandler:
         prepared_request = request.prepare()
         try:
             # Keep retrying to make the record if request fails
-            while self.running.is_set():
+            while not self.stopped.is_set():
                 with push_scope() as scope:
                     resp = self._send_request(scope, prepared_request, custom_json, kwargs)
                     if resp is True:
@@ -199,7 +199,7 @@ class QuartxAPIHandler:
         """Called when a token is no longer authorized."""
         logger.error("Quitting as the token does not have the required permissions or has been revoked.")
         auth.revoke_token()
-        self.running.clear()
+        self.stopped.set()
         if os.environ.get("TOKEN"):
             sys.exit(0)
         else:

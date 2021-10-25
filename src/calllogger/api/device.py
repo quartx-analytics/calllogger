@@ -8,7 +8,7 @@ import time
 from requests import codes
 
 # Local
-from calllogger import settings, __version__, utils, running
+from calllogger import settings, __version__, stopped
 from calllogger.api import QuartxAPIHandler
 
 linking_url = urljoin(settings.domain, "/api/v1/monitor/cdr/link-device/")
@@ -21,7 +21,7 @@ def link_device(identifier) -> Union[str, None]:
     api = QuartxAPIHandler()
     start = time.time()
 
-    while running.is_set():  # pragma: no branch
+    while not stopped.is_set():  # pragma: no branch
         resp = api.make_request(
             method="POST",
             url=linking_url,
@@ -39,8 +39,9 @@ def link_device(identifier) -> Union[str, None]:
             return data["token"]
         elif status_code == codes["no_content"]:  # 204
             logger.debug("Device registration rejected. Will try again in %s seconds.", settings.device_reg_check)
-            utils.sleeper(settings.device_reg_check, running.is_set)
-            # Keep attempting registration until timeout elapse
+            stopped.wait(settings.device_reg_check)
+
+            # Keep attempting registration until global timeout elapse
             if time.time() - start < settings.device_reg_timeout:
                 continue
             else:

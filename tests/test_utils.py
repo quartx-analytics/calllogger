@@ -8,7 +8,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 # Local
-from calllogger import utils
+from calllogger import utils, stopped
 
 
 @pytest.mark.parametrize("level, expected", [
@@ -33,13 +33,13 @@ def test_timeout_decay(mocker: MockerFixture):
         timeout_decay = 1.5
 
     # Test that timeout decay is working
-    mocked = mocker.patch.object(utils, "sleeper")
-    timeout = utils.Timeout(Settings, lambda: True)
+    mocked = mocker.patch.object(stopped, "wait")
+    timeout = utils.Timeout(Settings, stopped)
     values = [3, 4, 6, 9, 13, 19, 28, 42, 63, 94, 141, 211, 300, 300, 300]
     for count, i in enumerate(values[1:]):
         assert timeout.value == values[count]
         timeout.sleep()
-        mocked.assert_called_with(values[count], timeout._callback)
+        mocked.assert_called_with(values[count])
         assert timeout.value == i
         mocked.reset_mock()
 
@@ -48,18 +48,12 @@ def test_timeout_decay(mocker: MockerFixture):
     timeout.value = 500
     assert timeout.value == 500  # Should now be the new value
     timeout.sleep()
-    mocked.assert_called_with(500, timeout._callback)
+    mocked.assert_called_with(500)
     assert timeout.value == 300  # Should be original value
 
     # Test the reset works as exspected
     timeout.reset()
     assert timeout.value == 3
-
-
-def test_sleeper(disable_sleep):
-    """Test that time.sleep gets called twice as much as the timeout."""
-    utils.sleeper(5, lambda: True)
-    assert disable_sleep.call_count == 10
 
 
 class TestExitCodeManager:

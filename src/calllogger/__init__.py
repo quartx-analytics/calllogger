@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-__all__ = ["__version__", "__package__", "running", "settings", "closeers"]
+__all__ = ["__version__", "__package__", "stopped", "settings", "closeers"]
 
 # Standard lib
 from importlib.metadata import version
@@ -46,7 +46,7 @@ sentry_sdk.init(
 )
 
 # Initialize Settings
-running = threading.Event()
+stopped = threading.Event()
 settings = conf.Settings()
 closeers: list[callable] = []
 

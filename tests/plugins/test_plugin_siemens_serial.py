@@ -5,7 +5,7 @@ import pytest
 from calllogger.plugins.internal import siemens_serial
 from calllogger.record import CallDataRecord
 from ..common import call_plugin
-from calllogger import running
+from calllogger import stopped
 
 
 good_lines = b"""
@@ -156,7 +156,7 @@ def mock_port(mock_serial_port):
 @pytest.fixture
 def mock_plugin(mocker):
     plugin = call_plugin(siemens_serial.SiemensHipathSerial)
-    mocked_runner = mocker.patch.object(running, "is_set")
+    mocked_runner = mocker.patch.object(stopped, "is_set")
     mocked_runner.side_effect = [True, False]
     # This will protect from slow failing tests
     mocker.patch.object(plugin.timeout, "sleep")

@@ -8,7 +8,7 @@ from sentry_sdk import capture_exception
 
 # Local
 from calllogger.utils import ExitCodeManager
-from calllogger import running, closeers
+from calllogger import closeers, stopped
 
 
 class ThreadExceptionManager(threading.Thread):
@@ -27,7 +27,7 @@ class ThreadExceptionManager(threading.Thread):
         else:
             return True
         finally:
-            running.clear()
+            stopped.set()
 
     def entrypoint(self):  # pragma: no cover
         raise NotImplementedError
@@ -44,7 +44,7 @@ def terminate(signum, *_) -> int:
             pass
 
     code = 143 if signum == signal.SIGTERM else 130
-    running.clear()
+    stopped.set()
     return code
 
 
@@ -60,5 +60,5 @@ def graceful_exception(func):
         except KeyboardInterrupt:
             return terminate(signal.SIGINT)
         finally:
-            running.clear()
+            stopped.set()
     return wrapper

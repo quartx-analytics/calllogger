@@ -10,7 +10,7 @@ import sentry_sdk
 
 # Local
 from calllogger.plugins import get_plugin
-from calllogger import __version__, running, api, settings, telemetry
+from calllogger import __version__, api, settings, telemetry
 from calllogger.misc import ThreadExceptionManager
 from calllogger.auth import get_token
 from calllogger.misc import graceful_exception, terminate
@@ -45,7 +45,6 @@ def initialise_telemetry(client_info: dict):
 
 def main_loop(plugin: str) -> int:
     """Call the selected plugin and wait for program shutdown."""
-    running.set()
     tokenauth = get_token()
     queue = Queue(settings.queue_size)
     client_info = api.get_client_info(tokenauth, settings.identifier)
@@ -68,7 +67,7 @@ def main_loop(plugin: str) -> int:
     plugin_thread = plugin(_queue=queue)
     plugin_thread.start()
 
-    # Sinse both threads share the same running event
+    # Sinse both threads share the same stopped event
     # If one dies, so should the other.
     cdr_thread.join()
     plugin_thread.join()

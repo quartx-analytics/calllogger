@@ -46,8 +46,8 @@ def initialise_telemetry(client_info: dict):
 def main_loop(plugin: str) -> int:
     """Call the selected plugin and wait for program shutdown."""
     tokenauth = get_token()
-    queue = Queue(settings.queue_size)
     client_info = api.get_client_info(tokenauth, settings.identifier)
+    queue = Queue(settings.queue_size)
 
     # Enable periodic checkin
     api.setup_client_checkin(tokenauth, settings.identifier)

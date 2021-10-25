@@ -28,6 +28,7 @@ def initialise_telemetry(client_info: dict):
     # Enable metrics telemetry
     if settings.collect_metrics and client_info["influx_token"]:
         api.InfluxWrite(
+            url=client_info["influx_url"],
             collector=telemetry.collector,
             token=client_info["influx_token"],
             default_fields=dict(

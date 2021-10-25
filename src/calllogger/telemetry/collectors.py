@@ -11,14 +11,13 @@ logger = logging.getLogger(__name__)
 class InfluxCollector:
     """Registry will manage the communication with the influxdb server."""
 
-    def __init__(self, url: str, org: str, bucket: str):
+    def __init__(self, org: str, bucket: str):
         self.queue = queue.SimpleQueue()
         self.default_fields = {}
         self.default_tags = {}
         self.precision = "ns"
         self.bucket = bucket
         self.org = org
-        self.url = url
 
     # noinspection PyProtectedMember
     def write(self, point: Point):

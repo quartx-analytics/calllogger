@@ -13,7 +13,6 @@ from calllogger.telemetry import InfluxCollector, collector
 def new_collector():
     """Create a new collector when required."""
     return InfluxCollector(
-        collector.url,
         collector.org,
         collector.bucket,
     )
@@ -22,7 +21,7 @@ def new_collector():
 @pytest.fixture
 def api(mocker, new_collector):
     # Setup worker and mock running flag so loop will only run once
-    obj = influx.InfluxWrite(new_collector, "fake_token")
+    obj = influx.InfluxWrite("https://fake.url", new_collector, "fake_token")
     mocker.patch.object(influx, "sleeper", side_effect=[True, False])
     yield obj
 

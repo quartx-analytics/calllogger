@@ -26,7 +26,6 @@ __all__ = [
 # We need to instantiate the collector here so
 # we can pass the collector to all metric classes
 collector = InfluxCollector(
-    url="https://influxdb.tools.quartx.dev",
     org="quartx",
     bucket="calllogger",
 )

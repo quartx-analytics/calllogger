@@ -27,7 +27,7 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
     :param default_tags: Dict of default tags to add to every point.
     """
 
-    def __init__(self, collector: telemetry.InfluxCollector, token: str, default_tags=None, default_fields=None):
+    def __init__(self, url: str, collector: telemetry.InfluxCollector, token: str, default_tags=None, default_fields=None):
         super().__init__(system_collector=collector, suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.info("Initializing InfluxDB metrics monitoring")
         self.collector = collector
@@ -42,7 +42,7 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
         # Request
         self.request = requests.Request(
             method="POST",
-            url=urlparse.urljoin(collector.url, "/api/v2/write"),
+            url=urlparse.urljoin(url, "/api/v2/write"),
             auth=TokenAuth(token),
             params=dict(
                 org=collector.org,

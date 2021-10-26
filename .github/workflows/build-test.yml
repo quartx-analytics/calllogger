@@ -45,7 +45,7 @@ jobs:
           flake8 src
 
   docker:
-    if: github.ref == 'refs/heads/master/test/'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: [tests, flake8]
     steps:

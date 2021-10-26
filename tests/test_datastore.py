@@ -45,7 +45,7 @@ class TestGetToken:
         assert tokenauth.token == self.token
 
 
-class TRequestToken:
+class TestRequestToken:
     """Test the request_token part of the get_token function."""
 
     # Example mac address
@@ -74,14 +74,14 @@ class TRequestToken:
         mock_env(token="")
         yield
 
-    def test_link_device(self, mock_identifier, mock_link_device, disable_write_datastore):
+    def t_link_device(self, mock_identifier, mock_link_device, disable_write_datastore):
         """Test that request_token returns a valid token."""
         tokenauth = auth.get_token()
         assert mock_link_device.called
         assert disable_write_datastore.called
         assert tokenauth.token == self.token
 
-    def test_failed_link_device(self, mock_identifier, mock_link_device):
+    def t_failed_link_device(self, mock_identifier, mock_link_device):
         mock_link_device.return_value = None
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             auth.get_token()
@@ -89,14 +89,14 @@ class TRequestToken:
             assert mock_link_device.called
             assert pytest_wrapped_e.value.code == 0
 
-    def test_invalid_identifier(self, mock_identifier):
+    def t_invalid_identifier(self, mock_identifier):
         mock_identifier.return_value = None
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             auth.get_token()
             assert mock_identifier.called
             assert pytest_wrapped_e.value.code == 0
 
-    def test_valid_identifier_but_no_reg_key(self, mock_identifier, mock_link_device, mock_settings):
+    def t_valid_identifier_but_no_reg_key(self, mock_identifier, mock_link_device, mock_settings):
         mock_settings(reg_key="")
 
         with pytest.raises(SystemExit) as pytest_wrapped_e:

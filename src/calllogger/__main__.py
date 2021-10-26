@@ -10,8 +10,7 @@ import sentry_sdk
 
 # Local
 from calllogger.plugins import get_plugin
-from calllogger import __version__, api, settings, telemetry
-from calllogger.misc import ThreadExceptionManager
+from calllogger import __version__, api, settings, stopped, telemetry
 from calllogger.auth import get_token
 from calllogger.misc import graceful_exception, terminate
 
@@ -68,11 +67,9 @@ def main_loop(plugin: str) -> int:
     plugin_thread = plugin(_queue=queue)
     plugin_thread.start()
 
-    # Sinse both threads share the same stopped event
-    # If one dies, so should the other.
-    cdr_thread.join()
-    plugin_thread.join()
-    return ThreadExceptionManager.exit_code.value()
+    # Block untill the stop event has been triggered
+    stopped.wait()
+    return stopped.get_exit_code()
 
 
 # Entrypoint: calllogger

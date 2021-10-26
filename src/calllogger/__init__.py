@@ -22,7 +22,6 @@ __all__ = ["__version__", "__package__", "stopped", "settings", "closeers"]
 # Standard lib
 from importlib.metadata import version
 import logging.config
-import threading
 
 # Third Party
 import sentry_sdk
@@ -30,7 +29,7 @@ from decouple import config
 from sentry_sdk.integrations.threading import ThreadingIntegration
 
 # Local
-from calllogger import conf
+from calllogger import conf, utils
 
 __package__ = "quartx-calllogger"
 __version__ = version(__package__)
@@ -45,7 +44,7 @@ sentry_sdk.init(
 )
 
 # Initialize Settings
-stopped = threading.Event()
+stopped = utils.ExitCodeEvent()
 settings = conf.Settings()
 closeers: list[callable] = []
 

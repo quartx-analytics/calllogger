@@ -80,39 +80,42 @@ class TokenAuth(AuthBase):
         return req
 
 
-class ExitCodeManager:
+class ExitCodeEvent(threading.Event):
     """
-    Manager to keep track of the exit code on running threads.
+    Same as threading.Event but with support for setting a exit_code.
 
-    Will only allow for the exit code to be set once.
-    Any other attempt to set the exit code will be ignored.
+    example::
 
-    This is needed so a thread can trigger the program to exit and
-    have the thread state the exit code. Docker will then restart the
-    program if the exit code is anything other than 0.
+        >>> stopped = ExitCodeEvent()
+        >>> stopped.set(3)  # set event flag with exit code
+        >>> print(stopped.get_exit_code())
+        3
     """
 
     def __init__(self):
-        self.lock = threading.Lock()
+        super(ExitCodeEvent, self).__init__()
         # Exit code of zero says that the program
         # exited gracefully (Linux Default)
-        self.__exit_code = self.__set = None
-        self.reset()
-
-    def reset(self):
-        """Reset to defaults."""
         self.__exit_code = 0
-        self.__set = False
 
-    def set(self, exit_code: int):
-        """Set the exit code."""
-        if self.__set is False:
-            with self.lock:
+    # noinspection PyUnresolvedReferences
+    def set(self, exit_code: int = 0):
+        """Set the internal flag to true with program exit code."""
+        if not self._flag:
+            with self._cond:
                 self.__exit_code = exit_code
-                self.__set = True
 
-    def value(self) -> int:
-        """Return the exit code and reset."""
+        # Trigger the real event
+        super(ExitCodeEvent, self).set()
+
+    def clear(self):
+        """Reset the internal flag exit code."""
+        # noinspection PyUnresolvedReferences
+        with self._cond:
+            self.__exit_code = 0
+        super(ExitCodeEvent, self).clear()
+
+    def get_exit_code(self):
         return self.__exit_code
 
 

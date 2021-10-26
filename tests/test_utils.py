@@ -56,33 +56,6 @@ def test_timeout_decay(mocker: MockerFixture):
     assert timeout.value == 3
 
 
-class TestExitCodeManager:
-    def test_dups_ignored(self):
-        """Test that exit code can't be changed once set."""
-        exit_code = utils.ExitCodeManager()
-
-        # Exit code should be set to 22
-        exit_code.set(22)
-        assert exit_code.value() == 22
-
-        # Exit code should be ignored and say at 22
-        exit_code.set(11)
-        assert exit_code.value() == 22
-
-    def test_reset(self):
-        """Test that exit code can be reset."""
-        exit_code = utils.ExitCodeManager()
-
-        # Exit code should be set to 22
-        exit_code.set(22)
-        assert exit_code.value() == 22
-
-        # Reset should allow the code to be changed again
-        exit_code.reset()
-        exit_code.set(11)
-        assert exit_code.value() == 11
-
-
 class TestReadWrite:
     """Test read_datastore and write_datastore functions."""
 

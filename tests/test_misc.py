@@ -16,7 +16,6 @@ class TestThreadExceptionManager:
         causes no errors and returns True
         """
         spy_running_clear = mocker.spy(stopped, "set")
-        misc.ThreadExceptionManager.exit_code.reset()
 
         class Success(misc.ThreadExceptionManager):
             def entrypoint(self):
@@ -32,7 +31,6 @@ class TestThreadExceptionManager:
         and that the code is captured too.
         """
         spy_running_clear = mocker.spy(stopped, "set")
-        misc.ThreadExceptionManager.exit_code.reset()
 
         class Success(misc.ThreadExceptionManager):
             def entrypoint(self):
@@ -41,7 +39,7 @@ class TestThreadExceptionManager:
         manager = Success().run()
         assert manager is True
         assert spy_running_clear.called
-        assert Success.exit_code.value() == 22
+        assert stopped.get_exit_code() == 22
 
     @pytest.mark.parametrize("exc", [RuntimeError, KeyError, ValueError])
     def test_exception(self, mocker, exc):
@@ -50,7 +48,6 @@ class TestThreadExceptionManager:
         and that the code is captured too.
         """
         spy_running_clear = mocker.spy(stopped, "set")
-        misc.ThreadExceptionManager.exit_code.reset()
 
         class Success(misc.ThreadExceptionManager):
             def entrypoint(self):
@@ -59,7 +56,7 @@ class TestThreadExceptionManager:
         manager = Success().run()
         assert manager is False
         assert spy_running_clear.called
-        assert Success.exit_code.value() == 1
+        assert stopped.get_exit_code() == 1
 
 
 @pytest.mark.parametrize("return_data", [KeyboardInterrupt, "testdata"])

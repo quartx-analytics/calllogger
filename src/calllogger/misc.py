@@ -7,7 +7,6 @@ import signal
 from sentry_sdk import capture_exception
 
 # Local
-from calllogger.utils import ExitCodeManager
 from calllogger import closeers, stopped
 
 
@@ -44,22 +43,24 @@ class ThreadTimer(threading.Thread):
 
 
 class ThreadExceptionManager(threading.Thread):
-    exit_code = ExitCodeManager()
+    """
+    Same as a normal threading.Thread but with
+    Exception handling for the run method.
+    """
 
     def run(self) -> bool:
         try:
             self.entrypoint()
         except Exception as err:
             capture_exception(err)
-            self.exit_code.set(1)
+            stopped.set(1)
             return False
         except SystemExit as err:
-            self.exit_code.set(err.code)
+            stopped.set(err.code)
             return True
         else:
-            return True
-        finally:
             stopped.set()
+            return True
 
     def entrypoint(self):  # pragma: no cover
         raise NotImplementedError

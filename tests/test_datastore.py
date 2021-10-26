@@ -89,14 +89,14 @@ class TestRequestToken:
             assert mock_link_device.called
             assert pytest_wrapped_e.value.code == 0
 
-    def test_invalid_identifier(self, mock_identifier):
+    def t_invalid_identifier(self, mock_identifier):
         mock_identifier.return_value = None
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             auth.get_token()
             assert mock_identifier.called
             assert pytest_wrapped_e.value.code == 0
 
-    def t_valid_identifier_but_no_reg_key(self, mock_identifier, mock_link_device, mock_settings):
+    def test_valid_identifier_but_no_reg_key(self, mock_identifier, mock_link_device, mock_settings):
         mock_settings(reg_key="")
 
         with pytest.raises(SystemExit) as pytest_wrapped_e:

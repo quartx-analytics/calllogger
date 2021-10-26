@@ -20,16 +20,17 @@ def disable_logging():
     logging.disable(logging.NOTSET)
 
 
+@pytest.fixture(autouse=True)
+def reset_stopped():
+    """Reset stopped flag before every test."""
+    stopped.clear()
+
+
 @pytest.fixture
 def disable_sleep(mocker):
-    return mocker.patch("time.sleep")
-
-
-@pytest.fixture
-def mock_running(mocker):
-    mocked = mocker.patch.object(stopped, "is_set")
+    mocked = mocker.patch.object(stopped, "wait")
     mocked.return_value = False
-    yield mocked
+    return mocked
 
 
 @pytest.fixture

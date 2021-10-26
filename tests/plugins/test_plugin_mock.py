@@ -15,11 +15,10 @@ RECEIVED = 1
 
 
 @pytest.fixture
-def mock_plugin(mocker):
+def mock_plugin(mocker, disable_sleep):
     plugin = call_plugin(mockcalls.MockCalls)
     mocked_runner = mocker.patch.object(stopped, "is_set")
     mocked_runner.side_effect = [False, True]
-    mocker.patch.object(mockcalls, "sleeper")
     plugin.exts = 3  # Limit extensions
     yield plugin
 

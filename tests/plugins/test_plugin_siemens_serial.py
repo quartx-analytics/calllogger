@@ -156,10 +156,8 @@ def mock_port(mock_serial_port):
 @pytest.fixture
 def mock_plugin(mocker):
     plugin = call_plugin(siemens_serial.SiemensHipathSerial)
-    mocked_runner = mocker.patch.object(stopped, "is_set")
-    mocked_runner.side_effect = [True, False]
-    # This will protect from slow failing tests
-    mocker.patch.object(plugin.timeout, "sleep")
+    mocked_stopped = mocker.patch.object(stopped, "is_set")
+    mocked_stopped.side_effect = [False, True]
     yield plugin
 
 
@@ -191,7 +189,12 @@ def test_validate_bad_lines(mock_plugin: siemens_serial.SiemensHipathSerial, raw
 
 
 @pytest.mark.parametrize("raw_line", good_lines)
-def test_full_serial_parser_good_lines(mock_serial, mock_plugin: siemens_serial.SiemensHipathSerial, mocker, raw_line):
+def test_full_serial_parser_good_lines(
+        mock_serial,
+        mock_plugin: siemens_serial.SiemensHipathSerial,
+        mocker,
+        raw_line
+):
     """Test that all sorts of mocked call types work and DO not raise an exception."""
     mock_serial.readline.return_value = raw_line
     spy_push = mocker.patch.object(mock_plugin, "push")

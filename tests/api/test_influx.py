@@ -19,15 +19,15 @@ def new_collector():
 
 
 @pytest.fixture
-def api(mocker, new_collector):
+def api(new_collector, disable_sleep):
     # Setup worker and mock running flag so loop will only run once
     obj = influx.InfluxWrite("https://fake.url", new_collector, "fake_token")
-    mocker.patch.object(influx, "sleeper", side_effect=[True, False])
+    disable_sleep.side_effect = [False, True]
     yield obj
 
 
 # noinspection PyUnusedLocal
-def test_success(api: influx.InfluxWrite, mocker, requests_mock, mock_running):
+def test_success(api: influx.InfluxWrite, mocker, requests_mock):
     # Mock the influx API request
     mocked_req = requests_mock.post(
         f"{api.request.url}?{urlencode(api.request.params)}",
@@ -43,7 +43,7 @@ def test_success(api: influx.InfluxWrite, mocker, requests_mock, mock_running):
 
 
 # noinspection PyUnusedLocal
-def test_quit(api: influx.InfluxWrite, mocker, requests_mock, mock_running):
+def test_quit(api: influx.InfluxWrite, mocker, requests_mock):
     # Mock the influx API request
     mocked_req = requests_mock.post(
         f"{api.request.url}?{urlencode(api.request.params)}",
@@ -84,6 +84,7 @@ def test_defaults(new_collector):
     default_tags = {"tag": "value"}
 
     influx.InfluxWrite(
+        "https://fake.url",
         new_collector,
         "fake_token",
         default_tags=default_tags,

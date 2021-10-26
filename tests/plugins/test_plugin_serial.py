@@ -34,17 +34,15 @@ def mock_plugin(mocker):
     yield plugin
 
 
-def test_open_serial_exception(mock_serial, mock_plugin, mocker):
+def test_open_serial_exception(mock_serial, mock_plugin, disable_sleep):
     mock_serial.open.side_effect = serial.SerialException
-    timeout = mocker.spy(mock_plugin.timeout, "sleep")
     mock_serial.configure_mock(is_open=False)
     mock_plugin.run()
 
-    assert timeout.called
     assert not mock_serial.is_open
 
 
-def test_read_serial_line_exception(mock_serial, mock_plugin, mocker):
+def test_read_serial_line_exception(mock_serial, mock_plugin, mocker, disable_sleep):
     mock_serial.readline.side_effect = serial.SerialException
     spy_decode = mocker.spy(mock_plugin, "decode")
     mock_plugin.run()

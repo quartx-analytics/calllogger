@@ -11,10 +11,10 @@ import psutil
 # Local
 from .instruments import Metric, Histogram, Event
 from .collectors import InfluxCollector
-from .logs import setup_remote_logs, send_logs_to_logzio
+from .logs import send_logs_to_logzio
 
 __all__ = [
-    "setup_remote_logs",
+    "send_logs_to_logzio",
     "InfluxCollector",
     "collector",
     "SystemMetrics",

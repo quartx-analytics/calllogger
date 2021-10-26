@@ -89,7 +89,8 @@ class TestRequestToken:
             assert mock_link_device.called
             assert pytest_wrapped_e.value.code == 0
 
-    def t_invalid_identifier(self, mock_identifier):
+    @pytest.mark.skip
+    def test_invalid_identifier(self, mock_identifier, mock_link_device):
         mock_identifier.return_value = None
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             auth.get_token()

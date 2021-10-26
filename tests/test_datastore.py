@@ -7,7 +7,7 @@ from calllogger import auth, utils
 from calllogger.utils import TokenAuth
 
 
-class TestGetToken:
+class TGetToken:
     """Test get_token & revoke_token functions."""
     # Test token
     token = "testtoken"
@@ -45,7 +45,7 @@ class TestGetToken:
         assert tokenauth.token == self.token
 
 
-class TestRequestToken:
+class TRequestToken:
     """Test the request_token part of the get_token function."""
 
     # Example mac address

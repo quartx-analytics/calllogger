@@ -4,6 +4,7 @@ __all__ = [
     "InfluxWrite",
     "get_client_info",
     "link_device",
+    "setup_client_checkin",
 ]
 
 from calllogger.api.handlers import QuartxAPIHandler

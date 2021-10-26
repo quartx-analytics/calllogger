@@ -81,7 +81,7 @@ class TestRequestToken:
         assert disable_write_datastore.called
         assert tokenauth.token == self.token
 
-    def t_failed_link_device(self, mock_identifier, mock_link_device):
+    def test_failed_link_device(self, mock_identifier, mock_link_device):
         mock_link_device.return_value = None
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             auth.get_token()

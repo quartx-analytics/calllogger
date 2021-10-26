@@ -7,7 +7,7 @@ from calllogger import auth, utils
 from calllogger.utils import TokenAuth
 
 
-class TGetToken:
+class TestGetToken:
     """Test get_token & revoke_token functions."""
     # Test token
     token = "testtoken"

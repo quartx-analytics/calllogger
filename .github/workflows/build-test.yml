@@ -11,7 +11,7 @@ env:
 
 jobs:
   call-workflow-test:
-    uses: quartx-analytics/calllogger/.github/workflows/test.yml@v1
+    uses: quartx-analytics/calllogger/.github/workflows/test.yml
 
   docker:
     if: github.ref == 'refs/heads/main'

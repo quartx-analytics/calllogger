@@ -68,7 +68,7 @@ logging_config = {
             "stream": "ext://sys.stdout",
             "filters": ["only_messages"],
             "formatter": "levelname",
-            "level": "DEBUG" if settings.debug else "INFO",
+            "level": "DEBUG",
         },
         "console_errors": {
             "class": "logging.StreamHandler",
@@ -80,7 +80,7 @@ logging_config = {
     "loggers": {
         "calllogger": {
             "handlers": ["console_messages", "console_errors"],
-            "level": "DEBUG",
+            "level": "DEBUG" if settings.debug else "INFO",
         }
     }
 }

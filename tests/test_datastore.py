@@ -74,7 +74,7 @@ class TestRequestToken:
         mock_env(token="")
         yield
 
-    def t_link_device(self, mock_identifier, mock_link_device, disable_write_datastore):
+    def test_link_device(self, mock_identifier, mock_link_device, disable_write_datastore):
         """Test that request_token returns a valid token."""
         tokenauth = auth.get_token()
         assert mock_link_device.called

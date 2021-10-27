@@ -166,7 +166,7 @@ jobs:
 
       - id: mender
         name: Create mender artifact
-        uses: quartx-analytics/mender-docker-compose@c3cd20e90e327b28306d1b27ee120512aacdf328
+        uses: quartx-analytics/mender-docker-compose@main
         with:
           compose-file: "docker-compose.tpl"
           compose-file-variables: "IMAGE_TAG:${{ env.IMAGE_TAG }}"

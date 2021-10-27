@@ -166,7 +166,7 @@ jobs:
 
       - id: mender
         name: Create mender artifact
-        uses: quartx-analytics/mender-docker-compose@main
+        uses: quartx-analytics/mender-docker-compose@c3cd20e
         with:
           compose-file: "docker-compose.yml"
           compose-file-variables: "IMAGE_TAG:${{ env.IMAGE_TAG }}"

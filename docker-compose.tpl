@@ -5,7 +5,7 @@ volumes:
 
 services:
   app:
-    image: "ghcr.io/quartx-analytics/calllogger:latest"
+    image: "ghcr.io/quartx-analytics/calllogger:%%IMAGE_TAG%%"
     privileged: true
     restart: on-failure
     network_mode: host
@@ -18,5 +18,4 @@ services:
         target: /dev
     environment:
       DOMAIN: "https://quartx.dev/"
-      COLLECT_LOGS: "false"
       DEBUG: "true"

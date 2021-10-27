@@ -104,6 +104,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
   docker-dev:
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
@@ -151,6 +154,9 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
 
   mender:
     runs-on: ubuntu-latest

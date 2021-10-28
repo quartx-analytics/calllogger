@@ -10,9 +10,9 @@ on:
       - main
 
 env:
+  IMAGE_TAG: "${{ github.run_number }}"
   IMAGE_MAIN: ghcr.io/${{ github.repository_owner }}/calllogger
   IMAGE_DEV: ghcr.io/${{ github.repository_owner }}/calllogger-dev
-  IMAGE_TAG: "${{ github.run_number }}"
 
 jobs:
   tests:
@@ -160,7 +160,7 @@ jobs:
 
   mender:
     runs-on: ubuntu-latest
-    needs: [docker-main]
+    needs: [docker-dev]
     steps:
       - uses: actions/checkout@v2
 
@@ -169,7 +169,7 @@ jobs:
         uses: quartx-analytics/mender-docker-compose@main
         with:
           compose-file: docker-compose.tpl
-          compose-file-variables: IMAGE_TAG:${{ env.IMAGE_TAG }}
+          compose-file-variables: IMAGE_NAME:${{ env.IMAGE_DEV }} IMAGE_TAG:${{ env.IMAGE_TAG }}
           software-name: calllogger
           software-version: ${{ env.IMAGE_TAG }}
           device-types: raspberrypi3 raspberrypi4

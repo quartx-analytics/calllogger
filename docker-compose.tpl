@@ -5,7 +5,7 @@ volumes:
 
 services:
   app:
-    image: "ghcr.io/quartx-analytics/calllogger:%%IMAGE_TAG%%"
+    image: "%%IMAGE_NAME%%:%%IMAGE_TAG%%"
     privileged: true
     restart: on-failure
     network_mode: host

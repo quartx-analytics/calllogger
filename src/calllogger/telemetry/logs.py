@@ -16,7 +16,6 @@ def send_logs_to_logzio(client_info):
     handler = LogzioHandler(
         token=client_info["logzio_token"],
         logzio_type="calllogger",
-        logs_drain_timeout=5,
         url=client_info["logzio_listener_url"],
         debug=settings.debug,
         backup_logs=False,

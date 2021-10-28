@@ -54,7 +54,7 @@ def update_settings(**overrides):
     root_logger.setLevel(logging.DEBUG if settings.debug else logging.INFO)
 
 
-def get_client_info(token: TokenAuth, identifier: str, allow_restart=False) -> dict:
+def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> dict:
     """Request information about the client."""
     logger.info("Requesting client info and settings")
     api = QuartxAPIHandler()
@@ -69,26 +69,34 @@ def get_client_info(token: TokenAuth, identifier: str, allow_restart=False) -> d
     if private_ip := get_private_ip():
         params["private_ip"] = private_ip
 
-    client_data = api.make_request(
+    resp = api.make_request(
         method="POST",
         url=info_url,
         auth=token,
         json=params,
-    ).json()
+    )
 
-    # Check if a restart is requested
-    if allow_restart and client_data["restart"]:
-        logger.info("Restart was requested. Restarting...")
-        # By setting this flag, it will cause the whole program to exit
-        # Exit code of 1 is needed to trigger the restart
-        stopped.set(1)
+    if resp.ok:
+        client_data = resp.json()
 
-    # Update settings
-    update_settings(**client_data.get("settings", {}))
+        # Check if a restart is requested
+        if checkin and client_data["restart"]:
+            logger.info("Restart was requested. Restarting...")
+            # By setting this flag, it will cause the whole program to exit
+            # Exit code of 1 is needed to trigger the restart
+            stopped.set(1)
 
-    # Update sentry user
-    set_sentry_user(client_data)
-    return client_data
+        # Update settings
+        update_settings(**client_data.get("settings", {}))
+
+        # Update sentry user
+        set_sentry_user(client_data)
+        return client_data
+
+    # We can't proceed without client_data if not in checkin mode
+    elif not checkin:
+        # Raise the underlining http error
+        resp.raise_for_status()
 
 
 def setup_client_checkin(token: TokenAuth, identifier: str):

@@ -76,7 +76,7 @@ def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> dict:
         json=params,
     )
 
-    if resp.ok:
+    if resp:
         client_data = resp.json()
 
         # Check if a restart is requested
@@ -106,6 +106,6 @@ def setup_client_checkin(token: TokenAuth, identifier: str):
         # 30 * 60,  # 30mins
         get_client_info,
         args=[token, identifier],
-        kwargs={"allow_restart": True},
+        kwargs={"checkin": True},
         repeat=True
     ).start()

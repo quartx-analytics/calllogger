@@ -166,17 +166,13 @@ jobs:
 
       - id: mender
         name: Create mender artifact
-        uses: quartx-analytics/mender-docker-compose@37c85f5614fca6bf1827605277539bfa9d193489
+        uses: quartx-analytics/mender-docker-compose@main
         with:
           compose-file: docker-compose.tpl
-          compose-file-variables: |
-            IMAGE_TAG:${{ env.IMAGE_TAG }}
-            TEST_TAG:${{ env.IMAGE_TAG }}
+          compose-file-variables: IMAGE_TAG:${{ env.IMAGE_TAG }}
           software-name: calllogger
           software-version: ${{ env.IMAGE_TAG }}
-          device-types: |
-            raspberrypi3
-            raspberrypi4
+          device-types: raspberrypi3 raspberrypi4
           signing-key: ${{ secrets.ARTIFACT_SIGNING_KEY }}
 
       - name: Upload mender artifact

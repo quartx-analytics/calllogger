@@ -42,14 +42,20 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
 
     def entrypoint(self):
         """Process the call record queue."""
+        print("working")
         while not self.stopped.is_set():
+            print("looping")
             if self.queue.qsize() <= settings.batch_trigger:
+                print("singlton")
                 try:
                     record: CallDataRecord = self.queue.get(timeout=0.1)
                 except queue.Empty:
+                    print("empty")
                     continue
                 else:
+                    print("sending")
                     self.send_request(self.request, record.__dict__)
+                    print("sent")
 
             else:
                 batch_jobs = []
@@ -71,3 +77,5 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
                 # We only have incoming calls in the queue witch are ignored
                 if batch_jobs:
                     self.send_request(self.request, batch_jobs, timeout=20)
+
+            print("loop finished")

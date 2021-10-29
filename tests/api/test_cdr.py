@@ -1,5 +1,5 @@
 # Standard Lib
-from queue import Queue
+from queue import SimpleQueue
 
 # Third Party
 import pytest
@@ -21,19 +21,18 @@ def record():
     record.ext = 102
     record.ring = 10
     record.duration = 0
-    return record.__dict__
+    return record
 
 
 @pytest.fixture
-def api(mocker):
-    queue = Queue(10)
+def api(mocker, disable_sleep):
+    queue = SimpleQueue()
     tokenauth = TokenAuth("token")
 
     # Setup worker and mock running flag so loop will only run once
     obj = cdr.CDRWorker(queue, tokenauth)
     mocked = mocker.patch.object(stopped, "is_set")
     mocked.side_effect = [False, False, True]
-    mocker.patch.object(obj.timeout, "sleep")
     yield obj
 
 

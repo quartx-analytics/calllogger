@@ -84,7 +84,7 @@ class QuartxAPIHandler:
         request = requests.Request(*args, **kwargs)
         return self.send_request(request, custom_json)
 
-    def send_request(self, request: requests.Request, custom_json: dict = None, **kwargs) -> requests.Response:
+    def send_request(self, request: requests.Request, custom_json=None, **kwargs) -> requests.Response:
         """Send request using a request object."""
         prepared_request = request.prepare()
         try:
@@ -101,7 +101,7 @@ class QuartxAPIHandler:
         finally:
             self.timeout.reset()
 
-    def _send_request(self, scope, request: requests.PreparedRequest, custom_json: dict, kwargs) -> RetryResponse:
+    def _send_request(self, scope, request: requests.PreparedRequest, custom_json, kwargs) -> RetryResponse:
         """
         Send request and process the response for errors.
         Returning True if request needs to be retried.
@@ -114,7 +114,8 @@ class QuartxAPIHandler:
                 request.prepare_body(data, None)
 
             # Send Request
-            response = self.session.send(request, timeout=10.0, **kwargs)
+            kwargs.setdefault("timeout", 10.0)
+            response = self.session.send(request, **kwargs)
             telemetry.track_http_resp_time(response)
             response.raise_for_status()
             return response
@@ -148,8 +149,13 @@ class QuartxAPIHandler:
         """Check what kind of error we have and if we can safely retry the request."""
 
         # Server is unreachable, try again later
-        if isinstance(err, (requests.ConnectionError, requests.Timeout)):
-            logger.warning("Connection to server failed/timed out")
+        if isinstance(err, requests.ConnectionError):
+            logger.warning("Connection to server failed")
+            return True
+
+        # Request timed out, try again later
+        elif isinstance(err, requests.Timeout):
+            logger.warning("Connection to server timed out")
             return True
 
         # Check status code to deside what to do next
@@ -199,8 +205,6 @@ class QuartxAPIHandler:
         """Called when a token is no longer authorized."""
         logger.error("Quitting as the token does not have the required permissions or has been revoked.")
         auth.revoke_token()
-        self.stopped.set()
-        if os.environ.get("TOKEN"):
-            sys.exit(0)
-        else:
-            sys.exit(1)
+        exit_code = int(not os.environ.get("TOKEN"))
+        self.stopped.set(exit_code)
+        sys.exit(exit_code)

@@ -1,4 +1,5 @@
 # Standard Lib
+import logging
 import threading
 import functools
 import signal
@@ -8,6 +9,8 @@ from sentry_sdk import push_scope, capture_exception
 
 # Local
 from calllogger import closeers, stopped
+
+logger = logging.getLogger("calllogger")
 
 
 class ThreadTimer(threading.Thread):
@@ -57,6 +60,7 @@ class ThreadExceptionManager(threading.Thread):
             self.entrypoint()
         except Exception as err:
             capture_exception(err)
+            logger.warning(err)
             stopped.set(1)
             return False
         except SystemExit as err:

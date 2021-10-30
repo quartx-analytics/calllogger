@@ -178,6 +178,10 @@ class QuartxAPIHandler:
         Returning True if request needs to be retried.
         """
 
+        if resp.status_code == codes.not_found:
+            print(resp.json())
+
+
         # Quit if not authorized
         if resp.status_code in (codes.unauthorized, codes.payment_required, codes.forbidden):
             self.handle_unauthorized(resp)

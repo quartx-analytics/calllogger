@@ -29,6 +29,8 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
     def __init__(
             self,
             url: str,
+            orgid: str,
+            bucket: str,
             collector: telemetry.InfluxCollector,
             token: str,
             default_tags=None,
@@ -51,8 +53,8 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
             url=urlparse.urljoin(url, "/api/v2/write"),
             auth=TokenAuth(token),
             params=dict(
-                org=collector.org,
-                bucket=collector.bucket,
+                orgID=orgid,
+                bucket=bucket,
                 precision=collector.precision,
             )
         )
@@ -86,7 +88,7 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
         # We may not have any metrics to upload yet
         if lines:
             self.request.data = "\n".join(lines)
-            self.send_request(self.request)
+            self.send_request(self.request, timeout=20.0)
 
     def handle_unauthorized(self, response):
         """Quit submiting metrics if the token is no longer valid."""

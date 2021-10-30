@@ -6,22 +6,19 @@ import psutil
 
 # Local
 from calllogger.api import influx
-from calllogger.telemetry import InfluxCollector, collector
+from calllogger.telemetry import InfluxCollector
 
 
 @pytest.fixture
 def new_collector():
     """Create a new collector when required."""
-    return InfluxCollector(
-        collector.org,
-        collector.bucket,
-    )
+    return InfluxCollector()
 
 
 @pytest.fixture
 def api(new_collector, disable_sleep):
     # Setup worker and mock running flag so loop will only run once
-    obj = influx.InfluxWrite("https://fake.url", new_collector, "fake_token")
+    obj = influx.InfluxWrite("https://fake.url", "", "", new_collector, "fake_token")
     disable_sleep.side_effect = [False, True]
     yield obj
 
@@ -85,6 +82,8 @@ def test_defaults(new_collector):
 
     influx.InfluxWrite(
         "https://fake.url",
+        "",
+        "",
         new_collector,
         "fake_token",
         default_tags=default_tags,

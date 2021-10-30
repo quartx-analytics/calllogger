@@ -30,7 +30,7 @@ def test_metric_none():
 
 def test_metric_queue_full(mocker):
     mocked_q = mocker.patch.object(queue, "SimpleQueue")
-    new_collector = InfluxCollector("", "")
+    new_collector = InfluxCollector()
     metric = Metric("event_metric", new_collector)
     mocked_q.return_value.qsize.return_value = 1_001
     metric.field("value", True).write()

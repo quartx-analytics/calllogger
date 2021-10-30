@@ -1,6 +1,6 @@
 # Third Party
 from urllib.parse import urlencode
-from queue import Queue
+from collections import deque
 import pytest
 import psutil
 
@@ -68,14 +68,14 @@ def test_no_metrics(api: influx.InfluxWrite, mocker, requests_mock):
     )
 
     # Replace collector queue with an empty queue
-    mocker.patch.object(api.collector, "queue", new_callable=Queue)
+    mocker.patch.object(api.collector, "queue", new_callable=deque)
 
     # Mock the CPU usage calls, stops it from slowing down tests
     api.submit_metrics()
 
     assert not mocked_req.called
     # There should be 1 metric left as this is created after the request
-    assert api.collector.queue.empty()
+    assert not api.collector.queue
 
 
 def test_defaults(new_collector):

@@ -75,13 +75,13 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
         # Extrack upto the max of 250 metric lines
         # This is the recommended ammount by influxdata
         try:
-            for i in range(250):  # pragma: no branch
-                record = self.collector.queue.get_nowait()
-                lines.append(record)
+            for _ in range(250):  # pragma: no branch
+                line = self.collector.queue.popleft()
+                lines.append(line)
 
         # We use the exception here to
         # just break from the loop
-        except queue.Empty:
+        except IndexError:
             pass
 
         # We may not have any metrics to upload yet

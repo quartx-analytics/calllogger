@@ -2,7 +2,6 @@
 from urllib import parse as urlparse
 import threading
 import logging
-import queue
 
 # Third party
 import requests

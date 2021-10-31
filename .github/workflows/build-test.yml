@@ -160,17 +160,17 @@ jobs:
 
   mender:
     runs-on: ubuntu-latest
-    needs: [docker-dev]
+    needs: [docker-main]
     steps:
       - uses: actions/checkout@v2
 
       - id: mender
         name: Create mender artifact
-        uses: quartx-analytics/mender-docker-compose@test
+        uses: quartx-analytics/mender-docker-compose@main
         with:
           compose-file: docker-compose.yml
-          compose-file-variables: IMAGE_NAME=${{ env.IMAGE_DEV }} IMAGE_TAG=${{ env.IMAGE_TAG }}
-          software-name: calllogger6
+          compose-file-variables: IMAGE_NAME=${{ env.IMAGE_MAIN }} IMAGE_TAG=${{ env.IMAGE_TAG }}
+          software-name: calllogger
           software-version: ${{ env.IMAGE_TAG }}
           device-types: raspberrypi3 raspberrypi4
           signing-key: ${{ secrets.ARTIFACT_SIGNING_KEY }}

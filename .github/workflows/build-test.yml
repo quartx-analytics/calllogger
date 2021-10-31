@@ -170,7 +170,7 @@ jobs:
         with:
           compose-file: docker-compose.yml
           compose-file-variables: IMAGE_NAME=${{ env.IMAGE_DEV }} IMAGE_TAG=${{ env.IMAGE_TAG }}
-          software-name: calllogger2
+          software-name: calllogger3
           software-version: ${{ env.IMAGE_TAG }}
           device-types: raspberrypi3 raspberrypi4
           signing-key: ${{ secrets.ARTIFACT_SIGNING_KEY }}

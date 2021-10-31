@@ -148,14 +148,17 @@ class QuartxAPIHandler:
     def error_check(self, scope, err: Exception) -> bool:
         """Check what kind of error we have and if we can safely retry the request."""
 
+        # Extract url from err if possible, used for improving the logs
+        url = getattr(getattr(err, "response", None), "url", "")
+
         # Server is unreachable, try again later
         if isinstance(err, requests.ConnectionError):
-            logger.warning("Connection to server failed")
+            logger.warning("Connection to server failed", extra={"url": url})
             return True
 
         # Request timed out, try again later
         elif isinstance(err, requests.Timeout):
-            logger.warning("Connection to server timed out")
+            logger.warning("Connection to server timed out", extra={"url": url})
             return True
 
         # Check status code to deside what to do next
@@ -163,7 +166,12 @@ class QuartxAPIHandler:
             logger.warning(
                 "API request failed with status code: %s %s",
                 err.response.status_code,
-                err.response.reason
+                err.response.reason,
+                extra={
+                    "url": url,
+                    "status_code": err.response.status_code,
+                    "reason": err.response.reason,
+                },
             )
             response_scope(scope, err.response)
             return self.status_check(err.response)
@@ -171,7 +179,6 @@ class QuartxAPIHandler:
             logger.warning(str(err))
             return False
 
-    # TODO: Change method to except response and fix related tests
     def status_check(self, resp: requests.Response) -> bool:
         """
         Check the status of the response,
@@ -203,6 +210,9 @@ class QuartxAPIHandler:
 
     def handle_unauthorized(self, resp: requests.Response):
         """Called when a token is no longer authorized."""
+        # This code is related to the cdr token
+        # This will stay here as most use of it will be from CDR requests
+        # When use is not related to the CDR (Influx), it will be overridden by that class then
         logger.error("Quitting as the token does not have the required permissions or has been revoked.")
         auth.revoke_token()
         exit_code = int(not os.environ.get("TOKEN"))

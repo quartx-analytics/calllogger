@@ -49,10 +49,7 @@ class SerialPlugin(BasePlugin):
         # Check if serial port exists
         if not self.port.exists():
             print(f"The target serial port '{self.port}' can't be found.")
-            if settings.dockerized:
-                print("Please add the following to your docker command.")
-                print(f"--device={self.port}:{self.port}")
-            sys.exit(0)
+            print("Please ensure that the device is connected to the system.")
 
     def __open(self):
         """Open a connection to the serial interface, returning True if successful else False."""

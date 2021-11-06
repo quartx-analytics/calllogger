@@ -12,6 +12,14 @@ if ! isPathMounted "$DATA_LOCATION"; then
   exit 0
 fi
 
+# Ensure that the /dev directory is mounted
+if ! isPathMounted "/dev"; then
+  echo "The /dev directory is required to be mounted into the docker container."
+  echo "Please add the following to your docker command."
+  echo "--volume='/dev:/dev'"
+  exit 0
+fi
+
 # Ensure that the docker container is in network host mode
 if [ ! -d "/sys/class/net/docker0" ]; then
   echo "Looks like the docker network mode was not set to host."

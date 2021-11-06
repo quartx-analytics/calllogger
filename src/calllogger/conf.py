@@ -85,7 +85,11 @@ class Settings:
     max_timeout: int = 300
     #: Size of the call queue
     queue_size: int = 1_000
-    #: Set to true to enable debug logging.
+    #: The max number of records that can be sent in a batch job
+    batch_size: int = 25
+    #: The size the queue need to be before switching to batch job mode
+    batch_trigger: int = 20
+    #: Set to true to enable debug logging
     debug: bool = False
     #: Device registration cutoff timeout in seconds
     device_reg_timeout: int = 3 * 60 * 60

@@ -1,6 +1,6 @@
 # Standard library
 from typing import NoReturn
-from queue import Queue
+from queue import SimpleQueue
 import logging
 import abc
 
@@ -31,7 +31,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     .. note:: This class is not ment to be called directly, but subclassed by a Plugin.
     """
     id = None
-    _queue: Queue
+    _queue: SimpleQueue
 
     def __init__(self):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -44,7 +44,26 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
 
     def push(self, record: CallDataRecord) -> NoReturn:
         """Send a call log record to the call monitoring API."""
-        self._queue.put(record.__dict__)
+        if self._queue.qsize() < settings.queue_size:
+            self._queue.put(record)
+        else:
+            logger.warning(
+                f"CDR Queue is full {self._queue.qsize()}",
+                extra={"queue_size": self._queue.qsize()},
+            )
+
+            # As we are forced to us a simpleQueue it's not as easy to block
+            while not self.stopped.wait(0.1):
+                # The Queue has space now
+                if self._queue.qsize() < settings.queue_size:
+                    self._queue.put(record)
+                    break
+
+            logger.warning(
+                f"CDR Queue is no longer full {self._queue.qsize()}",
+                extra={"queue_size": self._queue.qsize()}
+            )
+
         record_logger.debug(record)
 
     @property

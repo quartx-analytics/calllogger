@@ -2,7 +2,6 @@
 from urllib import parse as urlparse
 import threading
 import logging
-import queue
 
 # Third party
 import requests
@@ -30,6 +29,8 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
     def __init__(
             self,
             url: str,
+            orgid: str,
+            bucket: str,
             collector: telemetry.InfluxCollector,
             token: str,
             default_tags=None,
@@ -52,8 +53,8 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
             url=urlparse.urljoin(url, "/api/v2/write"),
             auth=TokenAuth(token),
             params=dict(
-                org=collector.org,
-                bucket=collector.bucket,
+                orgID=orgid,
+                bucket=bucket,
                 precision=collector.precision,
             )
         )
@@ -72,22 +73,22 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
         """Submit to metrics to influxdb."""
         lines = []
 
-        # Extrack upto the max of 1000 metric lines
+        # Extrack upto the max of 250 metric lines
         # This is the recommended ammount by influxdata
         try:
-            for i in range(1000):  # pragma: no branch
-                record = self.collector.queue.get_nowait()
-                lines.append(record)
+            for _ in range(250):  # pragma: no branch
+                line = self.collector.queue.popleft()
+                lines.append(line)
 
         # We use the exception here to
         # just break from the loop
-        except queue.Empty:
+        except IndexError:
             pass
 
         # We may not have any metrics to upload yet
         if lines:
             self.request.data = "\n".join(lines)
-            self.send_request(self.request)
+            self.send_request(self.request, timeout=20.0)
 
     def handle_unauthorized(self, response):
         """Quit submiting metrics if the token is no longer valid."""

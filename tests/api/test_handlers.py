@@ -19,11 +19,10 @@ client_exit_status = [
 
 
 @pytest.fixture
-def api(mocker):
+def api(mocker, disable_sleep):
     obj = handlers.QuartxAPIHandler()
     mocked = mocker.patch.object(stopped, "is_set")
     mocked.side_effect = [False, True]
-    mocker.patch.object(obj.timeout, "sleep")
     yield obj
 
 

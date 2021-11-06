@@ -1,13 +1,16 @@
 # Standard Lib
+import logging
 import threading
 import functools
 import signal
 
 # Third Party
-from sentry_sdk import capture_exception
+from sentry_sdk import push_scope, capture_exception
 
 # Local
 from calllogger import closeers, stopped
+
+logger = logging.getLogger("calllogger")
 
 
 class ThreadTimer(threading.Thread):
@@ -33,7 +36,11 @@ class ThreadTimer(threading.Thread):
         # Run the function after waiting
         # if program has not stopped
         while not stopped.wait(self.interval):
-            self.function(*self.args, **self.kwargs)
+            with push_scope() as scope:
+                try:
+                    self.function(*self.args, **self.kwargs)
+                except Exception as err:
+                    capture_exception(err, scope=scope)
 
             # Keep looping if repeat is True, quit otherwise
             if self.repeat:
@@ -53,6 +60,7 @@ class ThreadExceptionManager(threading.Thread):
             self.entrypoint()
         except Exception as err:
             capture_exception(err)
+            logger.warning(err)
             stopped.set(1)
             return False
         except SystemExit as err:

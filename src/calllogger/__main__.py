@@ -1,5 +1,5 @@
 # Standard Lib
-from queue import Queue
+from queue import SimpleQueue
 import argparse
 import logging
 import signal
@@ -28,6 +28,8 @@ def initialise_telemetry(client_info: dict):
     if settings.collect_metrics and client_info["influx_token"]:
         api.InfluxWrite(
             url=client_info["influx_url"],
+            orgid=client_info["influx_orgid"],
+            bucket=client_info["influx_bucket"],
             collector=telemetry.collector,
             token=client_info["influx_token"],
             default_fields=dict(
@@ -59,7 +61,7 @@ def main_loop(plugin: str) -> int:
     sentry_sdk.set_tag("plugin", plugin.__name__)
 
     # Start the CDR worker to monitor the record queue
-    queue = Queue(settings.queue_size)
+    queue = SimpleQueue()
     cdr_thread = api.CDRWorker(queue, tokenauth)
     cdr_thread.start()
 

@@ -3,7 +3,6 @@ from typing import NoReturn, Union
 from pathlib import PosixPath
 import logging
 import abc
-import sys
 
 # Third party
 import serial
@@ -12,7 +11,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 # Local
 from calllogger.record import CallDataRecord
 from calllogger.plugins.base import BasePlugin
-from calllogger import settings, telemetry
+from calllogger import telemetry
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,6 @@ from typing import Union
 import json as _json
 import logging
 import sys
-import os
 
 # Third party
 import requests

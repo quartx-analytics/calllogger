@@ -76,27 +76,21 @@ def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> dict:
         json=params,
     )
 
-    if resp:
-        client_data = resp.json()
+    client_data = resp.json()
 
-        # Check if a restart is requested
-        if checkin and client_data["restart"]:
-            logger.info("Restart was requested. Restarting...")
-            # By setting this flag, it will cause the whole program to exit
-            # Exit code of 1 is needed to trigger the restart
-            stopped.set(1)
+    # Check if a restart is requested
+    if checkin and client_data["restart"]:
+        logger.info("Restart was requested. Restarting...")
+        # By setting this flag, it will cause the whole program to exit
+        # Exit code of 1 is needed to trigger the restart
+        stopped.set(1)
 
-        # Update settings
-        update_settings(**client_data.get("settings", {}))
+    # Update settings
+    update_settings(**client_data.get("settings", {}))
 
-        # Update sentry user
-        set_sentry_user(client_data)
-        return client_data
-
-    # We can't proceed without client_data if not in checkin mode
-    elif not checkin:
-        # Raise the underlining http error
-        resp.raise_for_status()
+    # Update sentry user
+    set_sentry_user(client_data)
+    return client_data
 
 
 def setup_client_checkin(token: TokenAuth, identifier: str):

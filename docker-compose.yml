@@ -7,7 +7,7 @@ services:
   app:
     image: "${IMAGE_NAME}:${IMAGE_TAG}"
     privileged: true
-    restart: on-failure
+    restart: always
     network_mode: host
     volumes:
       - type: volume
@@ -19,4 +19,4 @@ services:
     environment:
       DOMAIN: "https://quartx.dev/"
       DEBUG: "true"
-      PLUGIN_SLEEP: 60
+      PLUGIN_SLEEP: 300

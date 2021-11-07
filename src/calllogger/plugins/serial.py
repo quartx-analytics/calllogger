@@ -3,7 +3,6 @@ from typing import NoReturn, Union
 from pathlib import PosixPath
 import logging
 import abc
-import sys
 
 # Third party
 import serial
@@ -12,7 +11,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 # Local
 from calllogger.record import CallDataRecord
 from calllogger.plugins.base import BasePlugin
-from calllogger import settings, telemetry
+from calllogger import telemetry
 
 logger = logging.getLogger(__name__)
 
@@ -49,10 +48,7 @@ class SerialPlugin(BasePlugin):
         # Check if serial port exists
         if not self.port.exists():
             print(f"The target serial port '{self.port}' can't be found.")
-            if settings.dockerized:
-                print("Please add the following to your docker command.")
-                print(f"--device={self.port}:{self.port}")
-            sys.exit(0)
+            print("Please ensure that the device is connected to the system.")
 
     def __open(self):
         """Open a connection to the serial interface, returning True if successful else False."""

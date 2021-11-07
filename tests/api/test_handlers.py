@@ -123,7 +123,7 @@ def test_client_exit(api, requests_mock, mocker, bad_code, cleard, token, mock_e
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         client_errors(api, requests_mock, mocker, bad_code, cleard)
     assert pytest_wrapped_e.type == SystemExit
-    assert pytest_wrapped_e.value.code == 0 if token else 1
+    assert pytest_wrapped_e.value.code == 1
 
 
 def test_client_errors_suppressed(api, requests_mock, mocker):

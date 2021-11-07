@@ -92,9 +92,11 @@ class Settings:
     #: Set to true to enable debug logging
     debug: bool = False
     #: Device registration cutoff timeout in seconds
-    device_reg_timeout: int = 3 * 60 * 60
+    device_reg_timeout: int = 3 * 60 * 60  # 3 Hours
     #: Device registration check time in seconds
     device_reg_check: int = 10
+    #: The long delay after the device registration cutoff, limits requests
+    device_long_delay: int = 60 * 60  # 1 Hour
     #: Collect logs and send to remote server
     collect_logs: bool = True
     #: Collect metrics and send to remote server

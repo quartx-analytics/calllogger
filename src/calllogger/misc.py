@@ -50,7 +50,7 @@ class ThreadTimer(threading.Thread):
             if self.repeat:  # pragma: no branch
                 continue
             else:
-                break
+                break  # pragma: no cover
 
 
 class ThreadExceptionManager(threading.Thread):

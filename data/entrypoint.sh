@@ -32,9 +32,6 @@ case $1 in
   mock)
     exec calllogger-mock
   ;;
-  getid)
-    exec calllogger-getid
-  ;;
   *)
     exec "$@"
   ;;

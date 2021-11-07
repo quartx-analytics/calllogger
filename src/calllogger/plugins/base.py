@@ -52,7 +52,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
                 extra={"queue_size": self._queue.qsize()},
             )
 
-            # As we are forced to us a simpleQueue it's not as easy to block
+            # As we are forced to use a simpleQueue it's not as easy to block
             while not self.stopped.wait(0.1):
                 # The Queue has space now
                 if self._queue.qsize() < settings.queue_size:

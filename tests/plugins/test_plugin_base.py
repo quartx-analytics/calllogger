@@ -1,13 +1,18 @@
+# Standard lib
+from queue import SimpleQueue
+
 # Third Party
 from pytest_mock import MockerFixture
 import pytest
 
 # Local
-from calllogger import plugins
+from calllogger import plugins, settings
+from calllogger.record import CallDataRecord
 
 
 class MockedPlugin(plugins.BasePlugin):
     id = 1
+    _queue = SimpleQueue()
 
     def entrypoint(self):
         pass
@@ -42,3 +47,54 @@ class TestGetPlugin:
         """Test that systemexit is raised if plugin is now found."""
         with pytest.raises(SystemExit):
             plugins.get_plugin(value)
+
+
+@pytest.fixture
+def mock_record():
+    return CallDataRecord(call_type=1)
+
+
+class TestBasePluginPush:
+    def test_basic_push(self, mock_record):
+        """Test the push adds record to queue."""
+        plugin = MockedPlugin()
+        assert plugin._queue.qsize() == 0
+        plugin.push(mock_record)
+        assert plugin._queue.qsize() == 1
+
+    def test_queue_full_blocked(self, mock_record, mocker, disable_sleep):
+        """Test that push blocks and never pushes as long as the queue is full."""
+        plugin = MockedPlugin()
+        mocked = mocker.patch.object(plugin, "_queue", spec=SimpleQueue)
+        mocked.qsize.return_value = settings.queue_size
+        disable_sleep.side_effect = [False, True]
+
+        assert plugin._queue.qsize() == settings.queue_size
+        plugin.push(mock_record)
+        assert plugin._queue.qsize() == settings.queue_size
+        assert mocked.put.called is False
+
+    def test_queue_full_unblocked(self, mock_record, mocker, disable_sleep):
+        """Test that push blocks and but gets unblocked when queue size drops."""
+        plugin = MockedPlugin()
+        mocked = mocker.patch.object(plugin, "_queue", spec=SimpleQueue)
+
+        def unblocker(_):
+            """
+            This function will drop the size of queue to
+            simulate that the queue droped while waiting.
+            """
+            mocked.qsize.return_value -= 25
+            return False  # This will trigger the loop to continue
+
+        def put(_):
+            mocked.qsize.return_value += 1
+
+        mocked.qsize.return_value = settings.queue_size
+        mocked.put.side_effect = put
+        disable_sleep.side_effect = unblocker
+
+        assert plugin._queue.qsize() == settings.queue_size
+        plugin.push(mock_record)
+        assert plugin._queue.qsize() == settings.queue_size - 25 + 1
+        assert mocked.put.called is True

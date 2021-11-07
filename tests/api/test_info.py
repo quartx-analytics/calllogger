@@ -68,8 +68,6 @@ class TestGetClientInfo:
         assert resp == expected_resp
 
 
-
-
 def test_set_sentry_user(mocker: MockerFixture):
     """
     Test that set_sentry_user takes client data

@@ -42,10 +42,3 @@ class TestGetPlugin:
         """Test that systemexit is raised if plugin is now found."""
         with pytest.raises(SystemExit):
             plugins.get_plugin(value)
-
-    @pytest.mark.parametrize("value", ["pluginnotfound", ""])
-    def test_no_plugins_installed(self, mocker: MockerFixture, value):
-        """Test that no registered plugin will cause SystemExit to be raised too."""
-        mocker.patch.object(plugins, "installed", {})
-        with pytest.raises(SystemExit):
-            plugins.get_plugin(value)

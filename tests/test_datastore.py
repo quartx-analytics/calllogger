@@ -24,13 +24,6 @@ class TestGetToken:
         auth.revoke_token()
         assert mocked_spy.unlink.called
 
-    def test_token_in_env(self, mock_env):
-        mock_env(TOKEN=self.token)
-        tokenauth = auth.get_token()
-
-        assert isinstance(tokenauth, TokenAuth)
-        assert tokenauth.token == self.token
-
     def test_stored_token(self, mocker: MockerFixture):
         mocked_stored = mocker.patch.object(auth, "token_store")
         mocked_stored.exists.return_value = True

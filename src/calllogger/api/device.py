@@ -42,11 +42,9 @@ def link_device(identifier) -> Union[str, None]:
             stopped.wait(settings.device_reg_check)
 
             # Keep attempting registration until global timeout elapse
-            if time.time() - start < settings.device_reg_timeout:
-                continue
-            else:
-                logger.info("Device registration failed: Registration time elapsed, giving up.")
-                return None
+            if time.time() - start > settings.device_reg_timeout:
+                logger.info("Registration time elapsed. Switching to long delay mode.")
+                stopped.wait(settings.device_long_delay)
         else:
             # Have no idea what to do here only return None
             logger.info(

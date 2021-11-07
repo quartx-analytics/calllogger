@@ -215,6 +215,6 @@ class QuartxAPIHandler:
         # When use is not related to the CDR (Influx), it will be overridden by that class then
         logger.error("Quitting as the token does not have the required permissions or has been revoked.")
         auth.revoke_token()
-        exit_code = int(not os.environ.get("TOKEN"))
+        exit_code = 1
         self.stopped.set(exit_code)
         sys.exit(exit_code)

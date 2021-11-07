@@ -88,14 +88,6 @@ def mockcalls() -> int:
     return main_loop("MockCalls")
 
 
-# Entrypoint: calllogger-getid
-@graceful_exception
-def getid() -> int:
-    identifier = settings.identifier
-    print(identifier)
-    return 0
-
-
 # Gracefully shutdown for 'kill <pid>' or docker stop <container>
 signal.signal(signal.SIGTERM, terminate)
 

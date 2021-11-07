@@ -27,7 +27,7 @@ def test_retry(requests_mock, disable_sleep, timeout, mock_settings):
 
     device.link_device(mock_identifier)
     assert disable_sleep.called
-    assert mocked_request.call_count == (2 if timeout > 0 else 1)
+    assert mocked_request.call_count == 2
 
 
 def test_unexpected_status(requests_mock):

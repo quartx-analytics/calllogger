@@ -27,23 +27,14 @@ def register_plugins(*plugins: Type[BasePlugin]):
 
 def get_plugin(selected_plugin: Union[str, int]):
     """Return the selected plugin."""
-    selected_plugin = str(selected_plugin)
-    if plugin := installed.get(selected_plugin.lower()):
+    if plugin := installed.get(str(selected_plugin).lower()):
         return plugin
-    elif installed:
-        if selected_plugin:
-            print("Specified plugin not found:", selected_plugin)
-        else:
-            print("No plugin specified")
+    else:
+        print("Specified plugin not found:", selected_plugin)
         print("Available plugins are:")
         for plugin in installed.values():
             print(f"--> {plugin.id} {plugin.__name__} - {plugin.__doc__}")
-    else:
-        print("No plugins are installed")
-
-    # We only get here if the selected plugin
-    # was not found or no plugin was specified
-    sys.exit(0)
+        sys.exit(0)
 
 
 # def find_plugins() -> dict:

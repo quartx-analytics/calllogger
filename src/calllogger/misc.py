@@ -47,7 +47,7 @@ class ThreadTimer(threading.Thread):
                         break
 
             # Keep looping if repeat is True, quit otherwise
-            if self.repeat:
+            if self.repeat:  # pragma: no branch
                 continue
             else:
                 break

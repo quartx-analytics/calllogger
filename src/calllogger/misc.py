@@ -85,7 +85,7 @@ def terminate(signum, *_) -> int:
             pass
 
     code = 143 if signum == signal.SIGTERM else 130
-    stopped.set()
+    stopped.set(code)
     return code
 
 

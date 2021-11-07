@@ -17,18 +17,20 @@ class ThreadTimer(threading.Thread):
     """
     Call a function after a specified number of seconds.
 
-    :param float or int interval: The time to wait for before executing the function.
+    :param float or int interval: The time to wait before executing the function.
     :param callable function: The function to call.
     :param args: The position args to send to the function.
     :param kwargs: The keyword args to send to the function.
     :param bool repeat: When set to True, the thread will repeatedly call the function
+    :param bool quit_on_exc: Flag if set will cause the timer to quit when an exception is raised inside function.
     """
 
-    def __init__(self, interval, function, args=None, kwargs=None, repeat=False):
+    def __init__(self, interval, function, args=None, kwargs=None, repeat=False, quit_on_exc=False):
         super(ThreadTimer, self).__init__()
         self.interval = interval
         self.function = function
         self.repeat = repeat
+        self.quit_on_exc = quit_on_exc
         self.args = args if args is not None else []
         self.kwargs = kwargs if kwargs is not None else {}
 
@@ -41,6 +43,8 @@ class ThreadTimer(threading.Thread):
                     self.function(*self.args, **self.kwargs)
                 except Exception as err:
                     capture_exception(err, scope=scope)
+                    if self.quit_on_exc:
+                        break
 
             # Keep looping if repeat is True, quit otherwise
             if self.repeat:

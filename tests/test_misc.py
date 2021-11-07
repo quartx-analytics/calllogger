@@ -1,4 +1,5 @@
 # Standard Lib
+from unittest.mock import Mock
 import signal
 
 # Third Party
@@ -112,3 +113,91 @@ class Testterminate:
         # Reset back to org
         closeers.clear()
         closeers.extend(org_closers)
+
+
+class TestThreadTimer:
+    def test_basic_use(self, disable_sleep: Mock):
+        """Test that the function gets called."""
+        called = False
+
+        def test_func():
+            nonlocal called
+            called = True
+
+        interval = 10
+        timer = misc.ThreadTimer(interval, test_func)
+        timer.start()
+        timer.join()
+
+        disable_sleep.assert_called_once_with(interval)
+        assert called is True
+
+    def test_args_passed(self, disable_sleep: Mock):
+        """Test that the function gets called with the right args."""
+        called = False
+
+        def test_func(test_arg, new=False):
+            nonlocal called
+            called = True
+            assert test_arg == "passed"
+            assert new is True
+
+        interval = 10
+        timer = misc.ThreadTimer(interval, test_func, args=["passed"], kwargs={"new": True})
+        timer.start()
+        timer.join()
+
+        disable_sleep.assert_called_once_with(interval)
+        assert called is True
+
+    def test_repeater(self, disable_sleep: Mock):
+        """Test that the function gets called repeatedly."""
+        called = 0
+
+        def test_func():
+            nonlocal called
+            called += 1
+
+        interval = 10
+        disable_sleep.side_effect = [False, False, True]
+        timer = misc.ThreadTimer(interval, test_func, repeat=True)
+        timer.start()
+        timer.join()
+
+        disable_sleep.assert_called_with(interval)
+        assert called == 2
+
+    def test_exception(self, disable_sleep: Mock):
+        """Test that an exception within function don't pop up the stack."""
+        called = False
+
+        def test_func():
+            nonlocal called
+            called = True
+            raise RuntimeError
+
+        interval = 10
+        timer = misc.ThreadTimer(interval, test_func)
+        timer.start()
+        timer.join()
+
+        disable_sleep.assert_called_once_with(interval)
+        assert called is True
+
+    def test_exception_quit(self, disable_sleep: Mock):
+        """Test that the timer quits when exception is raised, repeater stops."""
+        called = 0
+
+        def test_func():
+            nonlocal called
+            called += 1
+            raise RuntimeError
+
+        interval = 10
+        disable_sleep.side_effect = [False, False, True]  # Should cause function to get call 2 times
+        timer = misc.ThreadTimer(interval, test_func, repeat=True, quit_on_exc=True)
+        timer.start()
+        timer.join()
+
+        disable_sleep.assert_called_with(interval)
+        assert called == 1

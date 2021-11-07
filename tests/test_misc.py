@@ -120,7 +120,7 @@ class TestThreadTimer:
         """Test that the function gets called."""
         called = False
 
-        def test_func():
+        def test_func(*_, **__):
             nonlocal called
             called = True
 

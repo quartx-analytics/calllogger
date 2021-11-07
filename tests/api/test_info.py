@@ -110,3 +110,10 @@ class TestUpdateSettings:
         os.environ["TIMEOUT"] = "3"
         info.update_settings(timeout=5)
         assert settings.timeout == 3
+
+
+def test_checkin_setup(mocker):
+    mocked = mocker.patch.object(info, "ThreadTimer", autospec=True)
+    tokenauth = TokenAuth("token")
+    info.setup_client_checkin(tokenauth, "C4:11:0B:0F:F5:C5")
+    assert mocked.return_value.start.called

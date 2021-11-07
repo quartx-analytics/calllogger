@@ -83,7 +83,6 @@ def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> dict:
         logger.info("Restart was requested. Restarting...")
         # By setting this flag, it will cause the whole program to exit
         # Exit code of 1 is needed to trigger the restart
-        print("dkfjlskdjf")
         stopped.set(1)
 
     # Update settings

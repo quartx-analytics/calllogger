@@ -43,7 +43,8 @@ def initialise_telemetry(client_info: dict, identifier: str):
         telemetry.send_logs_to_logzio(
             client_info=client_info,
             extras={
-                "identifier": identifier
+                "identifier": identifier,
+                "tenant_slug": client_info["slug"],
             },
         )
 

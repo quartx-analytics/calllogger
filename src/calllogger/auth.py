@@ -1,6 +1,7 @@
 # Standard Lib
 import logging
 import sys
+import os
 
 # Local
 from calllogger import api, settings, utils
@@ -13,9 +14,16 @@ token_store = settings.datastore.joinpath("token")
 
 def get_token() -> TokenAuth:
     """
-    Fetch the CDR token the datastore. If no token is found then request token from server.
+    Fetch the CDR token from environment variable if given, else fallback to
+    datastore. If no token is found then request token from server.
     """
-    if token_store.exists():
+    # Option 1: Environment Variable
+    if token := os.environ.get("TOKEN", ""):
+        logger.debug("Loading token from environment variable.")
+        return TokenAuth(token)
+
+    # Option 2: Stored locally
+    elif token_store.exists():
         logger.debug("Loading token from datastore.")
         token = utils.read_datastore(token_store)
         return TokenAuth(token)

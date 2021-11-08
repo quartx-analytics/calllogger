@@ -124,9 +124,8 @@ jobs:
           signing-key: ${{ secrets.ARTIFACT_SIGNING_KEY }}
 
       - name: Upload mender artifact
-        uses: actions/upload-artifact@v2
+        uses: quartx-analytics/mender-artifact-uploader@main
         with:
-          name: mender-artifacts
-          path: ${{ steps.mender.outputs.artifact-file }}
-
-      - run: echo ${{ needs.docker-main.outputs.digest }}
+          artifact: ${{ steps.mender.outputs.artifact-file }}
+          username: ${{ secrets.MENDER_USER }}
+          password: ${{ secrets.MENDER_PASS }}

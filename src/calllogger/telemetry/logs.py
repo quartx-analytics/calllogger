@@ -12,12 +12,31 @@ FLUENT_ADDRESS = "localhost"
 FLUENT_PORT = 24224
 
 
-def send_logs_to_logzio(client_info):
-    handler = LogzioHandler(
+class ExtraLogzioHandler(LogzioHandler):
+    """
+    Custom LogzioHandler with an extra parameter to add default extra fields to records.
+
+    :param dict default_extras: Dict of extra fields to add to all records.
+    """
+    def __init__(self, *args, default_extras: dict = None, **kwargs):
+        super(ExtraLogzioHandler, self).__init__(*args, **kwargs)
+        self._default_extras = default_extras or {}
+
+    def extra_fields(self, message):
+        """Inject default extra fields into record."""
+        extra_fields = super().extra_fields(message)
+        for key, val in self._default_extras.items():
+            extra_fields.setdefault(key, val)
+        return extra_fields
+
+
+def send_logs_to_logzio(client_info, extras: dict):
+    handler = ExtraLogzioHandler(
         token=client_info["logzio_token"],
         logzio_type="calllogger",
         url=client_info["logzio_listener_url"],
         debug=settings.debug,
         backup_logs=False,
+        default_extras=extras,
     )
     logger.addHandler(handler)

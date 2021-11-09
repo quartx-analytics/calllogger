@@ -22,7 +22,7 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_known_args()
 
 
-def initialise_telemetry(client_info: dict):
+def initialise_telemetry(client_info: dict, identifier: str):
     """Collect system metrics and logs."""
     # Enable metrics telemetry
     if settings.collect_metrics and client_info["influx_token"]:
@@ -42,6 +42,10 @@ def initialise_telemetry(client_info: dict):
     if settings.collect_logs:
         telemetry.send_logs_to_logzio(
             client_info=client_info,
+            extras={
+                "identifier": identifier,
+                "tenant_slug": client_info["slug"],
+            },
         )
 
 
@@ -51,7 +55,7 @@ def main_loop(plugin: str) -> int:
     client_info = api.get_client_info(tokenauth, settings.identifier)
 
     # Initialise telemetry if we are able to
-    initialise_telemetry(client_info)
+    initialise_telemetry(client_info, settings.identifier)
 
     # Enable periodic checkin
     api.setup_client_checkin(tokenauth, settings.identifier)

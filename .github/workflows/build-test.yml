@@ -15,7 +15,6 @@ env:
 
 jobs:
   tests:
-    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -39,7 +38,6 @@ jobs:
           flags: unittests
 
   flake8:
-    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

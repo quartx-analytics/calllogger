@@ -61,8 +61,9 @@ def main_loop(plugin: str) -> int:
     api.setup_client_checkin(tokenauth, settings.identifier)
 
     # Configure sentry
-    plugin = get_plugin(plugin if plugin else client_info["settings"]["plugin"])
-    sentry_sdk.set_tag("plugin", plugin.__name__)
+    plugin_name = plugin if plugin else client_info["settings"]["plugin"]
+    sentry_sdk.set_tag("plugin", plugin_name)
+    plugin = get_plugin(plugin_name)
 
     # Start the CDR worker to monitor the record queue
     queue = SimpleQueue()

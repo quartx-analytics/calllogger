@@ -17,9 +17,11 @@ logger = logging.getLogger(__name__)
 
 def link_device(identifier) -> Union[str, None]:
     """Link device to a tenant on the server and return the provided token."""
-    logger.info("Registering device with server using identifier: %s", identifier)
+    logger.info("Registering device with call monitoring server")
     api = QuartxAPIHandler()
     start = time.time()
+    api.logger = logger
+    wait_time = settings.device_reg_check
 
     while not stopped.is_set():  # pragma: no branch
         resp = api.make_request(
@@ -37,19 +39,26 @@ def link_device(identifier) -> Union[str, None]:
             logger.info("Device token received")
             data = resp.json()
             return data["token"]
-        elif status_code == codes["no_content"]:  # 204
-            logger.debug("Device registration rejected. Will try again in %s seconds.", settings.device_reg_check)
-            stopped.wait(settings.device_reg_check)
 
-            # Keep attempting registration until global timeout elapse
-            if time.time() - start > settings.device_reg_timeout:
-                logger.info("Registration time elapsed. Switching to long delay mode.")
-                stopped.wait(settings.device_long_delay)
+        elif status_code == codes["no_content"]:  # 204
+            # Switch to long delay mode if device registration period as passed
+            if wait_time == settings.device_reg_check and time.time() - start > settings.device_reg_timeout:
+                logger.info(
+                    "Registration time elapsed. Switching to long delay mode.",
+                    extra={"wait_time": settings.device_long_delay},
+                )
+                wait_time = settings.device_long_delay
+
+            logger.debug("Device registration rejected. Will try again later", extra={"wait_time": wait_time})
+            stopped.wait(wait_time)
+
         else:
             # Have no idea what to do here only return None
-            logger.info(
-                "Device registration failed: %s -> %s",
-                getattr(resp, "status_code", ""),
-                getattr(resp, "reason", "")
+            logger.warning(
+                "Device registration failed",
+                extra={
+                    "status_code": status_code,
+                    "reason": getattr(resp, "reason", ""),
+                }
             )
             return None

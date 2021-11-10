@@ -1,12 +1,9 @@
 # Standard Lib
 import collections
-import logging
 
 # Local
 from .point import Point
 from calllogger import settings
-
-logger = logging.getLogger(__name__)
 
 
 class InfluxCollector:

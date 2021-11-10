@@ -34,7 +34,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     _queue: SimpleQueue
 
     def __init__(self):
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger = logging.getLogger(f"calllogger.plugin.{self.__class__.__name__}")
         super(BasePlugin, self).__init__(name=f"Thread-{self.__class__.__name__}")
         self.logger.info("Initializing plugin: %s", self.__class__.__name__)
 
@@ -47,7 +47,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
         if self._queue.qsize() < settings.queue_size:
             self._queue.put(record)
         else:
-            logger.warning(
+            self.logger.warning(
                 f"CDR Queue is full {self._queue.qsize()}",
                 extra={"queue_size": self._queue.qsize()},
             )
@@ -59,7 +59,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
                     self._queue.put(record)
                     break
 
-            logger.warning(
+            self.logger.info(
                 f"CDR Queue is no longer full {self._queue.qsize()}",
                 extra={"queue_size": self._queue.qsize()}
             )

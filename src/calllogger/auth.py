@@ -47,7 +47,7 @@ def request_token() -> str:
         print("Missing optional registration key")
         print("Please set the REG_KEY environment variable to auto register device.")
 
-    logger.info("Device registration unavailable. Missing required registration key")
+    logger.warning("Device registration unavailable. Missing required registration key")
     print("Unable to proceed, missing required TOKEN.")
     print("Please set the TOKEN environment variable")
     sys.exit(0)

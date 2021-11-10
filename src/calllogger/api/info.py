@@ -56,8 +56,9 @@ def update_settings(**overrides):
 
 def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> dict:
     """Request information about the client."""
-    logger.info("Requesting client info and settings")
+    (logger.debug if checkin else logger.info)("Requesting client info and settings")
     api = QuartxAPIHandler()
+    api.logger = logger
 
     # We will pass data to server using query params
     params = dict(

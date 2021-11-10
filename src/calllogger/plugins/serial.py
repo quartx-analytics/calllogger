@@ -1,7 +1,6 @@
 # Standard library
 from typing import NoReturn, Union
 from pathlib import PosixPath
-import logging
 import abc
 
 # Third party
@@ -12,8 +11,6 @@ from sentry_sdk import push_scope, capture_exception, Scope
 from calllogger.record import CallDataRecord
 from calllogger.plugins.base import BasePlugin
 from calllogger import telemetry
-
-logger = logging.getLogger(__name__)
 
 
 class ParseError(RuntimeError):
@@ -57,7 +54,13 @@ class SerialPlugin(BasePlugin):
             self.sserver.port = str(self.port)
             self.sserver.open()
         except Exception:
-            logger.debug("Failed to connect to serial interface")
+            self.logger.warning(
+                "Failed to connect to serial interface",
+                extra={
+                    "baudrate": self.baudrate,
+                    "port": str(self.port)
+                }
+            )
             telemetry.serial_error_counter().tags(error_type="conn").mark()
             self.timeout.sleep()
             self.sserver.close()
@@ -68,7 +71,7 @@ class SerialPlugin(BasePlugin):
         try:
             return self.sserver.readline()
         except Exception:
-            logger.debug("Failed to read from serial interface")
+            self.logger.warning("Failed to read from serial interface")
             telemetry.serial_error_counter().tags(error_type="read").mark()
             self.timeout.sleep()
             self.sserver.close()
@@ -78,7 +81,10 @@ class SerialPlugin(BasePlugin):
         try:
             return self.decode(raw)
         except Exception:
-            logger.debug("Failed to decode serial line: %r", raw)
+            self.logger.warning(
+                "Failed to decode serial line",
+                extra={"serial_line": repr(raw)}
+            )
             telemetry.serial_error_counter().tags(error_type="decode").mark()
             raise
 
@@ -103,11 +109,14 @@ class SerialPlugin(BasePlugin):
             else:
                 raise ValidationError("Validation failed")
         except EmptyLine:
-            logger.debug("Serial line is empty, ignoring")
+            self.logger.debug("Serial line is empty, ignoring")
             telemetry.serial_error_counter().tags(error_type="empty_line").mark()
             raise
         except Exception:
-            logger.debug("Serial line failed validation: %s", decoded_line)
+            self.logger.debug(
+                "Serial line failed validation: %s",
+                extra={"serial_line": decoded_line}
+            )
             telemetry.serial_error_counter().tags(error_type="validation").mark()
             raise
 
@@ -131,7 +140,11 @@ class SerialPlugin(BasePlugin):
             else:
                 raise ParseError("Invalid return type")
         except Exception:
-            logger.debug("Failed to parse serial line: %s", validated_line)
+            self.logger.debug(
+                "Failed to parse serial line",
+                extra={
+                    "serial_line": validated_line
+                })
             telemetry.serial_error_counter().tags(error_type="parse").mark()
             raise
 

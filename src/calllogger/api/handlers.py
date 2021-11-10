@@ -14,7 +14,7 @@ from sentry_sdk import push_scope, capture_exception, Scope
 from calllogger.utils import Timeout
 from calllogger import stopped, settings, auth, telemetry, __version__
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("calllogger.api")
 RetryResponse = Union[bool, requests.Response]
 
 
@@ -46,7 +46,6 @@ def decode_response(response: requests.Response, limit=1000) -> Union[str, dict]
     try:
         data = response.json()
     except _json.decoder.JSONDecodeError:
-        logger.debug("Error response was not a valid json response")
         return response.text[:limit]
     else:
         return data[:limit] if isinstance(data, str) else data
@@ -69,10 +68,14 @@ class QuartxAPIHandler:
 
     def __init__(self, *args, suppress_errors=False, **kwargs):
         super(QuartxAPIHandler, self).__init__(*args, **kwargs)
-        self.timeout = Timeout(settings, stopped)  # pragma: no branch
+        self.timeout = Timeout(settings, stopped)
         self.suppress_errors = suppress_errors
         self.session = requests.Session()
         self.stopped = stopped
+
+        # We register the logger here
+        # so we can replace it elsewhere
+        self.logger = logger
 
         # Add custom calllogger useragent
         self.session.headers["User-Agent"] = f"quartx-calllogger/{__version__}"
@@ -93,7 +96,7 @@ class QuartxAPIHandler:
                     resp = self._send_request(scope, prepared_request, custom_json, kwargs)
                     if resp is True:
                         self.timeout.sleep()
-                        logger.info("Retrying request: %s", prepared_request.url)
+                        self.logger.info("Retrying request", extra={"url": prepared_request.url})
                         continue
                     else:
                         return resp
@@ -148,24 +151,22 @@ class QuartxAPIHandler:
         """Check what kind of error we have and if we can safely retry the request."""
 
         # Extract url from err if possible, used for improving the logs
-        url = getattr(getattr(err, "response", None), "url", "")
+        url = getattr(getattr(err, "request", None), "url", "")
 
         # Server is unreachable, try again later
         if isinstance(err, requests.ConnectionError):
-            logger.warning("Connection to server failed", extra={"url": url})
+            self.logger.warning("Connection to server failed", extra={"url": url})
             return True
 
         # Request timed out, try again later
         elif isinstance(err, requests.Timeout):
-            logger.warning("Connection to server timed out", extra={"url": url})
+            self.logger.warning("Connection to server timed out", extra={"url": url})
             return True
 
         # Check status code to deside what to do next
         elif isinstance(err, requests.HTTPError):
-            logger.warning(
-                "API request failed with status code: %s %s",
-                err.response.status_code,
-                err.response.reason,
+            self.logger.warning(
+                "API request failed",
                 extra={
                     "url": url,
                     "status_code": err.response.status_code,
@@ -175,7 +176,7 @@ class QuartxAPIHandler:
             response_scope(scope, err.response)
             return self.status_check(err.response)
         else:
-            logger.warning(str(err))
+            self.logger.warning(str(err), extra={"url": url})
             return False
 
     def status_check(self, resp: requests.Response) -> bool:
@@ -190,18 +191,30 @@ class QuartxAPIHandler:
 
         # Server is expereancing problems
         elif resp.status_code in (codes.not_found, codes.request_timeout) or resp.status_code >= codes.server_error:
-            logger.warning("Server is experiencing problems.")
+            self.logger.warning("Server is experiencing problems.", extra={"url": resp.url})
             return True
 
         # Client sent Too Many Requests
         elif resp.status_code == codes.too_many_requests:
-            logger.debug("Rate limiting is enabled, Retry request later")
             # True will retry the request later after a small timeout
             retry_timeout = str(resp.headers.get("Retry-After", "")).strip()
+            self.logger.warning("Rate limiting is enabled, Retrying request later", extra={
+                "timeout": retry_timeout,
+                "url": resp.url,
+            })
             if retry_timeout.isdigit():  # pragma: no branch
                 # Change the timeout value temporarily
                 self.timeout.value = int(retry_timeout)
             return True
+        else:
+            self.logger.warning(
+                "API request failed",
+                extra={
+                    "url": resp.url,
+                    "status_code": resp.status_code,
+                    "reason": resp.reason,
+                },
+            )
 
         # We don't know what other codes we might expect yet
         # So will default to False (No Retry)
@@ -212,7 +225,14 @@ class QuartxAPIHandler:
         # This code is related to the cdr token
         # This will stay here as most use of it will be from CDR requests
         # When use is not related to the CDR (Influx), it will be overridden by that class then
-        logger.error("Quitting as the token does not have the required permissions or has been revoked.")
+        self.logger.info(
+            "Quitting as the CDR token does not have the required permissions or has been revoked.",
+            extra={
+                "url": resp.url,
+                "status_code": resp.status_code,
+                "reason": resp.reason,
+            },
+        )
         auth.revoke_token()
         exit_code = 1
         self.stopped.set(exit_code)

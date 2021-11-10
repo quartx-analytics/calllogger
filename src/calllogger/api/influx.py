@@ -39,6 +39,7 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
         super().__init__(system_collector=collector, suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.info("Initializing InfluxDB metrics monitoring")
         self.collector = collector
+        self.logger = logger
         self.quit = False
 
         # Add the default fields to the collector
@@ -90,7 +91,15 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
             self.request.data = "\n".join(lines)
             self.send_request(self.request, timeout=20.0)
 
-    def handle_unauthorized(self, response):
+    def handle_unauthorized(self, resp: requests.Response):
         """Quit submiting metrics if the token is no longer valid."""
         # We only want to quit sending metrics not quit the program
+        self.logger.info(
+            "Quitting as the Influx token does not have the required permissions or has been revoked.",
+            extra={
+                "url": resp.url,
+                "status_code": resp.status_code,
+                "reason": resp.reason,
+            },
+        )
         self.quit = True

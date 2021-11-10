@@ -17,5 +17,6 @@ services:
         source: /dev
         target: /dev
     environment:
+      ENVIRONMENT: "${ENVIRONMENT:-Deployed}"
       DOMAIN: "https://quartx.dev/"
       PLUGIN_SLEEP: 300

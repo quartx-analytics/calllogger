@@ -93,8 +93,7 @@ def track_http_status_errors(resp: requests.Response):
 def track_http_resp_time(resp: requests.Response):
     """Track requests response time."""
     request_time(tags=dict(
-        endpoint=urlparse(resp.request.path_url).path,
-        code=resp.status_code,
+        endpoint=urlparse(resp.request.path_url).path
     )).observe(
         resp.elapsed.total_seconds()
     )

@@ -38,7 +38,7 @@ class MockCalls(BasePlugin):
     id = 1
 
     #: Time in seconds to delay, 0 will skip incoming and push at full speed.
-    sleep: float = 1
+    sleep: float = 300
     #: Time in seconds to delay between incoming call hops.
     incoming_delay: float = 2
     #: Determine preferred call direction, Outgoing is 0 and Received is 1.

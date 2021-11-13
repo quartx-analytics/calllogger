@@ -17,10 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-__all__ = ["__version__", "__package__", "stopped", "settings", "closeers"]
+__all__ = ["__version__", "stopped", "settings", "closeers"]
 
 # Standard lib
-from importlib.metadata import version
 import logging.config
 
 # Third Party
@@ -31,8 +30,7 @@ from sentry_sdk.integrations.threading import ThreadingIntegration
 # Local
 from calllogger import conf, utils
 
-__package__ = "quartx-calllogger"
-__version__ = version(__package__)
+__version__ = config("VERSION", default="latest", cast=str)
 
 # Setup Sentry
 sentry_sdk.init(

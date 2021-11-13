@@ -18,4 +18,3 @@ services:
         target: /dev
     environment:
       ENVIRONMENT: "${ENVIRONMENT:-Dockerized}"
-      PLUGIN_SLEEP: 300

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quartx-calllogger"
-version = "0.9.1"
+version = "1.0.0"
 description = "CDR(Call Data Record) logger that sends call logs to the Quartx Call Monitoring service for processing."
 license = "GPL-2.0-only"
 authors = ["William Forde <willforde@quartx.ie>"]

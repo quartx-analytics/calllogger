@@ -28,7 +28,7 @@ def initialise_telemetry(client_info, identifier: str):
     if settings.collect_metrics and client_info.influx_token:
         api.InfluxWrite(
             url=client_info.influx_url,
-            orgid=client_info.influx_orgid,
+            org=client_info.influx_org,
             bucket=client_info.influx_bucket,
             collector=telemetry.collector,
             token=client_info.influx_token,

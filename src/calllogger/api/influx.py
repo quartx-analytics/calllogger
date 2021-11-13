@@ -29,7 +29,7 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
     def __init__(
             self,
             url: str,
-            orgid: str,
+            org: str,
             bucket: str,
             collector: telemetry.InfluxCollector,
             token: str,
@@ -54,7 +54,7 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
             url=urlparse.urljoin(url, "/api/v2/write"),
             auth=TokenAuth(token),
             params=dict(
-                orgID=orgid,
+                org=org,
                 bucket=bucket,
                 precision=collector.precision,
             )

@@ -22,46 +22,47 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_known_args()
 
 
-def initialise_telemetry(client_info: dict, identifier: str):
+def initialise_telemetry(client_info: api.ClientInfo):
     """Collect system metrics and logs."""
     # Enable metrics telemetry
-    if settings.collect_metrics and client_info["influx_token"]:
+    if settings.collect_metrics and client_info.influx_token:
         api.InfluxWrite(
-            url=client_info["influx_url"],
-            orgid=client_info["influx_orgid"],
-            bucket=client_info["influx_bucket"],
+            url=client_info.influx_url,
+            org=client_info.influx_org,
+            bucket=client_info.influx_bucket,
             collector=telemetry.collector,
-            token=client_info["influx_token"],
+            token=client_info.influx_token,
             default_fields=dict(
                 identifier=settings.identifier,
-                client=client_info["slug"],
+                client=client_info.slug,
             )
         ).start()
 
     # Enable logs telemetry
     if settings.collect_logs:
         telemetry.send_logs_to_logzio(
-            client_info=client_info,
-            extras={
-                "identifier": identifier,
-                "tenant_slug": client_info["slug"],
-            },
+            url=client_info.logzio_url,
+            token=client_info.logzio_token,
+            extras=dict(
+                identifier=settings.identifier,
+                tenant_slug=client_info.slug,
+            ),
         )
 
 
 def main_loop(plugin: str) -> int:
     """Call the selected plugin and wait for program shutdown."""
     tokenauth = get_token()
-    client_info = api.get_client_info(tokenauth, settings.identifier)
+    client_info = api.ClientInfo.get_client_info(tokenauth, settings.identifier)
 
     # Initialise telemetry if we are able to
-    initialise_telemetry(client_info, settings.identifier)
+    initialise_telemetry(client_info)
 
     # Enable periodic checkin
-    api.setup_client_checkin(tokenauth, settings.identifier)
+    api.ClientInfo.setup_checkin(tokenauth, settings.identifier)
 
     # Configure sentry
-    plugin_name = plugin if plugin else client_info["settings"]["plugin"]
+    plugin_name = plugin if plugin else settings.plugin
     sentry_sdk.set_tag("plugin", plugin_name)
     plugin = get_plugin(plugin_name)
 
@@ -91,6 +92,12 @@ def monitor() -> int:
 def mockcalls() -> int:
     """Force use of the mock logger."""
     return main_loop("MockCalls")
+
+
+@graceful_exception
+def getmac() -> int:
+    print(settings.identifier)
+    return 0
 
 
 # Gracefully shutdown for 'kill <pid>' or docker stop <container>

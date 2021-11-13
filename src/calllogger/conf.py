@@ -138,7 +138,7 @@ class Settings:
         # Stored locally
         if self._identifier_store.exists():
             logger.debug("Loading device identifier from datastore.")
-            return utils.read_datastore(self._identifier_store)
+            return utils.read_datastore(self._identifier_store).upper()
 
         # Fetch and save
         identifier = get_mac_address()

@@ -53,13 +53,13 @@ def initialise_telemetry(client_info, identifier: str):
 def main_loop(plugin: str) -> int:
     """Call the selected plugin and wait for program shutdown."""
     tokenauth = get_token()
-    client_info = api.get_client_info(tokenauth, settings.identifier)
+    client_info = api.ClientInfo.get_client_info(tokenauth, settings.identifier)
 
     # Initialise telemetry if we are able to
     initialise_telemetry(client_info, settings.identifier)
 
     # Enable periodic checkin
-    api.setup_client_checkin(tokenauth, settings.identifier)
+    api.ClientInfo.setup_checkin(tokenauth, settings.identifier)
 
     # Configure sentry
     plugin_name = plugin if plugin else settings.plugin

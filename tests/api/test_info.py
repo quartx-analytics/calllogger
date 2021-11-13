@@ -39,7 +39,7 @@ class TestGetClientInfo:
         mocker.patch.object(info, "get_private_ip", return_value=get_private_ip)
         expected_resp = {'id': 1, 'name': 'Test', 'email': 'test@test.com', 'settings': {}}
         mocked_request = requests_mock.post(info.info_url, status_code=200, json=expected_resp)
-        resp = info.get_client_info(tokenauth, identifier)
+        resp = info.ClientInfo.get_client_info(tokenauth, identifier)
 
         assert mocked_request.called
         assert isinstance(resp, info.ClientInfo)
@@ -53,7 +53,7 @@ class TestGetClientInfo:
         mocker.patch.object(info, "get_private_ip", return_value="192.168.1.1")
         mocked_request = requests_mock.post(info.info_url, status_code=400)
         with pytest.raises(requests.HTTPError):
-            info.get_client_info(tokenauth, "C4:11:0B:0F:F5:C5")
+            info.ClientInfo.get_client_info(tokenauth, "C4:11:0B:0F:F5:C5")
 
         assert mocked_request.called
 
@@ -64,7 +64,7 @@ class TestGetClientInfo:
         mocker.patch.object(info, "get_private_ip", return_value="192.168.1.1")
         expected_resp = {'id': 1, 'name': 'Test', 'email': 'test@test.com', "restart": True, 'settings': {}}
         mocked_request = requests_mock.post(info.info_url, status_code=200, json=expected_resp)
-        resp = info.get_client_info(tokenauth, "C4:11:0B:0F:F5:C5", checkin=True)
+        resp = info.ClientInfo.get_client_info(tokenauth, "C4:11:0B:0F:F5:C5", checkin=True)
 
         spy_stopped.assert_called_with(1)
         assert mocked_request.called
@@ -121,5 +121,5 @@ class TestUpdateSettings:
 def test_checkin_setup(mocker):
     mocked = mocker.patch.object(info, "ThreadTimer", autospec=True)
     tokenauth = TokenAuth("token")
-    info.setup_client_checkin(tokenauth, "C4:11:0B:0F:F5:C5")
+    info.ClientInfo.setup_checkin(tokenauth, "C4:11:0B:0F:F5:C5")
     assert mocked.return_value.start.called

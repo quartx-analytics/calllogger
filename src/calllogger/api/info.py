@@ -18,12 +18,30 @@ root_logger = logging.getLogger("calllogger")
 logger = logging.getLogger(__name__)
 
 
-def set_sentry_user(client_info: dict):
+class ClientInfo:
+    """Class to make accessing client data easier."""
+    def __init__(self, raw_json: dict):
+        self.__dict__["raw_json"] = raw_json
+
+    def __setattr__(self, name, value):
+        raise Exception("Attribute is Read-Only")
+
+    def __getattr__(self, name):
+        try:
+            return self.raw_json[name]
+        except KeyError:
+            raise AttributeError("'{0}' object has no attribute '{1}'".format(self.__class__.__name__, name))
+
+    def __getitem__(self, key):
+        return self.raw_json[key]
+
+
+def set_sentry_user(client_info: ClientInfo):
     """Setup sentry user using client info."""
     sentry_sdk.set_user({
-        "id": client_info["id"],
-        "username": client_info["name"],
-        "email": client_info["email"],
+        "id": client_info.id,
+        "username": client_info.name,
+        "email": client_info.email,
     })
 
 
@@ -54,7 +72,7 @@ def update_settings(**overrides):
     root_logger.setLevel(logging.DEBUG if settings.debug else logging.INFO)
 
 
-def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> dict:
+def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> ClientInfo:
     """Request information about the client."""
     (logger.debug if checkin else logger.info)("Requesting client info and settings")
     api = QuartxAPIHandler()
@@ -78,16 +96,17 @@ def get_client_info(token: TokenAuth, identifier: str, checkin=False) -> dict:
     )
 
     client_data = resp.json()
+    client_data = ClientInfo(client_data)
 
     # Check if a restart is requested
-    if checkin and client_data["restart"]:
+    if checkin and client_data.restart:
         logger.info("Restart was requested. Restarting...")
         # By setting this flag, it will cause the whole program to exit
         # Exit code of 1 is needed to trigger the restart
         stopped.set(1)
 
     # Update settings
-    update_settings(**client_data.get("settings", {}))
+    update_settings(**client_data.settings)
 
     # Update sentry user
     set_sentry_user(client_data)

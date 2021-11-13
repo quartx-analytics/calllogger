@@ -30,11 +30,11 @@ class ExtraLogzioHandler(LogzioHandler):
         return extra_fields
 
 
-def send_logs_to_logzio(client_info, extras: dict):
+def send_logs_to_logzio(url: str, token: str, extras: dict):
     handler = ExtraLogzioHandler(
-        token=client_info["logzio_token"],
+        token=token,
         logzio_type="calllogger",
-        url=client_info["logzio_listener_url"],
+        url=url,
         debug=settings.debug,
         backup_logs=False,
         default_extras=extras,

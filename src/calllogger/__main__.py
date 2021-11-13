@@ -22,29 +22,30 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_known_args()
 
 
-def initialise_telemetry(client_info: dict, identifier: str):
+def initialise_telemetry(client_info, identifier: str):
     """Collect system metrics and logs."""
     # Enable metrics telemetry
-    if settings.collect_metrics and client_info["influx_token"]:
+    if settings.collect_metrics and client_info.influx_token:
         api.InfluxWrite(
-            url=client_info["influx_url"],
-            orgid=client_info["influx_orgid"],
-            bucket=client_info["influx_bucket"],
+            url=client_info.influx_url,
+            orgid=client_info.influx_orgid,
+            bucket=client_info.influx_bucket,
             collector=telemetry.collector,
-            token=client_info["influx_token"],
+            token=client_info.influx_token,
             default_fields=dict(
                 identifier=settings.identifier,
-                client=client_info["slug"],
+                client=client_info.slug,
             )
         ).start()
 
     # Enable logs telemetry
     if settings.collect_logs:
         telemetry.send_logs_to_logzio(
-            client_info=client_info,
+            url=client_info.logzio_url,
+            token=client_info.logzio_token,
             extras={
                 "identifier": identifier,
-                "tenant_slug": client_info["slug"],
+                "tenant_slug": client_info.slug,
             },
         )
 
@@ -61,7 +62,7 @@ def main_loop(plugin: str) -> int:
     api.setup_client_checkin(tokenauth, settings.identifier)
 
     # Configure sentry
-    plugin_name = plugin if plugin else client_info["settings"]["plugin"]
+    plugin_name = plugin if plugin else settings.plugin
     sentry_sdk.set_tag("plugin", plugin_name)
     plugin = get_plugin(plugin_name)
 

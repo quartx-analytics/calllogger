@@ -18,5 +18,4 @@ services:
         target: /dev
     environment:
       ENVIRONMENT: "${ENVIRONMENT:-Dockerized}"
-      DOMAIN: "https://quartx.dev/"
       PLUGIN_SLEEP: 300

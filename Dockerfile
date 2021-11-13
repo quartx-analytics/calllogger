@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.licenses="GPL-2.0-only"
 LABEL org.opencontainers.image.title="Quartx Call Logger"
 
 # Build Arguments, used to pass in Environment Variables
+ARG VERSION="latest"
 ARG SENTRY_DSN=""
 ARG REG_KEY=""
 
@@ -20,6 +21,7 @@ ENV DATA_LOCATION="/data"
 ENV SENTRY_DSN=$SENTRY_DSN
 ENV REG_KEY=$REG_KEY
 ENV VIRTUAL_ENV=/opt/venv
+ENV VERSION=$VERSION
 
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \

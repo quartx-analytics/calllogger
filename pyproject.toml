@@ -51,3 +51,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 calllogger = "calllogger.__main__:monitor"
 calllogger-mock = "calllogger.__main__:mockcalls"
+calllogger-getmac = "calllogger.__main__:getmac"

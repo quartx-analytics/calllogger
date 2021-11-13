@@ -22,7 +22,7 @@ parser.add_argument('--version', action='version', version=f"calllogger {__versi
 parser.parse_known_args()
 
 
-def initialise_telemetry(client_info, identifier: str):
+def initialise_telemetry(client_info: api.ClientInfo):
     """Collect system metrics and logs."""
     # Enable metrics telemetry
     if settings.collect_metrics and client_info.influx_token:
@@ -43,10 +43,10 @@ def initialise_telemetry(client_info, identifier: str):
         telemetry.send_logs_to_logzio(
             url=client_info.logzio_url,
             token=client_info.logzio_token,
-            extras={
-                "identifier": identifier,
-                "tenant_slug": client_info.slug,
-            },
+            extras=dict(
+                identifier=settings.identifier,
+                tenant_slug=client_info.slug,
+            ),
         )
 
 
@@ -56,7 +56,7 @@ def main_loop(plugin: str) -> int:
     client_info = api.ClientInfo.get_client_info(tokenauth, settings.identifier)
 
     # Initialise telemetry if we are able to
-    initialise_telemetry(client_info, settings.identifier)
+    initialise_telemetry(client_info)
 
     # Enable periodic checkin
     api.ClientInfo.setup_checkin(tokenauth, settings.identifier)
@@ -92,6 +92,12 @@ def monitor() -> int:
 def mockcalls() -> int:
     """Force use of the mock logger."""
     return main_loop("MockCalls")
+
+
+@graceful_exception
+def getmac() -> int:
+    print(settings.identifier)
+    return 0
 
 
 # Gracefully shutdown for 'kill <pid>' or docker stop <container>

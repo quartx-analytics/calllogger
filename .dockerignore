@@ -3,4 +3,4 @@ tox.ini
 .gitignore
 /.github
 /tests
-/docs
+docker-compose.yml

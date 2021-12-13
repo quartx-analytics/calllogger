@@ -127,7 +127,7 @@ msgpack = ">1.0"
 
 [[package]]
 name = "getmac"
-version = "0.8.2"
+version = "0.8.3"
 description = "Get MAC addresses of remote hosts and local interfaces"
 category = "main"
 optional = false
@@ -498,7 +498,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "e696dda68aa276d91febd64b4153a7e76b67b84199bc13874433fa1c7426a2bb"
+content-hash = "3f9896048733b4aa2c6bccf2564dedbbc3c7d8ab5c25d85dd6f777ce35bc588c"
 
 [metadata.files]
 appdirs = [
@@ -595,8 +595,8 @@ fluent-logger = [
     {file = "fluent_logger-0.10.0-py2.py3-none-any.whl", hash = "sha256:543637e5e62ec3fc3c92b44e5a4e148a3cea88a0f8ca4fae26c7e60fda7564c1"},
 ]
 getmac = [
-    {file = "getmac-0.8.2-py2.py3-none-any.whl", hash = "sha256:2e4aef2dd6c3befccd7cf9e18badddd24ab1992b928e2e811d415ed47137c547"},
-    {file = "getmac-0.8.2.tar.gz", hash = "sha256:d501d20b71856248cfa07a8758192e86a01077910afb8b659a89946c4d52d368"},
+    {file = "getmac-0.8.3-py2.py3-none-any.whl", hash = "sha256:95f5cbdf521a1045e3073f546a523d2adb2933f2ce647450c0a4b5c358ca85ca"},
+    {file = "getmac-0.8.3.tar.gz", hash = "sha256:6e38f9023b9792f53ef982cce6be65d84fea656be87100ab2f2d0376563af486"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},

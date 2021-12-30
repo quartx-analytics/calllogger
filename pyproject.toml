@@ -36,7 +36,7 @@ uptime = "^3.0.1"
 logzio-python-handler = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
-tox = "^3.24.4"
+tox = "^3.24.5"
 pytest = "^6.2.5"
 flake8 = "^4.0.1"
 pytest-cov = "^3.0.0"

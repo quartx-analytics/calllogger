@@ -1,6 +1,9 @@
 version = 1
 
-test_patterns = [
+exclude_patterns = [
+  "data/**",
+  "docs/**",
+  ".github/**",
   "tests/**"
 ]
 

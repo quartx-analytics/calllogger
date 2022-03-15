@@ -17,7 +17,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
           python-version: 3.9
@@ -40,7 +40,7 @@ jobs:
   flake8:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         with:
           python-version: 3.9
@@ -60,7 +60,7 @@ jobs:
     outputs:
       digest: ${{ steps.docker_build.outputs.digest }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set Environment Variables
         run: |
           echo "BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
@@ -68,7 +68,7 @@ jobs:
           echo "REG_KEY=$(echo -n '${{ secrets.REG_KEY }}' | base64 -w 0)" >> $GITHUB_ENV
 
       - name: Login to Github Container Registry
-        uses: docker/login-action@v1.12.0
+        uses: docker/login-action@v1.14.1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -82,7 +82,7 @@ jobs:
 
       - name: Build/Push Container Image
         id: docker_build
-        uses: docker/build-push-action@v2.7.0
+        uses: docker/build-push-action@v2.10.0
         with:
           push: true
           file: Dockerfile
@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [docker]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - id: mender
         name: Create mender artifact

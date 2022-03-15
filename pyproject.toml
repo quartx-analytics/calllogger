@@ -37,7 +37,7 @@ logzio-python-handler = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.24.5"
-pytest = "^6.2.5"
+pytest = "^7"
 flake8 = "^4.0.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"

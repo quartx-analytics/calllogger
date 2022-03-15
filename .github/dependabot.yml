@@ -7,12 +7,14 @@ version: 2
 updates:
   # Maintain dependencies for Poetry package system
   - package-ecosystem: "pip"
+    target-branch: "dev"
     directory: "/"
     schedule:
       interval: "daily"
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
+    target-branch: "dev"
     directory: "/"
     schedule:
       interval: "daily"

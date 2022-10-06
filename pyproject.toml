@@ -42,7 +42,7 @@ flake8 = "^4.0.1"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.6.1"
 requests-mock = "^1.9.3"
-tox-poetry-installer = "^0.8.2"
+tox-poetry-installer = "^0.10.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

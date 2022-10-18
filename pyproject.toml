@@ -31,7 +31,7 @@ attrs = "^21.4.0"
 appdirs = "^1.4.4"
 getmac = "^0.8.3"
 fluent-logger = "^0.10.0"
-psutil = "^5.9.0"
+psutil = "^5.9.3"
 uptime = "^3.0.1"
 logzio-python-handler = "^3.0.0"
 

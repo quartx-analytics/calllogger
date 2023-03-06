@@ -83,6 +83,8 @@ class Settings:
     timeout_decay: float = 1.5
     #: The max the timeout can be after continuous decay.
     max_timeout: int = 300
+    #: Time between server checkins in minutes
+    checkin_interval: int = 30
     #: Size of the call queue
     queue_size: int = 1_000
     #: The max number of records that can be sent in a batch job

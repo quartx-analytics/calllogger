@@ -83,7 +83,8 @@ class ClientInfo:
     def setup_checkin(cls, token: TokenAuth, identifier: str):
         logger.info("Scheduling client checkin for every 30min")
         ThreadTimer(
-            30 * 60,  # 30mins
+            # Convert from minutes to seconds
+            settings.checkin_interval * 60,
             cls.get_client_info,
             args=[token, identifier],
             kwargs={"checkin": True},

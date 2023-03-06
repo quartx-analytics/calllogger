@@ -30,20 +30,22 @@ Here is a list of command options that we will use to configure the docker conta
 
 * ``--detach``: Tell docker to start in the background.
 * ``--name "calllogger"``: Set the identifier name for the container.
-* ``--volume="calllogger-data:/data"``: Create a docker data volume and mounts it into the container,
+* ``--volume="calllogger-data:/data"``: Create a docker data volume and mount it into the container,
   this is required as containers are stateless.
 * ``--restart=on-failure``: Tell docker to start on startup and restart the docker container if
   the program exits unexpectedly.
 * ``--network host``: Give the container direct access to the network devices. This is required
   for device identification.
-* ``--env "KEY=VALUE"``: Set environment variables to be used by the calllogger.
-* ``--volume="/dev:/dev"``: Mounts all devices into the container. Required for serial port access.
-* ``--privileged``: Run the container in privileged mode. This is required for device access to work.
+* ``--env "KEY=VALUE"``: Set environment variables to be used by the call logger (Should not be needed).
+* ``--device=/dev/ttyUSB0:/dev/ttyUSB0``: Mount the USB serial device into the container.
+  The first path component is the path to the device on the host. The second path component is the mount point
+  in the container. The call logger expects the device path to be ``/dev/ttyUSB0`` by default.
+* ``--group-add dialout``: This will give the container permission to access the serial device.
 
-If you do not need access to any serial device, you can omit the
-``--volume="/dev:/dev`` and ``--privileged`` options.
+If you do not need access to any serial device, you can omit the ``--device`` and ``--group-add`` parameters.
 
-Below is a list of environment variables that can be used to configure the calllogger.
+Below is a list of environment variables that can be used to configure the call logger. This is normally
+controlled by the server, and is only used for testing.
 
 * ``TIMEOUT``: Timeout in seconds to sleep between errors.
 * ``TIMEOUT_DECAY``: Multiplier that increases the timeout on continuous errors.
@@ -61,8 +63,8 @@ Deployment
 ----------
 
 There is only one command required to install, configure and run the call logger.
-The plugin that will be used is determined by the server, but can be overridden.
+The plugin that will be used is determined by the server, but this can be overridden.
 
 ```bash
-docker run --detach --name "calllogger" --privileged --volume="/dev:/dev" --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger
+docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger
 ```

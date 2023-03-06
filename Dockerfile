@@ -25,7 +25,7 @@ ENV VERSION=$VERSION
 
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \
-    useradd --no-log-init -r -g users runner && \
+    useradd -rm -d /home/runner -s /bin/bash -g users -G dialout -u 999 runner && \
     chown runner:users $DATA_LOCATION
 
 # Copy required scripts
@@ -52,5 +52,4 @@ FROM base
 # Finalize build image
 COPY --from=compiler $VIRTUAL_ENV $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN usermod -a -G dialout runner
 USER runner:users

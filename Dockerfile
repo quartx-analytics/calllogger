@@ -26,7 +26,8 @@ ENV VERSION=$VERSION
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \
     useradd --no-log-init -r -g users runner && \
-    chown runner:users $DATA_LOCATION
+    chown runner:users $DATA_LOCATION \
+    usermod -a -G dialout runner
 
 # Copy required scripts
 COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules

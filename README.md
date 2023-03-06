@@ -40,7 +40,7 @@ Here is a list of command options that we will use to configure the docker conta
 * ``--device=/dev/ttyUSB0:/dev/ttyUSB0``: Mount the USB serial device into the container.
   The first path component is the path to the device on the host. The second path component is the mount point
   in the container. The call logger expects the device path to be ``/dev/ttyUSB0`` by default.
-* ``--group-add dialout``: This will give the container permission to access the serial device.
+* ``--group-add dialout``: This will give the container permission to access a serial device.
 
 If you do not need access to any serial device, you can omit the ``--device`` and ``--group-add`` parameters.
 

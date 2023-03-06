@@ -1,20 +1,16 @@
-version: "3.3"
-
 volumes:
   calllogger-data:
 
 services:
-  app:
+  calllogger:
     image: "ghcr.io/quartx-analytics/calllogger:${IMAGE_TAG:-latest}"
-    privileged: true
-    restart: always
+    restart: on-failure
     network_mode: host
     volumes:
       - type: volume
         source: calllogger-data
         target: /data
-      - type: bind
-        source: /dev
-        target: /dev
-    environment:
-      ENVIRONMENT: "${ENVIRONMENT:-Dockerized}"
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    group_add:
+      - dialout

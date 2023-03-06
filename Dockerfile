@@ -26,8 +26,8 @@ ENV VERSION=$VERSION
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \
     useradd --no-log-init -r -g users runner && \
-    chown runner:users $DATA_LOCATION && \
-    usermod -a -G dialout runner
+    chown runner:users $DATA_LOCATION
+    # usermod -a -G dialout runner
 
 # Copy required scripts
 COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules
@@ -44,7 +44,7 @@ COPY . /src
 RUN python -m venv /opt/venv && \
     . /opt/venv/bin/activate && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir /src --use-feature=in-tree-build
+    pip install --no-cache-dir /src
 
 
 # Switch back to base image to finish the build

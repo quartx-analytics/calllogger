@@ -8,6 +8,7 @@ import os
 
 # Third party
 import sentry_sdk
+import uptime
 
 # Local
 from calllogger import settings, stopped, __version__
@@ -45,10 +46,16 @@ class ClientInfo:
         api = QuartxAPIHandler()
         api.logger = logger
 
+        # Report the current system uptime
+        uptime_in_sec = uptime.uptime()
+        if uptime_in_sec is not None:
+            uptime_in_sec = int(uptime_in_sec)
+
         # We will pass data to server using query params
         params = dict(
             device_id=identifier,
             version=__version__,
+            uptime=uptime_in_sec,
         )
 
         # Add the local IP address

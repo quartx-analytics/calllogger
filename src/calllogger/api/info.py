@@ -133,6 +133,7 @@ def get_zerotier_ip() -> Optional[str]:
                     if addr.family == socket.AF_INET:
                         return addr.address
     except Exception:
+        logger.error("Unable to extract zerotier IP address")
         return None
 
 

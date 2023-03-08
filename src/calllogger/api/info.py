@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Standard lib
 from urllib.parse import urljoin
+from typing import Optional
 import logging
 import socket
 import os
@@ -9,6 +10,7 @@ import os
 # Third party
 import sentry_sdk
 import uptime
+import psutil
 
 # Local
 from calllogger import settings, stopped, __version__
@@ -46,21 +48,24 @@ class ClientInfo:
         api = QuartxAPIHandler()
         api.logger = logger
 
-        # Report the current system uptime
-        uptime_in_sec = uptime.uptime()
-        if uptime_in_sec is not None:
-            uptime_in_sec = int(uptime_in_sec)
-
         # We will pass data to server using query params
         params = dict(
             device_id=identifier,
             version=__version__,
-            uptime=uptime_in_sec,
         )
+
+        # Report the current system uptime
+        uptime_in_sec = uptime.uptime()
+        if uptime_in_sec is not None:
+            params["uptime"] = int(uptime_in_sec)
 
         # Add the local IP address
         if private_ip := get_private_ip():
             params["private_ip"] = private_ip
+
+        # Add the zerotier IP address
+        if zerotier_ip := get_zerotier_ip():
+            params["zerotier_ip"] = zerotier_ip
 
         resp = api.make_request(
             method="POST",
@@ -111,11 +116,24 @@ def set_sentry_user(client_info: ClientInfo):
 def get_private_ip() -> str:
     """Return the local network IP address."""
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(("quartx.ie", 80))
-            return s.getsockname()[0]
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("quartx.ie", 80))
+            return sock.getsockname()[0]
     except OSError:
         return ""
+
+
+# noinspection PyBroadException
+def get_zerotier_ip() -> Optional[str]:
+    """Return the IP address of the zerotier private network."""
+    try:
+        for interface, addrs in psutil.net_if_addrs().items():
+            if interface.startswith("zt"):
+                for addr in addrs:
+                    if addr.family == socket.AF_INET:
+                        return addr.address
+    except Exception:
+        return None
 
 
 def update_settings(**overrides):

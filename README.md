@@ -47,7 +47,7 @@ If you do not need access to any serial device, you can omit the ``--device`` an
 Below is a list of environment variables that can be used to configure the call logger. This is normally
 controlled by the server, and is only used for testing.
 
-* ``CHECKIN_INTERVAL``: Time between server checkins in minutes.
+* ``CHECKIN_INTERVAL``: Time between server checkins in minutes. Max 30min.
 * ``TIMEOUT``: Timeout in seconds to sleep between errors.
 * ``TIMEOUT_DECAY``: Multiplier that increases the timeout on continuous errors.
 * ``MAX_TIMEOUT``: The max the timeout can be after continuous decay.

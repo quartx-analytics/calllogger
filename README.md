@@ -69,3 +69,28 @@ The plugin that will be used is determined by the server, but this can be overri
 ```bash
 docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger
 ```
+
+Remote Access
+-------------
+
+For testing purposes, you can install a VPN like tool that allows for remote access without any port forwarding. 
+For this we will use ZeroTier. But first it would be a good idea to set up a firewall before installing ZeroTier.
+The following instructions are for Linux systems, ZeroTier will work on many systems.
+```bash
+# Install firewall
+sudo apt update
+sudo apt install ufw
+sudo ufw allow OpenSSH
+sudo ufw enable
+```
+
+```bash
+# Install ZeroTier
+curl -s https://install.zerotier.com | sudo bash
+zerotier-cli join <NETWORK-ID>
+```
+The above commands will set up the system to join a zerotier private network. The NETWORK-ID is the ID of the
+zerotier Call-Logger network. The ID can be found within the ZeroTier online account.
+
+To access the call-logger device you just need to join the correct network on your local machine.
+Then you can run ssh using the zerotier IP address of that device.

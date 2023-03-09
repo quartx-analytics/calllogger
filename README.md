@@ -60,6 +60,7 @@ Some plugins also have their own set of configurations that can be set using env
 -e "PLUGIN_<SETTING>=<VALUE>"
 ```
 
+
 Deployment
 ----------
 
@@ -69,6 +70,24 @@ The plugin that will be used is determined by the server, but this can be overri
 ```bash
 docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger
 ```
+
+
+Upgrading
+---------
+
+Updates can be handled using watchtower. Watchtower can update the running containers
+whenever it detects that a new image has been pushed to the docker registry. This check is run once every 24 hours.
+The update check process can also be triggered at any point when required by calling it with the ``--run-once`` parameter.
+
+Setup watchtower to periodically check for updates every 24 hours.
+```bash
+docker run --detach --name watchtower --volume /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower --cleanup --interval 86400
+```
+To trigger a watchtower update check.
+```bash
+docker run --rm --volume /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower --run-once --cleanup
+```
+
 
 Remote Access
 -------------
@@ -93,4 +112,8 @@ The above commands will set up the system to join a zerotier private network. Th
 zerotier Call-Logger network. The ID can be found within the ZeroTier online account.
 
 To access the call-logger device you just need to join the Call-Logger network on your local machine.
-Then you can run ssh using the zerotier IP address of that device.
+Then you can run ssh using the zerotier IP address of that device. Afterwords it's always a good idea to leave
+the network when your finished.
+```bash
+sudo zerotier-cli leave <NETWORK-ID>
+```

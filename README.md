@@ -87,7 +87,7 @@ sudo ufw enable
 ```bash
 # Install ZeroTier
 curl -s https://install.zerotier.com | sudo bash
-zerotier-cli join <NETWORK-ID>
+sudo zerotier-cli join <NETWORK-ID>
 ```
 The above commands will set up the system to join a zerotier private network. The NETWORK-ID is the ID of the
 zerotier Call-Logger network. The ID can be found within the ZeroTier online account.

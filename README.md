@@ -92,5 +92,5 @@ sudo zerotier-cli join <NETWORK-ID>
 The above commands will set up the system to join a zerotier private network. The NETWORK-ID is the ID of the
 zerotier Call-Logger network. The ID can be found within the ZeroTier online account.
 
-To access the call-logger device you just need to join the correct network on your local machine.
+To access the call-logger device you just need to join the Call-Logger network on your local machine.
 Then you can run ssh using the zerotier IP address of that device.

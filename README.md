@@ -79,7 +79,7 @@ Updates can be handled using watchtower. Watchtower can update the running conta
 whenever it detects that a new image has been pushed to the docker registry. This check is run once every 24 hours.
 The update check process can also be triggered at any point when required by calling it with the ``--run-once`` parameter.
 
-Setup watchtower to periodically check for updates every 24 hours.
+To set up watchtower to periodically check for updates every 24 hours.
 ```bash
 docker run --detach --name watchtower --volume /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower --cleanup --interval 86400
 ```

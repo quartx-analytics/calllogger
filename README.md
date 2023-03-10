@@ -72,8 +72,8 @@ docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dial
 ```
 
 
-Upgrading
----------
+Updating
+--------
 
 Updates can be handled using watchtower. Watchtower can update the running containers
 whenever it detects that a new image has been pushed to the docker registry. This check is run once every 24 hours.

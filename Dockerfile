@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM python:3.11-slim-bullseye as base
+FROM python:3.10-slim-bullseye as base
 
 # Add Labels for OCI Image Format Specification
 LABEL org.opencontainers.image.vendor="Quartx"
@@ -36,7 +36,7 @@ CMD ["calllogger"]
 
 
 # Switch to full buster to be able to compile uptime & psutil
-FROM python:3.11-bullseye as compiler
+FROM python:3.10-bullseye as compiler
 
 # Install the package in a virtual environment
 COPY . /src

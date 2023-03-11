@@ -10,7 +10,6 @@ on:
       - main
 
 env:
-  IMAGE_TAG: "${{ github.run_number }}"
   IMAGE_MAIN: ghcr.io/${{ github.repository_owner }}/calllogger
 
 jobs:
@@ -79,29 +78,30 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.IMAGE_MAIN }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=ref,event=branch
+            type=ref,event=pr
+
       - name: Build/Push Container Image
-        id: docker_build
         uses: docker/build-push-action@v4
         with:
-          push: true
-          file: Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
           platforms: |
             linux/amd64
-          tags: |
-            ${{ env.IMAGE_MAIN }}:dev
           build-args: |
             SENTRY_DSN=ZW5jb2RlZDo=${{ env.SENTRY_DSN }}
             REG_KEY=ZW5jb2RlZDo=${{ env.REG_KEY }}
-            VERSION=${{ env.IMAGE_TAG }}
-          labels: |
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.created=${{ env.BUILD_DATE }}
-            org.opencontainers.image.revision=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.IMAGE_MAIN }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_MAIN }}:buildcache,mode=max
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
 
 #  mender:
 #    runs-on: ubuntu-latest

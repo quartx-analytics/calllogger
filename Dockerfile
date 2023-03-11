@@ -3,11 +3,11 @@ FROM python:3.10-slim-bullseye as base
 
 # Add Labels for OCI Image Format Specification
 LABEL org.opencontainers.image.vendor="Quartx"
-LABEL org.opencontainers.image.title="Quartx Call Logger"
-LABEL org.opencontainers.image.description="CDR(Call Data Record) logger that sends call logs to the Quartx Call Monitoring service for analysis."
 LABEL org.opencontainers.image.authors="William Forde"
-LABEL org.opencontainers.image.url="https://quartx.ie"
-LABEL org.opencontainers.image.licenses="GPL-2.0-only"
+# LABEL org.opencontainers.image.title="Quartx Call Logger"
+# LABEL org.opencontainers.image.description="CDR(Call Data Record) logger that sends call logs to the Quartx Call Monitoring service for analysis."
+# LABEL org.opencontainers.image.url="https://quartx.ie"
+# LABEL org.opencontainers.image.licenses="GPL-2.0-only"
 
 # Build Arguments, used to pass in Environment Variables
 ARG VERSION="latest"

@@ -87,6 +87,8 @@ jobs:
             type=semver,pattern={{version}}
             type=ref,event=branch
             type=ref,event=pr
+          labels: |
+            org.opencontainers.image.title=Calllogger
 
       - name: Build/Push Container Image
         uses: docker/build-push-action@v4
@@ -97,6 +99,8 @@ jobs:
             SENTRY_DSN=ZW5jb2RlZDo=${{ env.SENTRY_DSN }}
             REG_KEY=ZW5jb2RlZDo=${{ env.REG_KEY }}
             VERSION=${{ steps.meta.outputs.version }}
+            --provenance=false
+            --sbom=false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.IMAGE_MAIN }}:buildcache

@@ -37,17 +37,5 @@ def get_plugin(selected_plugin: Union[str, int]):
         sys.exit(0)
 
 
-# def find_plugins() -> dict:
-#     """
-#     Return a dict of all the installed plugins.
-#     The name of the plugin as the key.
-#     """
-#     external_plugins = pkg_resources.iter_entry_points("calllogger.plugin")
-#     plugins = (plugin.get_class() for plugin in external_plugins)
-#     register_plugins(*plugins)
-#     return installed
-
-
 # Register Internal and External Plugins
 register_plugins(MockCalls, SiemensHipathSerial)
-# find_plugins()

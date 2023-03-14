@@ -30,7 +30,7 @@ from sentry_sdk.integrations.threading import ThreadingIntegration
 # Local
 from calllogger import conf, utils
 
-__version__ = config("VERSION", default="latest", cast=str)
+__version__ = "2.0.0"
 
 # Setup Sentry
 sentry_sdk.init(

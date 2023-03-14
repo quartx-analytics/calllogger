@@ -1,6 +1,0 @@
-LICENSE
-tox.ini
-.gitignore
-/.github
-/tests
-docker-compose.yml

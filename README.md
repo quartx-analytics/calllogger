@@ -1,4 +1,4 @@
-[![tests](https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml/badge.svg)](https://github.com/quartx-analytics/calllogger/actions/workflows/build-test.yml)
+[![ci](https://github.com/quartx-analytics/calllogger/actions/workflows/ci.yml/badge.svg)](https://github.com/quartx-analytics/calllogger/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/quartx-analytics/calllogger/branch/master/graph/badge.svg?token=AH0TIQ7F8V)](https://codecov.io/gh/quartx-analytics/calllogger)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c0d513f139aa33e2d4b6/maintainability)](https://codeclimate.com/github/quartx-analytics/calllogger/maintainability)
 

@@ -11,7 +11,7 @@ jobs:
         name: Create mender artifact
         uses: quartx-analytics/mender-docker-compose@main
         with:
-          compose-file: docker-compose.yml
+          compose-file: compose.yml
           compose-file-variables: IMAGE_TAG=${{ env.IMAGE_TAG }} ENVIRONMENT=Mender
           software-name: calllogger
           software-version: ${{ env.IMAGE_TAG }}

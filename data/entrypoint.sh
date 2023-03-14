@@ -1,4 +1,5 @@
-#!/bin/sh -e
+#!/bin/bash
+set -euo pipefail
 
 isMounted    () { findmnt -rno SOURCE,TARGET "$1" >/dev/null;} # path or device
 isDevMounted () { findmnt -rno SOURCE        "$1" >/dev/null;} # device only
@@ -9,14 +10,6 @@ if ! isPathMounted "$DATA_LOCATION"; then
   echo "The $DATA_LOCATION directory is required to be a mounted docker volume."
   echo "Please add the following to your docker command."
   echo "--volume='calllogger-data:$DATA_LOCATION'"
-  exit 0
-fi
-
-# Ensure that the /dev directory is mounted
-if ! isPathMounted "/dev"; then
-  echo "The /dev directory is required to be mounted into the docker container."
-  echo "Please add the following to your docker command."
-  echo "--volume='/dev:/dev'"
   exit 0
 fi
 

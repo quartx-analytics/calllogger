@@ -1,3 +1,19 @@
+# We use full Debian to be able to compile uptime & psutil
+FROM python:3.10-bullseye as builder
+
+# Install the package dependencies in a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1
+COPY requirements-docker.txt /requirements-docker.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip --disable-pip-version-check install --no-compile -r /requirements-docker.txt
+
+# Install the package itself
+COPY pyproject.toml LICENSE README.md /project/
+COPY src /project/src/
+RUN pip --disable-pip-version-check install --no-compile --no-clean --no-deps /project
+
+
 # syntax=docker/dockerfile:1.2
 FROM python:3.10-slim-bullseye as base
 
@@ -24,29 +40,15 @@ ENV VERSION=$VERSION
 RUN mkdir -p $DATA_LOCATION && \
     useradd -rm -d /home/runner -s /bin/bash -g users -G dialout -u 999 runner && \
     chown runner:users $DATA_LOCATION
+WORKDIR /home/runner
 
 # Copy required scripts
 COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules
 COPY data/entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["calllogger"]
-
-
-# Switch to full buster to be able to compile uptime & psutil
-FROM python:3.10-bullseye as compiler
-
-# Install the package in a virtual environment
-COPY . /src
-RUN python -m venv /opt/venv && \
-    . /opt/venv/bin/activate && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir /src
-
-
-# Switch back to base image to finish the build
-FROM base
 
 # Finalize build image
-COPY --from=compiler $VIRTUAL_ENV $VIRTUAL_ENV
+COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["calllogger"]
 USER runner:users

@@ -59,6 +59,6 @@ def link_device(identifier) -> Union[str, None]:
                 extra={
                     "status_code": status_code,
                     "reason": getattr(resp, "reason", ""),
-                }
+                },
             )
             return None

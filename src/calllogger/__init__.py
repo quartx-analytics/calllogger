@@ -49,11 +49,7 @@ closeers: list[callable] = []
 # Logging configuration
 logging_config = {
     "version": 1,
-    "filters": {
-        "only_messages": {
-            "()": "calllogger.utils.OnlyMessages"
-        }
-    },
+    "filters": {"only_messages": {"()": "calllogger.utils.OnlyMessages"}},
     "formatters": {
         "levelname": {
             "format": "%(levelname)s: %(message)s",
@@ -72,14 +68,14 @@ logging_config = {
             "stream": "ext://sys.stderr",
             "formatter": "levelname",
             "level": "WARNING",
-        }
+        },
     },
     "loggers": {
         "calllogger": {
             "handlers": ["console_messages", "console_errors"],
             "level": "DEBUG" if settings.debug else "INFO",
         }
-    }
+    },
 }
 
 # Apply logging config

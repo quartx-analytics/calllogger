@@ -98,6 +98,7 @@ def graceful_exception(func):
     Decorator function to handle exceptions gracefully.
     And signal any threads to end.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> int:
         try:
@@ -106,4 +107,5 @@ def graceful_exception(func):
             return terminate(signal.SIGINT)
         finally:
             stopped.set()
+
     return wrapper

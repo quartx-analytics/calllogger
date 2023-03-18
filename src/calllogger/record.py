@@ -50,6 +50,7 @@ class CallDataRecord:
     :cvar RECEIVED_TRANSFERRED_EXT: 37
     :cvar OUTGOING_TRANSFERRED_EXT: 38
     """
+
     # Class attributes
     call_type: int = attr.ib(init=True)
     date: datetime = attr.ib(init=False)

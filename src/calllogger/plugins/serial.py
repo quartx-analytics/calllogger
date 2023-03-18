@@ -56,10 +56,7 @@ class SerialPlugin(BasePlugin):
         except Exception:
             self.logger.warning(
                 "Failed to connect to serial interface",
-                extra={
-                    "baudrate": self.baudrate,
-                    "port": str(self.port)
-                }
+                extra={"baudrate": self.baudrate, "port": str(self.port)},
             )
             telemetry.serial_error_counter().tags(error_type="conn").mark()
             self.timeout.sleep()
@@ -82,8 +79,7 @@ class SerialPlugin(BasePlugin):
             return self.decode(raw)
         except Exception:
             self.logger.warning(
-                "Failed to decode serial line",
-                extra={"serial_line": repr(raw)}
+                "Failed to decode serial line", extra={"serial_line": repr(raw)}
             )
             telemetry.serial_error_counter().tags(error_type="decode").mark()
             raise
@@ -114,8 +110,7 @@ class SerialPlugin(BasePlugin):
             raise
         except Exception:
             self.logger.debug(
-                "Serial line failed validation: %s",
-                extra={"serial_line": decoded_line}
+                "Serial line failed validation: %s", extra={"serial_line": decoded_line}
             )
             telemetry.serial_error_counter().tags(error_type="validation").mark()
             raise

@@ -101,7 +101,7 @@ class ClientInfo:
             cls.get_client_info,
             args=[token, identifier],
             kwargs={"checkin": True},
-            repeat=True
+            repeat=True,
         ).start()
 
 

@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class OnlyMessages(logging.Filter):
     """Filter out log records that are less than the WARNING level."""
+
     def filter(self, record):
         return record.levelno < logging.WARNING
 

@@ -135,7 +135,7 @@ def _fields_protocol(fields: dict[str, Any]) -> str:
         # Double quote string field values
         elif isinstance(value, str):
             # Strip out any quotes, They are allowed but messy to work with
-            value = value.replace('"', '').replace("'", "")
+            value = value.replace('"', "").replace("'", "")
             value = f'"{value}"'
         else:
             raise ValueError(f'Type: "{type(value)}" of field: "{key}" is not supported.')

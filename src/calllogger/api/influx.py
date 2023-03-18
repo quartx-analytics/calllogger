@@ -27,14 +27,14 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
     """
 
     def __init__(
-            self,
-            url: str,
-            org: str,
-            bucket: str,
-            collector: telemetry.InfluxCollector,
-            token: str,
-            default_tags=None,
-            default_fields=None
+        self,
+        url: str,
+        org: str,
+        bucket: str,
+        collector: telemetry.InfluxCollector,
+        token: str,
+        default_tags=None,
+        default_fields=None,
     ):
         super().__init__(system_collector=collector, suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.info("Initializing InfluxDB metrics monitoring")
@@ -57,7 +57,7 @@ class InfluxWrite(telemetry.SystemMetrics, QuartxAPIHandler, threading.Thread):
                 org=org,
                 bucket=bucket,
                 precision=collector.precision,
-            )
+            ),
         )
 
     def run(self):

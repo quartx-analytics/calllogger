@@ -48,7 +48,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
             self._queue.put(record)
         else:
             self.logger.warning(
-                f"CDR Queue is full {self._queue.qsize()}",
+                "CDR Queue is full %s", self._queue.qsize(),
                 extra={"queue_size": self._queue.qsize()},
             )
 
@@ -60,7 +60,7 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
                     break
 
             self.logger.info(
-                f"CDR Queue is no longer full {self._queue.qsize()}",
+                "CDR Queue is no longer full %s", self._queue.qsize(),
                 extra={"queue_size": self._queue.qsize()}
             )
 

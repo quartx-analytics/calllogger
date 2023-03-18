@@ -18,7 +18,7 @@ ESCAPE_KEY = str.maketrans({
 })
 
 
-class Point(object):
+class Point:
     """Point defines the values that will be written to the database."""
 
     SECONDS = "s"

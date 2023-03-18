@@ -156,7 +156,7 @@ class SerialPlugin(BasePlugin):
         :param str validated_line: The decoded serial line.
         :returns: A :class:`calllogger.CallDataRecord` object.
         """
-        pass
+        raise NotImplementedError
 
     def entrypoint(self) -> NoReturn:
         """

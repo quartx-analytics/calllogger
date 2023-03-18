@@ -36,7 +36,7 @@ class ClientInfo:
         try:
             return self.raw_json[name]
         except KeyError:
-            raise AttributeError("'{0}' object has no attribute '{1}'".format(self.__class__.__name__, name))
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
     def __getitem__(self, key):
         return self.raw_json[key]

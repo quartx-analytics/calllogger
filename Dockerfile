@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Install the package itself
 COPY pyproject.toml LICENSE README.md /project/
 COPY src /project/src/
-RUN pip --disable-pip-version-check install --no-compile --no-clean --no-deps /project
+RUN pip --disable-pip-version-check install --no-cache-dir --no-compile --no-clean --no-deps /project
 
 
 # syntax=docker/dockerfile:1.2

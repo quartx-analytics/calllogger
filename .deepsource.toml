@@ -9,7 +9,7 @@ exclude_patterns = [
 
 [[analyzers]]
 name = "test-coverage"
-enabled = true
+enabled = false
 
 [[analyzers]]
 name = "secrets"

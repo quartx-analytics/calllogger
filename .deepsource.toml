@@ -1,10 +1,16 @@
 version = 1
 
 exclude_patterns = [
-  "data/**",
   ".github/**",
-  "tests/**"
 ]
+
+test_patterns = [
+  "tests/**",
+]
+
+[[analyzers]]
+name = "python"
+enabled = true
 
 [[analyzers]]
 name = "test-coverage"
@@ -16,10 +22,6 @@ enabled = true
 
 [[analyzers]]
 name = "docker"
-enabled = true
-
-[[analyzers]]
-name = "python"
 enabled = true
 
   [analyzers.meta]

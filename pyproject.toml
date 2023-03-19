@@ -67,7 +67,7 @@ tests = "pytest"
 linting = "flake8 src/calllogger"
 checks = {composite = ["linting", "tests"]}
 post_lock = {composite = [
-    "pdm export -o requirements.txt --without-hashes --prod",
+    "pdm export -o requirements-docker.txt --without-hashes --prod",
     "pdm export -o requirements-test.txt --without-hashes --dev --group test",
 ]}
 

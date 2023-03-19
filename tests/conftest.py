@@ -90,7 +90,7 @@ def mock_env():
     def env_mocker(**kwargs):
         for key, val in kwargs.items():
             key = key.upper()
-            org_value = os.environ.get(key, None)
+            org_value = os.environ.get(key)
             tracker.append((key, org_value))
             os.environ[key] = str(val)
 

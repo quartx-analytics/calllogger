@@ -2,9 +2,6 @@ version = 1
 
 exclude_patterns = [
   ".github/**",
-]
-
-test_patterns = [
   "tests/**",
 ]
 

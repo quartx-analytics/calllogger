@@ -51,6 +51,7 @@ def link_device(identifier) -> Union[str, None]:
 
             logger.debug("Device registration rejected. Will try again later", extra={"wait_time": wait_time})
             stopped.wait(wait_time)
+            continue
 
         else:
             # Have no idea what to do here only return None
@@ -62,3 +63,4 @@ def link_device(identifier) -> Union[str, None]:
                 },
             )
             return None
+    return None

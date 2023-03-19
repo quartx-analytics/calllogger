@@ -135,7 +135,7 @@ def get_zerotier_ip() -> Optional[str]:
                         return addr.address
     except Exception:
         logger.error("Unable to extract zerotier IP address")
-        return None
+    return None
 
 
 def update_settings(**overrides):

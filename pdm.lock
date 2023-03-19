@@ -308,7 +308,7 @@ summary = "Module for decorators, wrappers and monkey patching."
 
 [metadata]
 lock_version = "4.1"
-content_hash = "sha256:faf2ed2114e61a2df7cb82816e736d0086eae483cf310bc0234274ce1c1c33d0"
+content_hash = "sha256:317d4f7da14b644e608f4a811d83effd2225ba20d4601398f35fc25cb6699b1f"
 
 [metadata.files]
 "appdirs 1.4.4" = [

@@ -111,4 +111,4 @@ cov.xml
 
 # PDM
 __pypackages__
-/.pdm.toml
+.pdm.toml

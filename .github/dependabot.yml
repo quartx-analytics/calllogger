@@ -5,16 +5,23 @@
 
 version: 2
 updates:
-  # Maintain dependencies for Poetry package system
+  # Maintain dependencies for Python
   - package-ecosystem: "pip"
-    target-branch: "dev"
+    target-branch: "main"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+
+  # Maintain source images for Dockerfile
+  - package-ecosystem: "docker"
+    target-branch: "main"
+    directory: "/"
+    schedule:
+      interval: "weekly"
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
-    target-branch: "dev"
+    target-branch: "main"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"

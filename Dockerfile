@@ -4,9 +4,9 @@ FROM python:3.10-bullseye as builder
 # Install the package dependencies in a virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1
-COPY requirements-docker.txt /requirements-docker.txt
+COPY requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip --disable-pip-version-check install --no-compile -r /requirements-docker.txt
+    pip --disable-pip-version-check install --no-compile -r /requirements.txt
 
 # Install the package itself
 COPY pyproject.toml LICENSE README.md /project/

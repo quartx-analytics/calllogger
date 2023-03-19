@@ -1,5 +1,5 @@
 # We use full Debian to be able to compile uptime & psutil
-FROM python:3.10-bullseye as builder
+FROM python:3.11-bullseye as builder
 
 # Install the package dependencies in a virtual environment
 RUN python -m venv /opt/venv
@@ -15,7 +15,7 @@ RUN pip --disable-pip-version-check install --no-cache-dir --no-compile --no-cle
 
 
 # syntax=docker/dockerfile:1.2
-FROM python:3.10-slim-bullseye as base
+FROM python:3.11-slim-bullseye as base
 
 # Add Labels for OCI Image Format Specification
 LABEL org.opencontainers.image.vendor="Quartx"

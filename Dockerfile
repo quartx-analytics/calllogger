@@ -3,7 +3,7 @@ FROM python:3.10-bullseye as builder
 
 # Install the package dependencies in a virtual environment
 RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 COPY requirements-docker.txt /requirements-docker.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip --disable-pip-version-check install --no-compile -r /requirements-docker.txt
@@ -14,27 +14,25 @@ COPY src /project/src/
 RUN pip --disable-pip-version-check install --no-cache-dir --no-compile --no-clean --no-deps /project
 
 
-# syntax=docker/dockerfile:1.2
+# Switch to slim Debian for the runtime
 FROM python:3.10-slim-bullseye as base
 
 # Add Labels for OCI Image Format Specification
 LABEL org.opencontainers.image.vendor="Quartx"
-LABEL org.opencontainers.image.authors="William Forde"
+LABEL org.opencontainers.image.authors="William Forde <william@quartx.ie>"
 
 # Build Arguments, used to pass in Environment Variables
-ARG VERSION="latest"
 ARG SENTRY_DSN=""
 ARG REG_KEY=""
 
 # Docker Environment Variables
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV DOCKERIZED=1
 ENV ENVIRONMENT="Dockerized"
 ENV DATA_LOCATION="/data"
 ENV SENTRY_DSN=$SENTRY_DSN
 ENV REG_KEY=$REG_KEY
-ENV VIRTUAL_ENV=/opt/venv
-ENV VERSION=$VERSION
 
 # Image setup
 RUN mkdir -p $DATA_LOCATION && \
@@ -47,8 +45,8 @@ COPY data/99-serial.rules /etc/udev/rules.d/99-serial.rules
 COPY data/entrypoint.sh /entrypoint.sh
 
 # Finalize build image
-COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["calllogger"]
 USER runner:users

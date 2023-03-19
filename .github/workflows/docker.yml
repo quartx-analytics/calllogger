@@ -29,8 +29,7 @@ jobs:
       - name: Build/Push Container Image
         uses: docker/build-push-action@v4
         with:
-          push: ${{ github.event_name != 'pull_request' }}
           platforms: linux/amd64
-          build-args: VERSION=${{ steps.meta.outputs.version }}
-          tags: ${{ steps.meta.outputs.tags }}
+          push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}

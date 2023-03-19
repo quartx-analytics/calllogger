@@ -97,6 +97,5 @@ jobs:
           build-args: |
             REG_KEY=${{ secrets.REG_KEY }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-            VERSION=${{ steps.meta.outputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

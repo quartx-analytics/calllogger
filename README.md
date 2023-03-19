@@ -1,6 +1,5 @@
 [![ci](https://github.com/quartx-analytics/calllogger/actions/workflows/ci.yml/badge.svg)](https://github.com/quartx-analytics/calllogger/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/quartx-analytics/calllogger/branch/master/graph/badge.svg?token=AH0TIQ7F8V)](https://codecov.io/gh/quartx-analytics/calllogger)
-[![DeepSource](https://deepsource.io/gh/quartx-analytics/calllogger.svg/?label=active+issues&token=Mreie4RAWMjhCZ2JORGFbhnn)](https://deepsource.io/gh/quartx-analytics/calllogger/?ref=repository-badge)
 
 
 Quartx Call Logger

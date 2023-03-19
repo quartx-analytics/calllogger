@@ -10,7 +10,7 @@ logzio-python-handler==4.0.1
 msgpack==1.0.5
 opentelemetry-api==1.16.0
 opentelemetry-instrumentation==0.32b0
-opentelemetry-instrumentation-logging==0.32b0
+opentelemetry-instrumentation-logging==0.37b0
 protobuf==4.22.1
 psutil==5.9.4
 pyserial==3.5

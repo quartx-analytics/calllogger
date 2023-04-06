@@ -1,6 +1,7 @@
 name: Cleanup
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "20 23 */2 * *"
   delete:

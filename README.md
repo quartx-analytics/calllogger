@@ -67,7 +67,7 @@ There is only one command required to install, configure and run the call logger
 The plugin that will be used is determined by the server, but this can be overridden.
 
 ```bash
-docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger
+docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger:latest
 ```
 
 
@@ -91,7 +91,7 @@ docker run --rm --volume /var/run/docker.sock:/var/run/docker.sock containrrr/wa
 Remote Access
 -------------
 
-For testing purposes, you can install a VPN like tool that allows for remote access without any port forwarding. 
+For testing purposes, you can install a VPN like tool that allows for remote access without any port forwarding.
 For this we will use ZeroTier. But first it would be a good idea to set up a firewall before installing ZeroTier.
 The following instructions are for Linux systems, ZeroTier will work on many systems.
 ```bash

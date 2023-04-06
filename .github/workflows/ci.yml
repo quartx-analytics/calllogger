@@ -1,11 +1,19 @@
 name: CI
 
 on:
-  - push
-  - pull_request
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      no-cache:
+        description: Disable the build caching
+        required: false
+        default: false
+        type: boolean
 
 env:
-  IMAGE_MAIN: ghcr.io/${{ github.repository_owner }}/calllogger
+  ENABLE_DOCKER_DEPOT: false
+  IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/calllogger
   PYTHON_VERSION: "3.10"
 
 jobs:
@@ -67,7 +75,12 @@ jobs:
       id-token: write
     steps:
       - name: Setup Depot Build
+        if: env.ENABLE_DOCKER_DEPOT == 'true'
         uses: depot/setup-action@v1
+
+      - name: Setup Docker Buildkit
+        if: env.ENABLE_DOCKER_DEPOT == 'false'
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to Github Container Registry
         uses: docker/login-action@v2
@@ -80,7 +93,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.IMAGE_MAIN }}
+          images: ${{ env.IMAGE_BASE }}
           tags: |
             type=semver,pattern={{version}}
             type=ref,event=branch
@@ -88,14 +101,34 @@ jobs:
           labels: |
             org.opencontainers.image.title=Calllogger
 
-      - name: Build/Push Container Image
+      - name: Build/Push using Depot
+        if: env.ENABLE_DOCKER_DEPOT == 'true'
         uses: depot/build-push-action@v1
         with:
           project: ${{ vars.DEPOT_PROJECT_ID }}
-          push: ${{ github.event_name != 'pull_request' }}
           platforms: linux/amd64, linux/arm64, linux/arm/v7
           build-args: |
             REG_KEY=${{ secrets.REG_KEY }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          no-cache: ${{ inputs.no-cache || 'false' }}
+          pull: ${{ inputs.no-cache || 'false' }}
+          push: true
+
+      - name: Build/Push using Buildkit
+        if: env.ENABLE_DOCKER_DEPOT == 'false'
+        uses: docker/build-push-action@v4
+        with:
+          platforms: linux/amd64, linux/arm64, linux/arm/v7
+          build-args: |
+            REG_KEY=${{ secrets.REG_KEY }}
+            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.IMAGE_BASE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_BASE }}:buildcache,mode=max
+          no-cache: ${{ inputs.no-cache || 'false' }}
+          pull: ${{ inputs.no-cache || 'false' }}
+          provenance: false
+          push: true

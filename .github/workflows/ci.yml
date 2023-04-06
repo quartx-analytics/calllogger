@@ -137,5 +137,4 @@ jobs:
           cache-to: type=registry,ref=${{ env.IMAGE_BASE }}:buildcache,mode=max
           no-cache: ${{ inputs.no-cache || 'false' }}
           pull: ${{ inputs.no-cache || 'false' }}
-          provenance: false
           push: true

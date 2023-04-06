@@ -21,6 +21,7 @@ env:
 
 jobs:
   python-lint:
+    name: Python Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,6 +38,7 @@ jobs:
           flake8 src
 
   docker-lint:
+    name: Docker Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,6 +48,7 @@ jobs:
           ignore: DL3042
 
   tests:
+    name: Unittests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -69,8 +72,9 @@ jobs:
         with:
           flags: unittests
 
-  docker-depot:
+  docker-build:
     if: ${{ github.event_name != 'pull_request' }}
+    name: Build
     runs-on: ubuntu-latest
     needs: [docker-lint, python-lint, tests]
     permissions:

@@ -12,7 +12,7 @@ on:
         type: boolean
 
 env:
-  ENABLE_DOCKER_DEPOT: false
+  ENABLE_DOCKER_DEPOT: true
   # ENABLE_DOCKER_DEPOT: ${{ github.event_name != 'pull_request' }}
   IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/calllogger
   PYTHON_VERSION: "3.10"
@@ -82,6 +82,10 @@ jobs:
       - name: Setup Docker Buildkit
         if: env.ENABLE_DOCKER_DEPOT == 'false'
         uses: docker/setup-buildx-action@v2
+
+      - name: Set up QEMU
+        if: env.ENABLE_DOCKER_DEPOT == 'false'
+        uses: docker/setup-qemu-action@v2
 
       - name: Login to Github Container Registry
         uses: docker/login-action@v2

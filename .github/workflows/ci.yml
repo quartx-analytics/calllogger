@@ -12,9 +12,11 @@ on:
         type: boolean
 
 env:
-  ENABLE_DOCKER_DEPOT: true
+  ENABLE_DOCKER_DEPOT: false
   # ENABLE_DOCKER_DEPOT: ${{ github.event_name != 'pull_request' }}
   IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/calllogger
+  BUILD_PLATFORMS: linux/amd64, linux/arm64, linux/arm/v7
+  # BUILD_PLATFORMS: linux/amd64
   PYTHON_VERSION: "3.10"
 
 jobs:
@@ -111,7 +113,7 @@ jobs:
         uses: depot/build-push-action@v1
         with:
           project: ${{ vars.DEPOT_PROJECT_ID }}
-          platforms: linux/amd64, linux/arm64, linux/arm/v7
+          platforms: ${{ env.BUILD_PLATFORMS }}
           build-args: |
             REG_KEY=${{ secrets.REG_KEY }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
@@ -125,7 +127,7 @@ jobs:
         if: env.ENABLE_DOCKER_DEPOT == 'false'
         uses: docker/build-push-action@v4
         with:
-          platforms: linux/amd64, linux/arm64, linux/arm/v7
+          platforms: ${{ env.BUILD_PLATFORMS }}
           build-args: |
             REG_KEY=${{ secrets.REG_KEY }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}

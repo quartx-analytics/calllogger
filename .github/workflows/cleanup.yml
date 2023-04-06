@@ -13,7 +13,7 @@ on:
       - closed
 
 env:
-  MIN_VERSIONS_TO_KEEP: 5
+  MIN_VERSIONS_TO_KEEP: 10
 
 jobs:
   registry:
@@ -29,7 +29,7 @@ jobs:
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
           name: calllogger
-          owner: quartx-analytics
+          owner: ${{ github.repository_owner }}
           token: ${{ secrets.REGISTRY_TOKEN }}
           untagged-keep-latest: ${{ steps.calc.outputs.multi_value }}
 
@@ -43,7 +43,7 @@ jobs:
         continue-on-error: true
         with:
           name: calllogger
-          owner: quartx-analytics
+          owner: ${{ github.repository_owner }}
           token: ${{ secrets.REGISTRY_TOKEN }}
           tag: ${{ github.event.ref }}
 
@@ -56,6 +56,6 @@ jobs:
         uses: bots-house/ghcr-delete-image-action@v1.1.0
         with:
           name: calllogger
-          owner: quartx-analytics
+          owner: ${{ github.repository_owner }}
           token: ${{ secrets.REGISTRY_TOKEN }}
           tag: pr-${{github.event.pull_request.number}}

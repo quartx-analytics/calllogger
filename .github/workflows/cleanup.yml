@@ -25,15 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete all containers from repository without tags
-        uses: quartx-analytics/delete-untagged-ghcr-action@new
+        uses: quartx-analytics/delete-untagged-ghcr-action@main
         with:
-          dry_run: ${{ inputs.dry-run || 'false' }}
-          token: ${{ github.token }}
-          repository_owner: ${{ github.repository_owner }}
-          repository: ${{ github.repository }}
-          except_untagged_multiplatform: true
-          untagged_only: true
-          owner_type: org
+          dry-run: ${{ inputs.dry-run || 'false' }}
+          token: ${{ secrets.REGISTRY_TOKEN }}
+          package-name: quartx-site
+          owner-type: org
 
   branch_deleted:
     if: github.event_name == 'delete' && github.event.ref_type == 'branch'

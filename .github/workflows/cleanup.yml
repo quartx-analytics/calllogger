@@ -2,6 +2,12 @@ name: Cleanup
 
 on:
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Run the registry cleanup script without making any changes.
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: "20 23 */2 * *"
   delete:
@@ -12,26 +18,22 @@ on:
     types:
       - closed
 
-env:
-  MIN_VERSIONS_TO_KEEP: 10
-
 jobs:
-#  registry:
-#    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
-#    name: Registry Cleanup
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Multiply min version to account for multi arch
-#        run: echo "multi_value=$(( $MIN_VERSIONS_TO_KEEP * 4 ))" >> $GITHUB_OUTPUT
-#        id: calc
-#
-#      - name: Remove all but the ${{ env.MIN_VERSIONS_TO_KEEP }} most recent untagged images
-#        uses: bots-house/ghcr-delete-image-action@v1.1.0
-#        with:
-#          name: calllogger
-#          owner: ${{ github.repository_owner }}
-#          token: ${{ secrets.REGISTRY_TOKEN }}
-#          untagged-keep-latest: ${{ steps.calc.outputs.multi_value }}
+  registry:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    name: Registry Cleanup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all containers from repository without tags
+        uses: quartx-analytics/delete-untagged-ghcr-action@new
+        with:
+          dry_run: ${{ inputs.dry-run || 'false' }}
+          token: ${{ github.token }}
+          repository_owner: ${{ github.repository_owner }}
+          repository: ${{ github.repository }}
+          except_untagged_multiplatform: true
+          untagged_only: true
+          owner_type: org
 
   branch_deleted:
     if: github.event_name == 'delete' && github.event.ref_type == 'branch'

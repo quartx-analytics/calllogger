@@ -25,12 +25,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete all containers from repository without tags
-        uses: quartx-analytics/delete-untagged-ghcr-action@main
+        uses: quartx-analytics/ghcr-cleaner@v1
         with:
           dry-run: ${{ inputs.dry-run || 'false' }}
           token: ${{ secrets.REGISTRY_TOKEN }}
           package-name: calllogger
           owner-type: org
+          delete-untagged: true
+          keep-at-most: 5
+          filter-tags: v*
+          skip-tags: latest
 
   branch_deleted:
     if: github.event_name == 'delete' && github.event.ref_type == 'branch'

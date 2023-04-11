@@ -106,7 +106,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_BASE }}
           tags: |
-            type=semver,pattern={{version}}
+            type=semver,pattern=v{{version}}
             type=ref,event=branch
             type=ref,event=pr
           labels: |

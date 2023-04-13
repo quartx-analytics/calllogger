@@ -12,7 +12,7 @@ def strip_str(_, __, value):
     return value.strip() if isinstance(value, str) else value
 
 
-@attrs.define(on_setattr=strip_str, slots=False)
+@attrs.define(on_setattr=strip_str)
 class CallDataRecord:
     """
     The dataclass is for call data records.
@@ -21,13 +21,13 @@ class CallDataRecord:
 
         * **call_type** (*int*) - The type of call record, incoming/received/outgoing
         * **line** (*int*) - The line number that the call is on.
-        * **ext** (*int*) - The extention number that the call is on.
+        * **ext** (*int*) - The extension number that the call is on.
         * **number** (*str*) - The phone number of the caller. If not givin, '+353000000000' is used.
         * **date** (*datetime*) - The datetime of the call, optional but recommended.
         * **ring** (*int*) - The time in seconds that the caller was ringing for. Defaults = 0
         * **duration** (*int*) - The duration of the call in seconds. Defaults = 0
         * **answered** (*int*/*bool*) - Indicate if call was answered. Determined by duration if not given.
-        * **raw** (*str*) - The original unparsed raw call record.
+        * **raw** (*str*) - The original un-parsed raw call record.
 
     .. note:: **duration** & **ring** may also be in the format of ``HH:MM:SS`` or ``MM:SS``.
 
@@ -103,4 +103,18 @@ class CallDataRecord:
 
     def as_dict(self) -> dict:
         """Return this objects data as a dict of values."""
-        return self.__dict__
+        unset_fields = []
+
+        # We need to replace all fields that have not been set, to None
+        # This needs to be done or attrs.asdict will fail.
+        # We can then ignore those fields in the final output.
+        for field in attrs.fields(CallDataRecord):
+            try:
+                getattr(self, field.name)
+            except AttributeError:
+                unset_fields.append(field.name)
+                setattr(self, field.name, None)
+
+        raw_data = attrs.asdict(self)
+        # Scrap the unset fields from the asdict output.
+        return {key: val for key, val in raw_data.items() if key not in unset_fields}

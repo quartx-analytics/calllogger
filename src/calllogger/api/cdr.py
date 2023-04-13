@@ -59,7 +59,7 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
                     while len(batch_jobs) < settings.batch_size:
                         record: CallDataRecord = self.queue.get(timeout=0.1)
                         # In batch mode we ignore incoming calls
-                        # They make no sence in a batch job
+                        # They make no sense in a batch job
                         if str(record.call_type) != str(record.INCOMING):
                             batch_jobs.append(record.__dict__)
 

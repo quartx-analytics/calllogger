@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 
 # Third Party
-import attr
+import attrs
 
 __all__ = ["CallDataRecord"]
 
@@ -12,7 +12,7 @@ def strip_str(_, __, value):
     return value.strip() if isinstance(value, str) else value
 
 
-@attr.s(auto_attribs=True, collect_by_mro=True, on_setattr=strip_str, repr=True)
+@attrs.define(on_setattr=strip_str, slots=False)
 class CallDataRecord:
     """
     The dataclass is for call data records.
@@ -52,18 +52,18 @@ class CallDataRecord:
     """
 
     # Class attributes
-    call_type: int = attr.ib(init=True)
-    date: datetime = attr.ib(init=False)
-    number: str = attr.ib(init=False)
-    contact_name: str = attr.ib(init=False)
-    contact_email: str = attr.ib(init=False)
-    line: int = attr.ib(init=False)
-    ext: int = attr.ib(init=False)
-    ext_name: str = attr.ib(init=False)
-    ring: int = attr.ib(init=False)
-    duration: int = attr.ib(init=False)
-    answered: bool = attr.ib(init=False)
-    raw: str = attr.ib(init=False)
+    call_type: int = attrs.field(init=True)
+    date: datetime = attrs.field(init=False)
+    number: str = attrs.field(init=False)
+    contact_name: str = attrs.field(init=False)
+    contact_email: str = attrs.field(init=False)
+    line: int = attrs.field(init=False)
+    ext: int = attrs.field(init=False)
+    ext_name: str = attrs.field(init=False)
+    ring: int = attrs.field(init=False)
+    duration: int = attrs.field(init=False)
+    answered: bool = attrs.field(init=False)
+    raw: str = attrs.field(init=False)
 
     # Class Vars
     INCOMING = 0

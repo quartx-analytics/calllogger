@@ -50,7 +50,7 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
                 except queue.Empty:
                     continue
                 else:
-                    self.send_request(self.request, record.__dict__)
+                    self.send_request(self.request, record.as_dict())
 
             else:
                 batch_jobs = []
@@ -61,7 +61,7 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
                         # In batch mode we ignore incoming calls
                         # They make no sense in a batch job
                         if str(record.call_type) != str(record.INCOMING):
-                            batch_jobs.append(record.__dict__)
+                            batch_jobs.append(record.as_dict())
 
                 except queue.Empty:
                     # We use the Empty exception as a

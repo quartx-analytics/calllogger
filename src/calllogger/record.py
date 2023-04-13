@@ -100,3 +100,7 @@ class CallDataRecord:
         """
         if date := date.strip():
             self.date = datetime.strptime(date, fmt).replace(tzinfo=tz)
+
+    def as_dict(self) -> dict:
+        """Return this objects data as a dict of values."""
+        return self.__dict__

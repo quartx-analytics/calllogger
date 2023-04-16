@@ -12,8 +12,7 @@ on:
         type: boolean
 
 env:
-  ENABLE_DOCKER_DEPOT: false
-  # ENABLE_DOCKER_DEPOT: ${{ github.event_name != 'pull_request' }}
+  ENABLE_DOCKER_DEPOT: ${{ vars.ENABLE_DOCKER_DEPOT == 'true' && github.event_name != 'pull_request' }}
   IMAGE_BASE: ghcr.io/${{ github.repository }}
   BUILD_PLATFORMS: linux/amd64, linux/arm64, linux/arm/v7
   # BUILD_PLATFORMS: linux/amd64

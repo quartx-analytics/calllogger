@@ -57,6 +57,7 @@ jobs:
     steps:
       - name: Delete Pull Request Image
         uses: bots-house/ghcr-delete-image-action@v1.1.0
+        continue-on-error: true
         with:
           name: calllogger
           owner: ${{ github.repository_owner }}

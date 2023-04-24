@@ -1,0 +1,23 @@
+name: Git Backup Live
+
+on:
+  schedule:
+    - cron: "15 7 * * *"  # At 07:15 every day
+  workflow_dispatch:
+
+jobs:
+  docker-build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --exclude '.git/*' --delete
+        env:
+          AWS_REGION: ${{ vars.S3_REGION }}
+          AWS_S3_BUCKET: ${{ vars.S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+          AWS_S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+          DEST_DIR: repos/call-logger/live

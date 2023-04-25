@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: jakejarvis/s3-sync-action@master
         with:
-          args: --exclude '.git/*' --delete
+          args: --exclude '.git/*'
         env:
           AWS_REGION: ${{ vars.S3_REGION }}
           AWS_S3_BUCKET: ${{ vars.S3_BUCKET }}

@@ -1,4 +1,4 @@
-name: Git Backup Live
+name: Backups
 
 on:
   schedule:

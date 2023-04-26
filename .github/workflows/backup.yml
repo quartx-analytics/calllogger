@@ -5,8 +5,8 @@ on:
     - cron: "15 7 * * *"  # At 07:15 every day
 
 jobs:
-  docker-build:
-    name: Build
+  backup-repo:
+    name: Backup Repo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master

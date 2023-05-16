@@ -93,11 +93,20 @@ jobs:
         uses: docker/setup-qemu-action@v2
 
       - name: Login to Github Container Registry
+        if: env.ENABLE_DOCKER_DEPOT == 'true'
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Login to Github Container Registry
+        if: env.ENABLE_DOCKER_DEPOT == 'false'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
 
       - name: Docker metadata
         id: meta

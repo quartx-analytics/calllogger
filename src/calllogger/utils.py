@@ -48,11 +48,12 @@ class Timeout:
         self._stopped = stopped
         self._temp_delay = None
 
-    def sleep(self):
+    def sleep(self, value: float = None):
         """Sleep for the required timeout, increasing timeout value before returning."""
         logger.debug("Retrying in '%d' seconds", self._timeout)
-        self._stopped.wait(self.value)
-        self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
+        self._stopped.wait(value or self.value)
+        if value is None:
+            self._timeout = int(min(self._settings.max_timeout, self._timeout * self._settings.timeout_decay))
         self._temp_delay = None
 
     def reset(self):

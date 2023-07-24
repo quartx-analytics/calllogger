@@ -8,6 +8,7 @@ from calllogger.plugins.base import BasePlugin
 from calllogger.plugins.serial import SerialPlugin
 
 # Internal Plugins
+from calllogger.plugins.internal.beronet import BeroNet
 from calllogger.plugins.internal.mockcalls import MockCalls
 from calllogger.plugins.internal.siemens_serial import SiemensHipathSerial
 
@@ -38,4 +39,4 @@ def get_plugin(selected_plugin: Union[str, int]):
 
 
 # Register Internal and External Plugins
-register_plugins(MockCalls, SiemensHipathSerial)
+register_plugins(MockCalls, SiemensHipathSerial, BeroNet)

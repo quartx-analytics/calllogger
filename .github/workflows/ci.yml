@@ -16,7 +16,7 @@ env:
   IMAGE_BASE: ghcr.io/${{ github.repository }}
   BUILD_PLATFORMS: linux/amd64, linux/arm64, linux/arm/v7
   # BUILD_PLATFORMS: linux/amd64
-  PYTHON_VERSION: "3.10"
+  PYTHON_VERSION: "3.11"
 
 jobs:
   python-lint:
@@ -92,7 +92,7 @@ jobs:
         if: env.ENABLE_DOCKER_DEPOT == 'false'
         uses: docker/setup-qemu-action@v2
 
-      - name: Login to Github Container Registry
+      - name: Login to Github Container Registry (Depot)
         if: env.ENABLE_DOCKER_DEPOT == 'true'
         uses: docker/login-action@v2
         with:

@@ -7,7 +7,7 @@ name = "quartx-calllogger"
 dynamic = ["version"]
 description = "CDR(Call Data Record) logger that sends call logs to the Quartx Call Monitoring service for processing."
 readme = "README.md"
-requires-python = "~=3.10.0"
+requires-python = ">=3.10.0"
 license = {file = "LICENSE"}
 authors = [
   { name = "William Forde", email = "willforde@quartx.ie" },

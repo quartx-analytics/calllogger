@@ -18,11 +18,6 @@ CDR,32,ISDN:1:1,SIP,100,013231111,100 <sip:013231111@sip.iptel.co>,<sip:01323111
 """.strip()
 
 
-@pytest.fixture(autouse=True)
-def mock_port(mock_serial_port):
-    return mock_serial_port
-
-
 @pytest.fixture
 def mock_plugin(mocker, mock_env):
     mock_env(

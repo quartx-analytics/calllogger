@@ -13,6 +13,7 @@ The monitoring frontend will then analyze the records and display them in a easy
 Phone system support is done using plugins. The currently available plugins are:
 
 * ``SiemensHipathSerial``: Add's support for the Siemens Hipath phone system, using the serial interface.
+* ``BeroNet``: Add's support for ISDN -> SIP exchange BeroNet devices, HTTP API requests.
 * ``Mock``: Generate random call records continuously.
 
 This package is designed to be run within a containerized environment, for this we use docker.
@@ -52,11 +53,23 @@ controlled by the server, and is only used for testing.
 * ``MAX_TIMEOUT``: The max the timeout can be after continuous decay.
 * ``QUEUE_SIZE``: Size of the call queue.
 * ``DEBUG``: Set to ``true`` to enable debug logging.
+* ``PLUGIN``: Set to plugin of choice i.e. ``SiemensHipathSerial``
 
 Some plugins also have their own set of configurations that can be set using environment variables.
 
 ```bash
 -e "PLUGIN_<SETTING>=<VALUE>"
+```
+
+
+Development
+----------
+
+In order to run this project locally, run the below commands with `pdm` installed. Adding a `.env` file with enviroment varible you want to alter in the project root directory will allow for settings changes. 
+
+```bash
+pdm install
+pdm run calllogger
 ```
 
 

@@ -20,7 +20,7 @@ This package is designed to be run within a containerized environment, for this 
 The containerized image is built to work on linux/amd64 and linux/arm64.
 
 
-Configuration
+<a id="configuration"></a> Configuration
 -------------
 
 All the configuration is done through the docker command. Docker is configured through the command options and
@@ -65,7 +65,7 @@ Some plugins also have their own set of configurations that can be set using env
 Development
 ----------
 
-In order to run this project locally, run the below commands with `pdm` installed. Adding a `.env` file with enviroment varible you want to alter in the project root directory will allow for settings changes. 
+In order to run this project locally, run the below commands with `pdm` installed. Adding a `.env` file with the environment variables you want to alter in the project's root directory, will allow for settings to be easily changed.
 
 ```bash
 pdm install
@@ -77,10 +77,13 @@ Deployment
 ----------
 
 There is only one command required to install, configure and run the call logger.
-The plugin that will be used is determined by the server, but this can be overridden.
+The plugin that will be used is determined by the plugin environment variable.
+
+Below is an example of how to deploy the call logger using docker. See [Configuration](#configuration) for extra parameters that you may need to use.
+
 
 ```bash
-docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host ghcr.io/quartx-analytics/calllogger:latest
+docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host --env PLUGIN=SiemensHipathSerial ghcr.io/quartx-analytics/calllogger:latest
 ```
 
 

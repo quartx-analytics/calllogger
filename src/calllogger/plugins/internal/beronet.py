@@ -35,6 +35,10 @@ class BeroNet(BasePlugin):
     def __init__(self):
         super(BeroNet, self).__init__()
         self.session = requests.Session()
+        self.session.auth = HTTPBasicAuth(
+            self.beronet_user,
+            self.beronet_password,
+        )
 
     def entrypoint(self) -> NoReturn:
         while self.is_running:
@@ -59,12 +63,8 @@ class BeroNet(BasePlugin):
             "apiCommand": "TelephonyGetCdr",
             "Action": "download"
         }
-        auth = HTTPBasicAuth(
-            self.beronet_user,
-            self.beronet_password,
-        )
         url = f"http://{self.beronet_ip}/app/api/api.php"
-        response = self.session.get(url=url, params=query_params, auth=auth)
+        response = self.session.get(url=url, params=query_params)
         response.raise_for_status()
 
         if response.status_code == 200:

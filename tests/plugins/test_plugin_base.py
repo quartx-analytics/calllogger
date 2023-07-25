@@ -98,3 +98,48 @@ class TestBasePluginPush:
         plugin.push(mock_record)
         assert plugin._queue.qsize() == settings.queue_size - 25 + 1
         assert mocked.put.called is True
+
+
+class TestBasePluginSettings:
+
+    def test_with_default_value_in_init(self, mock_env):
+        """Test that a plugin setting with default value gets changed and is available in init."""
+
+        class MockedPluginSetting(plugins.BasePlugin):
+            id = 1
+            _queue = SimpleQueue()
+            test_value: str = "false"
+
+            def __init__(self):
+                super().__init__()
+                self.value = self.test_value
+
+            def entrypoint(self):
+                pass
+
+        assert_value = "true"
+        mock_env(plugin_test_value=assert_value)
+        plugin = MockedPluginSetting()
+        assert plugin.test_value == assert_value
+        assert plugin.value == assert_value
+
+    def test_with_no_default_value_in_init(self, mock_env):
+        """Test that a plugin setting with no default value gets set and is available in init."""
+
+        class MockedPluginSetting(plugins.BasePlugin):
+            id = 1
+            _queue = SimpleQueue()
+            test_value: str
+
+            def __init__(self):
+                super().__init__()
+                self.value = self.test_value
+
+            def entrypoint(self):
+                pass
+
+        assert_value = "true"
+        mock_env(plugin_test_value=assert_value)
+        plugin = MockedPluginSetting()
+        assert plugin.test_value == assert_value
+        assert plugin.value == assert_value

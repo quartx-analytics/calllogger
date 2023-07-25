@@ -18,10 +18,12 @@ installed_plugins = {}
 class PluginSettings(abc.ABCMeta):
     """Metaclass to intercept the init call and apply the plugin settings."""
 
-    def __call__(cls, **kwargs):
-        inst = super().__call__()
-        conf.merge_settings(inst, prefix="plugin_", **kwargs)
-        return inst
+    def __call__(cls, *args, **kwargs):
+        # We update any default plugin values here
+        # Before the plugin gets initialised
+        for key, val in kwargs.items():
+            setattr(cls, key, val)
+        return super().__call__()
 
 
 class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
@@ -32,6 +34,13 @@ class BasePlugin(ThreadExceptionManager, metaclass=PluginSettings):
     """
     id = None
     _queue: SimpleQueue
+
+    def __new__(cls):
+        # We inject the plugin settings onto the plugin instance
+        # Before it gets passed to init.
+        self = super().__new__(cls)
+        conf.merge_settings(self, prefix="plugin_")
+        return self
 
     def __init__(self):
         self.logger = logging.getLogger(f"calllogger.plugin.{self.__class__.__name__}")

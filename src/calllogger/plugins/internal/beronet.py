@@ -39,6 +39,7 @@ class BeroNet(BasePlugin):
             self.beronet_user,
             self.beronet_password,
         )
+        self.api_url = f"http://{self.beronet_ip}/app/api/api.php"
 
     def entrypoint(self) -> NoReturn:
         while self.is_running:
@@ -46,7 +47,7 @@ class BeroNet(BasePlugin):
                 self.logger.debug("Collecting calls from beronet...")
 
                 try:
-                    cdr = self.collect()
+                    cdr = self.collect_cdr()
                     self.process_cdr(cdr)
                 except Exception as err:
                     scope.set_context("BeroNet", {
@@ -57,14 +58,13 @@ class BeroNet(BasePlugin):
 
                 self.timeout.sleep(self.beronet_sleep)
 
-    def collect(self) -> list[list[str]]:
+    def collect_cdr(self) -> list[list[str]]:
         """Collect CDR from the BeroNet web API."""
         query_params = {
             "apiCommand": "TelephonyGetCdr",
             "Action": "download"
         }
-        url = f"http://{self.beronet_ip}/app/api/api.php"
-        response = self.session.get(url=url, params=query_params)
+        response = self.session.get(url=self.api_url, params=query_params)
         response.raise_for_status()
 
         if response.status_code == 200:

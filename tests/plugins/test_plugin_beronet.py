@@ -78,7 +78,8 @@ def test_outgoing_cdr(requests_mock, mock_plugin: beronet.BeroNet, disable_sleep
     assert record.duration  # Assert that we have a duration
 
 
-def test_wrong_status_code_no_error(requests_mock, mock_plugin: beronet.BeroNet, disable_sleep):
+@pytest.mark.parametrize("status_code", [204, 400, 500])
+def test_wrong_status_code_no_error(requests_mock, mock_plugin: beronet.BeroNet, disable_sleep, status_code):
     """Test that the wrong status error gets caught and not cause an error."""
-    requests_mock.get(mock_plugin.api_url, status_code=400)
+    requests_mock.get(mock_plugin.api_url, status_code=status_code)
     assert mock_plugin.run()  # This should return True if error was caught

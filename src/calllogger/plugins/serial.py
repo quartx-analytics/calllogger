@@ -104,10 +104,6 @@ class SerialPlugin(BasePlugin):
                 raise EmptyLine("Serial line is empty")
             else:
                 raise ValidationError("Validation failed")
-        except EmptyLine:
-            self.logger.debug("Serial line is empty, ignoring")
-            telemetry.serial_error_counter().tags(error_type="empty_line").mark()
-            raise
         except Exception:
             self.logger.debug(
                 "Serial line failed validation: %s", extra={"serial_line": decoded_line}
@@ -162,6 +158,9 @@ class SerialPlugin(BasePlugin):
             with push_scope() as scope:
                 try:
                     self.monitor_interface(scope)
+                except EmptyLine:
+                    self.logger.debug("Serial line is empty, ignoring")
+                    telemetry.serial_error_counter().tags(error_type="empty_line").mark()
                 except Exception as err:
                     scope.set_context("Serial Interface", {
                         "baudrate": self.baudrate,

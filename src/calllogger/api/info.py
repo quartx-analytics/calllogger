@@ -93,8 +93,8 @@ class ClientInfo:
 
     @classmethod
     def setup_checkin(cls, token: TokenAuth, identifier: str):
-        logger.info("Scheduling client checkin for every 30min")
         checkin_interval = min(settings.checkin_interval, 30)
+        logger.info("Scheduling client checkin every %smin", checkin_interval)
         ThreadTimer(
             # Convert from minutes to seconds
             checkin_interval * 60,

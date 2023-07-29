@@ -15,9 +15,9 @@ linking_url = urljoin(settings.domain, "/api/v1/monitor/cdr/link-device/")
 logger = logging.getLogger(__name__)
 
 
-def link_device(identifier) -> Union[str, None]:
+def link_device(identifier: str) -> Union[str, None]:
     """Link device to a tenant on the server and return the provided token."""
-    logger.info("Registering device with call monitoring server")
+    logger.info("Registering device with call monitoring server: %s", identifier)
     api = QuartxAPIHandler()
     start = time.time()
     api.logger = logger

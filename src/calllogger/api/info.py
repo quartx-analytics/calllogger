@@ -52,6 +52,7 @@ class ClientInfo:
         params = dict(
             device_id=identifier,
             version=__version__,
+            check_interval=min(settings.checkin_interval, 30) * 60,
         )
 
         # Report the current system uptime

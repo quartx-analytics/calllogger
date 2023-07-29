@@ -1,6 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
+# Bypass check if user is just looking for the mac address
+if [ "$1" == "getmac" ]; then
+  exec calllogger-getmac
+  exit 0
+fi
+
 isMounted    () { findmnt -rno SOURCE,TARGET "$1" >/dev/null;} # path or device
 isDevMounted () { findmnt -rno SOURCE        "$1" >/dev/null;} # device only
 isPathMounted() { findmnt -rno        TARGET "$1" >/dev/null;} # path only

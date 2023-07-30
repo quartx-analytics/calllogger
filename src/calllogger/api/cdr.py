@@ -1,5 +1,7 @@
 # Standard lib
 from urllib import parse as urlparse
+from typing import Iterator
+import itertools
 import logging
 import queue
 
@@ -8,7 +10,6 @@ import requests
 
 # Local
 from calllogger.misc import ThreadExceptionManager
-from calllogger.record import CallDataRecord
 from calllogger.api import QuartxAPIHandler
 from calllogger.utils import TokenAuth
 from calllogger import settings
@@ -31,6 +32,7 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
         super().__init__(suppress_errors=True, name=f"Thread-{self.__class__.__name__}")
         logger.info("Initializing CDR queue monitoring")
         logger.info("Sending CDRs to: %s", settings.domain)
+        self.backlog_mode = False
         self.queue = call_queue
         self.logger = logger
 
@@ -43,32 +45,33 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
 
     def entrypoint(self):
         """Process the call record queue."""
+
         while not self.stopped.is_set():
-            if self.queue.qsize() <= settings.batch_backlog:
-                try:
-                    record: CallDataRecord = self.queue.get(timeout=0.1)
-                except queue.Empty:
-                    continue
-                else:
-                    self.send_request(self.request, record.__dict__)
+            # Deside if we need to switch to backlog mode
+            if self.queue.qsize() > settings.backlog_trigger:
+                self.backlog_mode = True
 
+            # Process only at most the batch size of records
+            records = self.process_queue(self.queue)
+            records = list(itertools.islice(records, settings.batch_size))
+
+            # We only send records in batches when in backlog mode
+            # This is cause the server ignores errors for bulk requests
+            if records and self.backlog_mode:
+                self.send_request(self.request, records)
             else:
-                batch_jobs = []
-                try:
-                    # Extrack up to the max limit of records per batch job
-                    while len(batch_jobs) < settings.batch_size:
-                        record: CallDataRecord = self.queue.get(timeout=0.1)
-                        # In backlog mode we ignore incoming calls
-                        # They make no sense in backlog mode
-                        if str(record.call_type) != str(record.INCOMING):
-                            batch_jobs.append(record.__dict__)
+                for record in records:
+                    self.send_request(self.request, record)
 
-                except queue.Empty:
-                    # We use the Empty exception as a
-                    # way to break from the loop
-                    pass
+    def process_queue(self, record_queue) -> Iterator:
+        """Keep yielding call records until queue is empty."""
+        try:
+            while record := record_queue.get(timeout=0.1):
+                # In backlog mode we ignore incoming calls
+                if self.backlog_mode and str(record.call_type) == str(record.INCOMING):
+                    continue
 
-                # This is needed to catch the rare time when
-                # We only have incoming calls in the queue witch are ignored
-                if batch_jobs:
-                    self.send_request(self.request, batch_jobs, timeout=20)
+                yield record.__dict__
+
+        except queue.Empty:
+            self.backlog_mode = False

@@ -90,10 +90,11 @@ class Settings:
     checkin_interval: int = 5
     #: Size of the call queue
     queue_size: int = 1_000
-    #: The max number of records that can be sent in a batch job
-    batch_size: int = 25
+    #: The max number of records that can be sent in one request
+    batch_size: int = 15
     #: The size the queue needs to be before switching to backlog mode
-    batch_backlog: int = 20
+    #: Backlog mode ignores incoming calls and errors
+    backlog_trigger: int = 20
     #: Set to true to enable debug logging
     debug: bool = False
     #: Device registration cutoff timeout in seconds

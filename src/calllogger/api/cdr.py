@@ -44,7 +44,7 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
     def entrypoint(self):
         """Process the call record queue."""
         while not self.stopped.is_set():
-            if self.queue.qsize() <= settings.batch_trigger:
+            if self.queue.qsize() <= settings.batch_backlog:
                 try:
                     record: CallDataRecord = self.queue.get(timeout=0.1)
                 except queue.Empty:
@@ -58,8 +58,8 @@ class CDRWorker(QuartxAPIHandler, ThreadExceptionManager):
                     # Extrack up to the max limit of records per batch job
                     while len(batch_jobs) < settings.batch_size:
                         record: CallDataRecord = self.queue.get(timeout=0.1)
-                        # In batch mode we ignore incoming calls
-                        # They make no sence in a batch job
+                        # In backlog mode we ignore incoming calls
+                        # They make no sense in backlog mode
                         if str(record.call_type) != str(record.INCOMING):
                             batch_jobs.append(record.__dict__)
 

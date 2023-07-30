@@ -75,13 +75,16 @@ class Settings:
     """
     Settings class that allows settings
     to be overridden by environment variables.
+
+    To change any variable, just set an environment
+    variable with the name of the setting capitalized.
     """
 
     #: Timeout in seconds to sleep between errors.
     timeout: int = 3
     #: Multiplier that increases the timeout on continuous errors.
     timeout_decay: float = 1.5
-    #: The max the timeout can be after continuous decay.
+    #: The max value the timeout can be after continuous decay.
     max_timeout: int = 300
     #: Time between server checkins in minutes
     checkin_interval: int = 5
@@ -89,8 +92,8 @@ class Settings:
     queue_size: int = 1_000
     #: The max number of records that can be sent in a batch job
     batch_size: int = 25
-    #: The size the queue need to be before switching to batch job mode
-    batch_trigger: int = 20
+    #: The size the queue needs to be before switching to backlog mode
+    batch_backlog: int = 20
     #: Set to true to enable debug logging
     debug: bool = False
     #: Device registration cutoff timeout in seconds

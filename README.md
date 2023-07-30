@@ -50,7 +50,7 @@ controlled by the server, and is only used for testing.
 * ``CHECKIN_INTERVAL``: Time between server checkins in minutes. Max 30min.
 * ``TIMEOUT``: Timeout in seconds to sleep between errors.
 * ``TIMEOUT_DECAY``: Multiplier that increases the timeout on continuous errors.
-* ``MAX_TIMEOUT``: The max the timeout can be after continuous decay.
+* ``MAX_TIMEOUT``: The max value the timeout can be after continuous decay.
 * ``QUEUE_SIZE``: Size of the call queue.
 * ``DEBUG``: Set to ``true`` to enable debug logging.
 * ``PLUGIN``: Set to plugin of choice i.e. ``SiemensHipathSerial``
@@ -63,9 +63,19 @@ Some plugins also have their own set of configurations that can be set using env
 
 
 Development
-----------
+-----------
 
-In order to run this project locally, run the below commands with `pdm` installed. Adding a `.env` file with the environment variables you want to alter in the project's root directory, will allow for settings to be easily changed.
+In order to run this project locally, you will need to have `PDM` installed. `PDM` is used to manage and install the package dependencies while also making it easier to run the project.
+
+`PDM` can be installed using pacman or if that failes, using a install script.
+```bash
+sudo pacman -S python-pdm # Better option
+```
+```bash
+curl -sSL https://pdm.fming.dev/dev/install-pdm.py | python3 - # Fallback
+```
+
+With `PDM` installed, run the below commands to start the call-logger. Adding a `.env` file with the environment variables you want to alter in the project's root directory, will allow for settings to be easily changed. See `src/calllogger/conf.py` for all available settings.
 
 ```bash
 pdm install
@@ -77,13 +87,21 @@ Deployment
 ----------
 
 There is only one command required to install, configure and run the call logger.
-The plugin that will be used is determined by the plugin environment variable.
+The plugin that will be used is determined by the plugin environment variable. See [Configuration](#configuration) for extra parameters that you may need to use.
 
-Below is an example of how to deploy the call logger using docker. See [Configuration](#configuration) for extra parameters that you may need to use.
-
-
+Example of a SiemensHipathSerial deployment.
 ```bash
 docker run --detach --name "calllogger" --device="/dev/ttyUSB0" --group-add dialout --volume="calllogger-data:/data" --restart=on-failure --network host --env PLUGIN=SiemensHipathSerial ghcr.io/quartx-analytics/calllogger:latest
+```
+
+Example of a BeroNet deployment.
+```bash
+docker run --detach --name "calllogger" --volume="calllogger-data:/data" --restart=on-failure --network host --env PLUGIN=BeroNet ghcr.io/quartx-analytics/calllogger:latest
+```
+
+When deploying a call-logger device, it is useful to know the mac address of the device. This is used as the device identifier.
+```bash
+docker run --rm --network host ghcr.io/quartx-analytics/calllogger getmac
 ```
 
 

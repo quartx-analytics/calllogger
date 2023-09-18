@@ -90,7 +90,7 @@ jobs:
 
       - name: Set up QEMU
         if: env.ENABLE_DOCKER_DEPOT == 'false'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Login to Github Container Registry (Depot)
         if: env.ENABLE_DOCKER_DEPOT == 'true'
